@@ -51,6 +51,7 @@
             <x-dashboard-nav></x-dashboard-nav>
             <x-user-nav></x-user-nav>
             <x-setting-nav></x-setting-nav>
+            <x-branch></x-branch>
         </ul>
     </div>
     <!-- Sidebar -->

@@ -1,7 +1,7 @@
 @canAny(['theme-customization', 'general-setting', 'email-setting', 'pusher-setting'])
     <li class="nav-item">
         <a class="nav-link menu-link" href="#settingsNav" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsNav">
-        <i class="ri-settings-3-line"></i> <span data-key="t-maps">Settings</span>
+        <i class="ri-settings-3-line"></i> <span data-key="t-maps">Settings </span>
         </a>
         <div class="collapse menu-dropdown" id="settingsNav">
             <ul class="nav nav-sm flex-column">
