@@ -8,19 +8,13 @@
                 
                 @can('branch-list')
                 <li class="nav-item">
-                    <a href="" class="nav-link" data-key="t-branch-list">
+                    <a href="{{ route('admin.branch.index') }}" class="nav-link" data-key="t-branch-list">
                         Branch List
                     </a>
                 </li>
                 @endcan
 
-                @can('branch-create')
-                <li class="nav-item">
-                    <a href="{{ route('admin.branch.create') }}" class="nav-link" data-key="t-branch-create">
-                        Create New Branch
-                    </a>
-                </li>
-                @endcan
+                
 
             </ul>
         </div>

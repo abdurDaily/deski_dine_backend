@@ -2,44 +2,93 @@
 
 namespace App\Http\Controllers\Backend;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class BranchController extends Controller
 {
-    //*CREATE A NEW BRANCH  
-    public function create()
-    {
-        return view("backend.branch.index");
-    }
+
     /**
-     * Store a newly created branch in storage.
+     * Display the list and the form.
+     */
+    public function index(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Branch::latest()->get();
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    return '
+                        <button class="btn btn-sm btn-soft-info edit-btn" data-id="' . $row->id . '">
+                            <i class="ri-pencil-fill"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '">
+                            <i class="ri-delete-bin-fill"></i>
+                        </button>';
+                })
+                ->make(true);
+        }
+        return view('backend.branch.index');
+    }
+
+    /**
+     * Store a newly created branch.
      */
     public function store(Request $request)
     {
-        // 1. Validation (Laravel automatically returns JSON errors if the request is AJAX)
-        $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'location' => 'required|string|max:500',
+        $request->validate([
+            'name'     => 'required|string|max:255|unique:branches,name',
             'phone'    => 'required|string|max:20',
+            'location' => 'required|string|max:500',
         ]);
 
-        try {
-            // 2. Save to Database
-            $branch = Branch::create($validated);
+        $branch = Branch::create($request->all());
 
-            // 3. Return JSON Success
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Branch "' . $branch->name . '" created successfully!'
-            ], 200);
-        } catch (\Exception $e) {
-            // 4. Return JSON Error
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Something went wrong. Please try again.'
-            ], 500);
-        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Branch "' . $branch->name . '" created successfully!'
+        ]);
+    }
+
+    /**
+     * Show the form for editing (via JSON).
+     */
+    public function edit(Branch $branch)
+    {
+        return response()->json($branch);
+    }
+
+    /**
+     * Update the specified branch.
+     */
+    public function update(Request $request, Branch $branch)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255|unique:branches,name,' . $branch->id,
+            'phone'    => 'required|string|max:20',
+            'location' => 'required|string|max:500',
+        ]);
+
+        $branch->update($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Branch updated successfully!'
+        ]);
+    }
+
+    /**
+     * Remove the specified branch.
+     */
+    public function destroy(Branch $branch)
+    {
+        $branch->delete();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Branch deleted successfully!'
+        ]);
     }
 }
