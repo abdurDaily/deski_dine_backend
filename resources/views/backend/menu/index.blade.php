@@ -129,14 +129,23 @@
         </div>
     </div>
 
-    <div class="modal fade" id="viewDescModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="variantDetailsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Description</h5>
+                    <h5 class="modal-title">Variant Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="full_description_text"></div>
+                <div class="modal-body text-center">
+                    <div id="variantImageWrapper" class="mb-3">
+                        <img src="" id="v_modal_image" class="img-fluid rounded shadow-sm"
+                            style="max-height: 300px; display: none;">
+                        <div id="v_no_image" class="py-5 bg-light rounded text-muted">No Image Available</div>
+                    </div>
+
+                    <h4 id="v_modal_name" class="fw-bold mb-1"></h4>
+                    <p class="text-muted">Price: <span id="v_modal_price" class="text-primary fw-bold"></span> TK</p>
+                </div>
             </div>
         </div>
     </div>
@@ -182,7 +191,31 @@
                         {
                             data: 'variations',
                             name: 'variations',
-                            orderable: false
+                            orderable: false,
+                            render: function(data, type, row) {
+                                let html = '';
+                                // 'data' here is the HTML string or array sent from the Controller
+                                // If your controller sends an array/object:
+                                if (Array.isArray(data)) {
+                                    data.forEach(v => {
+                                        html += `
+                    <div class="mb-1">
+                        <span class="badge bg-soft-primary text-primary view-variant-details" 
+                              style="cursor:pointer"
+                              data-name="${v.name}" 
+                              data-price="${v.price}" 
+                              data-image="${v.image ? '/' + v.image : ''}">
+                            <i class="ri-eye-line me-1"></i> ${v.name}
+                        </span>
+                    </div>`;
+                                    });
+                                } else {
+                                    // If the controller already sends pre-rendered HTML, 
+                                    // ensure the controller's HTML includes these data-attributes.
+                                    return data;
+                                }
+                                return html || '<span class="text-muted">No variations</span>';
+                            }
                         },
                         {
                             data: 'status',
@@ -225,8 +258,10 @@
                         "{{ route('admin.menu.store') }}";
 
                     let formData = new FormData($(this)[0]);
-                 
-                    
+
+
+                    console.log(formData);
+
                     $.ajax({
                         url: url,
                         method: "POST", // DO NOT change this to PUT. Keep it POST.
@@ -331,6 +366,41 @@
                 vIndex = 0;
                 addVariationRow(); // Add back the first row
             }
+        </script>
+        <script>
+            // Click event for the variant badges
+            $(document).on('click', '.view-variant-details', function() {
+                const name = $(this).data('name');
+                const price = $(this).data('price');
+                const image = $(this).data('image');
+
+                // Set Text Content
+                $('#v_modal_name').text(name);
+                $('#v_modal_price').text(price);
+
+                // Handle Image Logic
+                if (image && image !== '/') {
+                    $('#v_modal_image').attr('src', image).show();
+                    $('#v_no_image').hide();
+                } else {
+                    $('#v_modal_image').hide();
+                    $('#v_no_image').show();
+                }
+
+                // Show the Modal
+                $('#variantDetailsModal').modal('show');
+            });
+
+            // Optional: Logic for that "View Info" description link you added in the 'name' column
+            $(document).on('click', '.description-truncate', function() {
+                const desc = $(this).data('desc');
+                Swal.fire({
+                    title: 'Item Description',
+                    text: desc || 'No description provided.',
+                    icon: 'info',
+                    confirmButtonText: 'Close'
+                });
+            });
         </script>
     @endpush
 @endpush

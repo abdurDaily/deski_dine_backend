@@ -24,9 +24,15 @@ class MenuController extends Controller
                 ->addColumn('variations', function ($row) {
                     $html = '';
                     foreach ($row->variations as $v) {
-                        $html .= '<span class="badge bg-light text-dark border me-1">' . $v->name . ': ' . number_format($v->price, 0) . ' TK</span>';
+                        $html .= '<span class="badge bg-soft-primary text-primary view-variant-details me-1" 
+                        style="cursor:pointer"
+                        data-name="' . $v->name . '" 
+                        data-price="' . $v->price . '" 
+                        data-image="' . asset($v->image) . '">
+                        ' . $v->name . '
+                  </span>';
                     }
-                    return $html ?: '<span class="text-muted">No variations</span>';
+                    return $html;
                 })
                 ->addColumn('status', function ($row) {
                     return $row->is_available
@@ -132,7 +138,7 @@ class MenuController extends Controller
                     if ($oldVar->image && file_exists(public_path($oldVar->image))) {
                         // Check if this image is still being used by checking old_image inputs
                         $stillUsed = false;
-                        foreach ($request->variations as $index=>$v) {
+                        foreach ($request->variations as $index => $v) {
                             if (($v['old_image'] ?? '') == $oldVar->image && !$request->hasFile("variations." . $index . ".image")) {
                                 $stillUsed = true;
                             }
