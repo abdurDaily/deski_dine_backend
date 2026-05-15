@@ -6,7 +6,6 @@
         <div class="collapse menu-dropdown" id="menuNav">
             <ul class="nav nav-sm flex-column">
                 
-                {{-- Categories --}}
                 @can('category-list')
                 <li class="nav-item">
                     <a href="{{ route('admin.category.index') }}" class="nav-link" data-key="t-category-list">
@@ -15,6 +14,13 @@
                 </li>
                 @endcan
 
+                @can('menu-list')
+                <li class="nav-item">
+                    <a href="{{ route('admin.menu.index') }}" class="nav-link" data-key="t-menu-list">
+                        Menu Items
+                    </a>
+                </li>
+                @endcan
 
             </ul>
         </div>
