@@ -30,5 +30,5 @@ Route::middleware(['auth', 'verified', 'setLocale'])->prefix("menu")->name("menu
     Route::get("/{menu}/edit", [MenuController::class, "edit"])->name("edit");
     Route::post("/{menu}/update", [MenuController::class, "update"])->name("update");
     Route::delete("/{menu}/delete", [MenuController::class, "destroy"])->name("delete");
-    Route::put('menu/{id}/update', [MenuController::class, 'update'])->name('admin.menu.update');
+    Route::post('menu/{id}/update', [MenuController::class, 'update'])->name('admin.menu.update');
 });

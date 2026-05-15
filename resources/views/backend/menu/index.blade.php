@@ -224,13 +224,9 @@
                     let url = id ? "{{ route('admin.menu.update', ':id') }}".replace(':id', id) :
                         "{{ route('admin.menu.store') }}";
 
-                    let formData = new FormData(this);
-
-                    // This is the "Spoofing" that Laravel looks for
-                    if (id) {
-                        formData.append('_method', 'PUT');
-                    }
-
+                    let formData = new FormData($(this)[0]);
+                 
+                    
                     $.ajax({
                         url: url,
                         method: "POST", // DO NOT change this to PUT. Keep it POST.

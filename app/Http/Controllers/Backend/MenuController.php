@@ -132,8 +132,8 @@ class MenuController extends Controller
                     if ($oldVar->image && file_exists(public_path($oldVar->image))) {
                         // Check if this image is still being used by checking old_image inputs
                         $stillUsed = false;
-                        foreach ($request->variations as $v) {
-                            if (($v['old_image'] ?? '') == $oldVar->image && !$request->hasFile("variations." . $loop->index . ".image")) {
+                        foreach ($request->variations as $index=>$v) {
+                            if (($v['old_image'] ?? '') == $oldVar->image && !$request->hasFile("variations." . $index . ".image")) {
                                 $stillUsed = true;
                             }
                         }
@@ -165,7 +165,7 @@ class MenuController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
-    
+
 
     public function destroy($id)
     {
