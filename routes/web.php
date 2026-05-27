@@ -10,13 +10,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\NotificationController;
 
-Route::get('/', function ()
-{
-    return to_route('login');
-});
+// Route::get('/', function ()
+// {
+//     return to_route('login');
+// });
 
 Auth::routes(['register' => false, 'verify' => true]);
 
@@ -101,4 +102,13 @@ Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
         Route::put('profile', 'profileUpdate')->name('profile.update');
         Route::put('password', 'passwordUpdate')->name('password.update');
     });
+});
+
+Route::name('frontend.')->group(function(){
+
+    //* HOME PAGE
+    Route::get('/',[HomeController::class, 'home'])->name('home');
+    Route::get('/add-to-cart',[HomeController::class, 'addToCart'])->name('addtocart');
+    Route::get('/checkout',[HomeController::class, 'checkout'])->name('checkout');
+
 });

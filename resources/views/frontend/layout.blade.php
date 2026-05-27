@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Degchi Dine | ডেক্সি ডাইন</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+  <link rel="stylesheet" href="{{ asset('assets/frontend/style.css') }}" />
+</head>
+
+<body class="hero-page">
+  <nav id="desktopNavbar" class="navbar py-0 desktop-navbar d-none d-lg-block sticky-top">
+    <div class="container px-4 px-xxl-5">
+      <a class="navbar-brand" href="#">
+        <div class="logo-badge-wrapper">
+          <img src="{{ asset('assets/frontend/images/logo.webp') }}" alt="Logo" class="nav-logo-img" />
+        </div>
+      </a>
+
+      <ul class="navbar-nav flex-row desktop-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html#home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="about.html">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="menu.html">Menu</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cards-page.html">Card</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="index.html#testimonials">Reviews</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="contact.html">Contact</a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center">
+        <a href="#cartDrawer" class="desktop-order-icon" aria-label="Open cart" data-bs-toggle="offcanvas" role="button"
+          aria-controls="cartDrawer">
+          <iconify-icon class="desktop-order-symbol" icon="solar:cart-large-2-outline"
+            aria-hidden="true"></iconify-icon>
+          <span class="desktop-order-qty" aria-label="0 items">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <nav class="navbar py-0 navbar-light mobile-topbar d-lg-none sticky-top">
+    <div class="container-fluid px-3 px-sm-4">
+      <button id="mobileMenuToggle" class="navbar-toggler mobile-menu-toggle" type="button" aria-controls="mobileMenu"
+        aria-label="Open menu">
+        <iconify-icon class="mobile-menu-icon" icon="ri:menu-2-line" width="24" height="24"
+          aria-hidden="true"></iconify-icon>
+      </button>
+
+      <a class="navbar-brand mobile-nav-brand" href="#home">
+        <img src="./images/logo.webp" class="mobile-logo-img" alt="Restaurant logo" />
+      </a>
+
+      <a href="#cartDrawer" class="mobile-order-icon" aria-label="Open cart" data-bs-toggle="offcanvas" role="button"
+        aria-controls="cartDrawer">
+        <iconify-icon class="mobile-order-symbol" icon="solar:cart-large-2-outline" aria-hidden="true"></iconify-icon>
+        <span class="mobile-order-qty" aria-label="0 items">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="offcanvas offcanvas-start mobile-sidebar" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileMenuLabel">
+        <img src="./images/logo.webp" class="offcanvas-logo-img" alt="Restaurant logo" />
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="nav flex-column side-nav">
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="index.html#home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="about.html">About</a>
+        </li>
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="menu.html">Menu</a>
+        </li>
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="cards-page.html">Card</a>
+        </li>
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="index.html#testimonials">Reviews</a>
+        </li>
+        <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="contact.html">Contact</a>
+        </li>
+      </ul>
+
+      <div class="side-footer mt-4 pt-3 border-top">
+        <p class="mb-1">
+          <i class="bi bi-geo-alt me-2"></i>Boropool Circle, Kaptan Villa,
+          Halishahar, Chittagong, Bangladesh
+        </p>
+        <p class="mb-1">
+          <i class="bi bi-clock me-2"></i>Mon-Sun: 5:00 PM - 11:30 PM
+        </p>
+        <p class="mb-0"><i class="bi bi-telephone me-2"></i>01898-795400</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    @yield('frontend_content');
+    <!-- Footer -->
+    <footer id="contact" class="site-footer">
+      <div class="footer-top">
+        <div class="container px-4 px-lg-5">
+          <div class="row g-5">
+            <div class="col-lg-4 col-md-6">
+              <img src="{{ asset('assets/frontend/images/logo.webp') }}" alt="Degchi Dine" class="footer-logo mb-3" />
+              <p class="footer-about">
+                Degchi Dine - ডেক্সি ডাইন. A refined dining destination in
+                Halishahar, Chittagong, known for warm hospitality and
+                signature flavors.
+              </p>
+              <div class="footer-socials">
+                <a href="https://www.facebook.com/DegchiDine" target="_blank" rel="noopener noreferrer"
+                  aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" aria-label="Twitter / X"><i class="bi bi-twitter-x"></i></a>
+                <a href="#" aria-label="TripAdvisor"><i class="bi bi-star"></i></a>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 col-6">
+              <h6 class="footer-heading">Quick Links</h6>
+              <ul class="footer-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="privilege-card.html">Privilege Card</a></li>
+                <li><a href="complete-menu.html">Complete Menu</a></li>
+                <li><a href="#video">Video</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#location">Location</a></li>
+              </ul>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-6">
+              <h6 class="footer-heading">Contact Us</h6>
+              <ul class="footer-links">
+                <li>
+                  <i class="bi bi-geo-alt me-2 text-brand"></i>Boropool
+                  Circle, Kaptan Villa, Halishahar, Chittagong, Bangladesh
+                </li>
+                <li>
+                  <i class="bi bi-telephone me-2 text-brand"></i>01898-795400
+                </li>
+                <li>
+                  <i class="bi bi-envelope me-2 text-brand"></i>degchidine@gmail.com
+                </li>
+                <li>
+                  <i class="bi bi-clock me-2 text-brand"></i>Daily, 5:00 PM
+                  &ndash; 11:30 PM
+                </li>
+              </ul>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <h6 class="footer-heading">Newsletter</h6>
+              <p class="footer-about">
+                Stay updated with seasonal menus and exclusive events.
+              </p>
+              <form class="footer-newsletter" onsubmit="return false;">
+                <input type="email" placeholder="Your email address" aria-label="Email for newsletter" />
+                <button type="submit" aria-label="Subscribe">
+                  <i class="bi bi-send"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <div
+          class="container px-4 px-lg-5 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+          <p class="mb-0">&copy; 2026 Degchi Dine. All rights reserved.</p>
+          <div class="d-flex gap-3">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <!-- Floating action button: WhatsApp (right) -->
+  <div class="floating-right">
+    <a id="whatsappBtn" class="fab fab-whatsapp is-visible"
+      href="https://wa.me/8801898795400?text=Hello%20Degchi%20Dine%20I%20have%20a%20question%20about%20ordering"
+      target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp">
+      <i class="bi bi-whatsapp" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  <div class="modal fade mc-quick-modal" id="mcQuickViewModal" tabindex="-1" aria-labelledby="mcQuickViewTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content mc-modal-content">
+        <button type="button" class="btn-close mc-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="row g-0">
+          <div class="col-md-6">
+            <div class="mc-modal-image-wrap">
+              <img id="mcQuickViewImage" src="" alt="" class="mc-modal-image" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mc-modal-body">
+              <p class="mc-modal-kicker mb-2">Menu Preview</p>
+              <h4 id="mcQuickViewTitle" class="mc-modal-title mb-2"></h4>
+              <p id="mcQuickViewDesc" class="mc-modal-desc"></p>
+              <div class="mc-modal-meta">
+                <span id="mcQuickViewServe" class="mc-serve-info"></span>
+              </div>
+              <div class="mc-modal-price-wrap mt-3">
+                <span class="mc-price-label">Starts from</span>
+                <span id="mcQuickViewPrice" class="mc-price"></span>
+              </div>
+              <a href="menu.html" class="mc-show-more-btn mt-4" data-bs-dismiss="modal">
+                Explore Full Menu
+                <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART -->
+  <div class="offcanvas offcanvas-end cart-drawer" tabindex="-1" id="cartDrawer" aria-labelledby="cartDrawerLabel">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title text-uppercase" id="cartDrawerLabel">
+        <i class="bi bi-bag-check me-2" aria-hidden="true"></i>Your Cart
+      </h5>
+      <button type="button" class="btn-close-custom" data-bs-dismiss="offcanvas" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="offcanvas-body d-flex flex-column">
+      <div id="cartDrawerItems" class="cart-drawer-items flex-grow-1">
+        <article class="cart-item">
+          <div class="cart-item-image-wrap">
+            <img src="images/signature_menu/1.jpg" alt="Mutton Kacchi" class="cart-item-image" />
+          </div>
+          <div class="cart-item-body">
+            <div class="cart-item-header-row">
+              <h6 class="cart-item-title">Mutton Kacchi</h6>
+              <button class="cart-item-remove-btn" type="button" aria-label="Remove item">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            <div class="cart-item-footer-row">
+              <div class="cart-qty-row">
+                <button class="qty-adjust-btn" type="button" aria-label="Decrease quantity">
+                  —
+                </button>
+                <span class="cart-qty">1</span>
+                <button class="qty-adjust-btn" type="button" aria-label="Increase quantity">
+                  +
+                </button>
+              </div>
+              <div class="cart-item-meta">৳ 420</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="cart-item">
+          <div class="cart-item-image-wrap">
+            <img src="images/signature_menu/4.jpg" alt="Kacchi Biryani" class="cart-item-image" />
+          </div>
+          <div class="cart-item-body">
+            <div class="cart-item-header-row">
+              <h6 class="cart-item-title">Kacchi Biryani</h6>
+              <button class="cart-item-remove-btn" type="button" aria-label="Remove item">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            <div class="cart-item-footer-row">
+              <div class="cart-qty-row">
+                <button class="qty-adjust-btn" type="button" aria-label="Decrease quantity">
+                  —
+                </button>
+                <span class="cart-qty">2</span>
+                <button class="qty-adjust-btn" type="button" aria-label="Increase quantity">
+                  +
+                </button>
+              </div>
+              <div class="cart-item-meta">৳ 360</div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="cart-drawer-footer border-top pt-4 mt-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <span class="cart-total-label text-uppercase">Subtotal</span>
+          <strong id="cartDrawerSubtotal" class="cart-total-value">৳ 1,140</strong>
+        </div>
+        <div class="d-grid gap-3">
+          <a href="{{ route('frontend.addtocart') }}" class="btn cart-view-btn">View Full Cart</a>
+          <a href="{{ route('frontend.checkout') }}" class="btn cart-checkout-btn">
+            <span>Proceed To Checkout <i class="bi bi-arrow-right ms-1"></i></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ asset('assets/frontend/app.js') }}"></script>
+</body>
+
+</html>
