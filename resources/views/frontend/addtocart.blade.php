@@ -39,7 +39,7 @@
                 Looks like you haven't added anything yet.<br />Let's find
                 something delicious!
             </p>
-            <a href="menu.html" class="btn cart-checkout-btn px-5">
+            <a href="{{ route('frontend.home') }}#menu" class="btn cart-checkout-btn px-5">
                 <i class="bi bi-grid me-2"></i>Browse Menu
             </a>
         </div>
@@ -126,7 +126,7 @@
                 </div>
                 <!-- /cart-items-list -->
 
-                <a href="menu.html" class="cart-continue-link mt-3 d-inline-flex align-items-center">
+                <a href="{{ route('frontend.home') }}#menu" class="cart-continue-link mt-3 d-inline-flex align-items-center">
                     <i class="bi bi-arrow-left me-2"></i>Continue Shopping
                 </a>
             </div>
@@ -156,7 +156,7 @@
                     </div>
 
                     <div class="cart-summary-footer">
-                        <a href="checkout.html" class="btn cart-checkout-btn w-100">
+                        <a href="{{ route('frontend.checkout') }}" class="btn cart-checkout-btn w-100">
                             Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
                         </a>
                         <p class="cart-secure-note">

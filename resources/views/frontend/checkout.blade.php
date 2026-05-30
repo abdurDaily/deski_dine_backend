@@ -34,7 +34,24 @@
           <div class="row g-4 align-items-start">
             <!-- Left: Checkout Form -->
             <div class="col-lg-7">
-              <form id="checkoutForm" class="checkout-form-card">
+              <form id="checkoutForm" class="checkout-form-card" action="{{ route('frontend.order.store') }}" method="POST">
+                @csrf
+
+                <div id="checkoutMessages"></div>
+
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Delivery Details -->
                 <div class="checkout-form-section">
                   <h6 class="checkout-form-heading">
@@ -50,7 +67,7 @@
                           class="form-control checkout-input"
                           required
                           type="text"
-                          name="name"
+                          name="customer_name"
                           placeholder="e.g. Rahim Uddin"
                         />
                       </div>
@@ -63,7 +80,7 @@
                           class="form-control checkout-input"
                           required
                           type="tel"
-                          name="phone"
+                          name="customer_phone"
                           placeholder="01XXXXXXXXX"
                         />
                       </div>
@@ -78,11 +95,47 @@
                           class="form-control checkout-input"
                           required
                           rows="3"
-                          name="address"
+                          name="customer_address"
                           placeholder="House/Flat, Road, Area, City"
                         ></textarea>
                       </div>
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Membership Card Number</label>
+                        <div class="checkout-input-wrap">
+                          <i class="bi bi-credit-card checkout-input-icon"></i>
+                          <input
+                            class="form-control checkout-input"
+                            required
+                            type="text"
+                            name="member_card_number"
+                            placeholder="Enter your registered card number"
+                          />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-4 pt-2">
+                            <input class="form-check-input" type="checkbox" name="student_card" value="1" id="studentCard" />
+                            <label class="form-check-label" for="studentCard">I can show a student card</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Order Total (৳)</label>
+                        <div class="checkout-input-wrap">
+                          <i class="bi bi-cash-stack checkout-input-icon"></i>
+                          <input
+                            class="form-control checkout-input"
+                            required
+                            readonly
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            name="order_total"
+                            value="0"
+                          />
+                        </div>
+                    </div>
+                    <input type="hidden" name="items" value="[]" />
                   </div>
                 </div>
 
@@ -98,14 +151,14 @@
                   </h6>
                   <div class="checkout-payment-options">
                     <label class="checkout-payment-card">
-                      <input type="radio" name="payment" value="cod" checked />
+                      <input type="radio" name="payment_method" value="cod" checked />
                       <span class="checkout-payment-body">
                         <i class="bi bi-cash-stack checkout-payment-icon"></i>
                         <span>Cash on Delivery</span>
                       </span>
                     </label>
                     <label class="checkout-payment-card">
-                      <input type="radio" name="payment" value="bkash" />
+                      <input type="radio" name="payment_method" value="bkash" />
                       <span class="checkout-payment-body">
                         <i
                           class="bi bi-phone checkout-payment-icon"
@@ -193,7 +246,7 @@
               </div>
 
               <a
-                href="cart.html"
+                href="{{ route('frontend.addtocart') }}"
                 class="cart-continue-link mt-3 d-inline-flex align-items-center"
               >
                 <i class="bi bi-arrow-left me-2"></i>Back to Cart

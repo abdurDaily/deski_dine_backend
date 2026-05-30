@@ -4,6 +4,43 @@
         <x-breadcrumb></x-breadcrumb>
         <div class="row">
             <div class="col-xl-12">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm rounded-3 bg-primary-soft me-3">
+                                        <i class="ri-shopping-cart-line fs-22 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-1">Total Orders</p>
+                                        <h4 class="mb-0">{{ $ordersCount ?? 0 }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm rounded-3 bg-success-soft me-3">
+                                        <i class="ri-user-star-line fs-22 text-success"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-1">Total Members</p>
+                                        <h4 class="mb-0">{{ $membersCount ?? 0 }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
                 <div class="card crm-widget">
                     <div class="p-0 card-body">
                         <div class="row row-cols-xxl-5 row-cols-md-3 row-cols-1 g-0">

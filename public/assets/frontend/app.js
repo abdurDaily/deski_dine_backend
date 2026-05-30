@@ -14,16 +14,19 @@ const observer = new IntersectionObserver(
 revealItems.forEach((item) => observer.observe(item));
 
 const getCurrentPageFile = () => {
-  const pathname = window.location.pathname;
+  const pathname = window.location.pathname.replace(/\/$/, "");
   const file = pathname.substring(pathname.lastIndexOf("/") + 1);
-  return file || "index.html";
+  return file === "" || file === "index" ? "home" : file;
 };
 
 const syncSharedNavigationAndFooter = () => {
   const currentPage = getCurrentPageFile();
-  const isHomePage = currentPage === "index.html";
+  const isHomePage = currentPage === "home";
 
   const pageKeyMap = {
+    "home": "home",
+    "": "home",
+    "index": "home",
     "index.html": "home",
     "about.html": "about",
     "menu.html": "menu",
@@ -31,8 +34,11 @@ const syncSharedNavigationAndFooter = () => {
     "menu-detail.html": "menu",
     "complete-menu-detail.html": "menu",
     "cart.html": "menu",
-    "checkout.html": "menu",
+    "add-to-cart": "menu",
+    "checkout": "menu",
     "cards-page.html": "privilege",
+    "cards": "privilege",
+    "card-apply": "privilege",
     "privilege-card.html": "privilege",
     "contact.html": "contact",
     "review.html": "reviews",
@@ -291,7 +297,373 @@ const setupPrivilegeCardForm = () => {
   updateFormState();
 };
 
+const CART_STORAGE_KEY = "degchi_cart";
+
+const getCartData = () => {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (error) {
+    return [];
+  }
+};
+
+const saveCartData = (cart) => {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+};
+
+const formatCurrency = (value) => {
+  return `৳ ${Number(value || 0).toFixed(2)}`;
+};
+
+const getCartTotal = (cart) => {
+  return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+};
+
+const buildCartItemId = (item) => {
+  return `${item.title}`.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+};
+
+const createMenuItemFromCard = (button) => {
+  const card = button.closest(".menu-slide-item") || button.closest(".menu-offer-card");
+  if (!card) return null;
+
+  const title = card.querySelector(".menu-offer-title")?.textContent.trim();
+  const priceText = card.querySelector(".menu-offer-price")?.textContent || "0";
+  const image = card.querySelector(".menu-offer-image")?.getAttribute("src") || "";
+  const quantityText = card.querySelector(".menu-offer-serve")?.textContent || "1 person";
+
+  const price = Number(priceText.replace(/[^\\d.]/g, "")) || 0;
+  return {
+    id: buildCartItemId({ title }),
+    title: title || "Menu item",
+    price,
+    quantity: 1,
+    image,
+    note: quantityText.trim() || "1 person",
+  };
+};
+
+const updateCartBadges = (cart) => {
+  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  document.querySelectorAll(".desktop-order-qty, .mobile-order-qty").forEach((node) => {
+    node.textContent = totalCount;
+    node.setAttribute("aria-label", `${totalCount} items`);
+  });
+};
+
+const renderCartDrawer = () => {
+  const cart = getCartData();
+  const cartDrawerItems = document.getElementById("cartDrawerItems");
+  const subtotalNode = document.getElementById("cartDrawerSubtotal");
+
+  if (!cartDrawerItems || !subtotalNode) return;
+
+  if (!cart.length) {
+    cartDrawerItems.innerHTML = `
+      <div class="text-center py-5">
+        <i class="bi bi-bag-x cart-empty-icon"></i>
+        <p class="mt-3 mb-0">Your cart is empty.</p>
+      </div>
+    `;
+  } else {
+    cartDrawerItems.innerHTML = cart
+      .map((item) => `
+        <article class="cart-item" data-item-id="${item.id}">
+          <div class="cart-item-image-wrap">
+            <img src="${item.image}" alt="${item.title}" class="cart-item-image" />
+          </div>
+          <div class="cart-item-body">
+            <div class="cart-item-header-row">
+              <h6 class="cart-item-title">${item.title}</h6>
+              <button class="cart-item-remove-btn btn btn-link p-0" type="button" aria-label="Remove item">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            <div class="cart-item-footer-row">
+              <div class="cart-qty-row">
+                <button class="qty-adjust-btn btn btn-sm" type="button" data-change="-1" aria-label="Decrease quantity">—</button>
+                <span class="cart-qty">${item.quantity}</span>
+                <button class="qty-adjust-btn btn btn-sm" type="button" data-change="1" aria-label="Increase quantity">+</button>
+              </div>
+              <div class="cart-item-meta">${formatCurrency(item.price * item.quantity)}</div>
+            </div>
+          </div>
+        </article>
+      `)
+      .join("");
+  }
+
+  subtotalNode.textContent = formatCurrency(getCartTotal(cart));
+  updateCartBadges(cart);
+};
+
+const renderCartPage = () => {
+  const cart = getCartData();
+  const cartPageItems = document.getElementById("cartPageItems");
+  const cartPageSubtotal = document.getElementById("cartPageSubtotal");
+  const cartPageTotal = document.getElementById("cartPageTotal");
+  const cartCountBadge = document.querySelector(".cart-count-badge");
+  const cartPageEmpty = document.getElementById("cartPageEmpty");
+
+  if (!cartPageItems || !cartPageSubtotal || !cartPageTotal) return;
+
+  if (!cart.length) {
+    if (cartPageEmpty) cartPageEmpty.style.display = "block";
+    cartPageItems.innerHTML = "";
+    cartPageSubtotal.textContent = formatCurrency(0);
+    cartPageTotal.textContent = formatCurrency(0);
+    if (cartCountBadge) cartCountBadge.textContent = "0 Items";
+    return;
+  }
+
+  if (cartPageEmpty) cartPageEmpty.style.display = "none";
+  cartPageItems.innerHTML = cart
+    .map((item) => `
+      <div class="cart-product-card" data-item-id="${item.id}">
+        <div class="cart-product-img-wrap">
+          <img src="${item.image}" alt="${item.title}" class="cart-product-img" />
+        </div>
+        <div class="cart-product-body">
+          <div class="cart-product-top">
+            <div>
+              <h6 class="cart-product-name">${item.title}</h6>
+              <span class="cart-product-tag">${item.note}</span>
+            </div>
+            <button class="btn cart-remove-btn" type="button" aria-label="Remove item">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="cart-product-bottom">
+            <div class="cart-product-qty">
+              <button class="btn cart-qty-btn" type="button" data-change="-1">
+                <i class="bi bi-dash"></i>
+              </button>
+              <span class="cart-qty-val">${item.quantity}</span>
+              <button class="btn cart-qty-btn" type="button" data-change="1">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+            <div class="cart-product-price-wrap">
+              <span class="cart-product-unit">${formatCurrency(item.price)} × ${item.quantity}</span>
+              <strong class="cart-product-total">${formatCurrency(item.price * item.quantity)}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    `)
+    .join("");
+
+  cartPageSubtotal.textContent = formatCurrency(getCartTotal(cart));
+  cartPageTotal.textContent = formatCurrency(getCartTotal(cart));
+
+  const cartSectionLabel = document.querySelector(".cart-section-label");
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  if (cartSectionLabel) {
+    cartSectionLabel.innerHTML = `<i class="bi bi-list-check me-2"></i>${itemCount} item${itemCount === 1 ? "" : "s"} in your cart`;
+  }
+
+  if (cartCountBadge) cartCountBadge.textContent = `${itemCount} Items`;
+};
+
+const renderCheckoutSummary = () => {
+  const cart = getCartData();
+  const checkoutItemsWrap = document.querySelector(".checkout-summary-items-wrap");
+  const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+  const checkoutTotal = document.getElementById("checkoutTotal");
+  const orderTotalInput = document.querySelector("input[name='order_total']");
+  const itemsInput = document.querySelector("input[name='items']");
+
+  if (!checkoutItemsWrap || !checkoutSubtotal || !checkoutTotal) return;
+
+  if (!cart.length) {
+    checkoutItemsWrap.innerHTML = `<div class="text-center py-5"><p class="mb-0">Your cart is empty. Add items before checking out.</p></div>`;
+    checkoutSubtotal.textContent = formatCurrency(0);
+    checkoutTotal.textContent = formatCurrency(0);
+    if (orderTotalInput) orderTotalInput.value = "0";
+    if (itemsInput) itemsInput.value = JSON.stringify([]);
+    return;
+  }
+
+  checkoutItemsWrap.innerHTML = cart
+    .map((item) => `
+      <div class="checkout-order-item">
+        <img src="${item.image}" alt="${item.title}" class="checkout-order-img" />
+        <div class="checkout-order-info">
+          <p class="checkout-order-name">${item.title}</p>
+          <span class="checkout-order-price">${formatCurrency(item.price)} × ${item.quantity}</span>
+        </div>
+        <strong class="checkout-order-subtotal">${formatCurrency(item.price * item.quantity)}</strong>
+      </div>
+    `)
+    .join("");
+
+  const total = getCartTotal(cart);
+  checkoutSubtotal.textContent = formatCurrency(total);
+  checkoutTotal.textContent = formatCurrency(total);
+  if (orderTotalInput) orderTotalInput.value = total.toFixed(2);
+  if (itemsInput) itemsInput.value = JSON.stringify(cart);
+};
+
+const addToCart = (item) => {
+  const cart = getCartData();
+  const existing = cart.find((entry) => entry.id === item.id);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push(item);
+  }
+  saveCartData(cart);
+  renderCartDrawer();
+  renderCartPage();
+  renderCheckoutSummary();
+};
+
+const removeFromCart = (itemId) => {
+  const cart = getCartData().filter((item) => item.id !== itemId);
+  saveCartData(cart);
+  renderCartDrawer();
+  renderCartPage();
+  renderCheckoutSummary();
+};
+
+const changeCartQuantity = (itemId, delta) => {
+  const cart = getCartData().map((item) => {
+    if (item.id !== itemId) return item;
+    return { ...item, quantity: Math.max(1, item.quantity + delta) };
+  });
+  saveCartData(cart.filter((item) => item.quantity > 0));
+  renderCartDrawer();
+  renderCartPage();
+  renderCheckoutSummary();
+};
+
+const clearCart = () => {
+  saveCartData([]);
+  renderCartDrawer();
+  renderCartPage();
+  renderCheckoutSummary();
+};
+
+const openCartDrawer = () => {
+  const drawerEl = document.getElementById("cartDrawer");
+  if (!drawerEl || !window.bootstrap?.Offcanvas) return;
+  const drawer = bootstrap.Offcanvas.getOrCreateInstance(drawerEl);
+  drawer.show();
+};
+
+const initCartEvents = () => {
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".menu-offer-cart-btn");
+    if (button) {
+      event.preventDefault();
+      const item = createMenuItemFromCard(button);
+      if (item) {
+        addToCart(item);
+        openCartDrawer();
+      }
+      return;
+    }
+
+    const removeButton = event.target.closest(".cart-item-remove-btn, .cart-remove-btn");
+    if (removeButton) {
+      const card = removeButton.closest("[data-item-id]");
+      if (card) {
+        const itemId = card.getAttribute("data-item-id");
+        removeFromCart(itemId);
+      }
+      return;
+    }
+
+    const qtyButton = event.target.closest(".qty-adjust-btn, .cart-qty-btn");
+    if (qtyButton) {
+      const change = Number(qtyButton.dataset.change || qtyButton.getAttribute("data-change") || 0);
+      const card = qtyButton.closest("[data-item-id]");
+      if (card && change !== 0) {
+        const itemId = card.getAttribute("data-item-id");
+        changeCartQuantity(itemId, change);
+      }
+      return;
+    }
+
+    const clearBtn = event.target.closest(".cart-clear-btn");
+    if (clearBtn) {
+      event.preventDefault();
+      clearCart();
+      return;
+    }
+  });
+
+  $(document).on("submit", "#checkoutForm", function (event) {
+    const cart = getCartData();
+    if (!cart.length) {
+      alert("Please add items to your cart before placing an order.");
+      event.preventDefault();
+      return false;
+    }
+
+    const cardInput = document.querySelector("input[name='member_card_number']");
+    if (cardInput && !cardInput.value.trim()) {
+      alert("Please register and enter your membership card number before placing an order.");
+      cardInput.focus();
+      event.preventDefault();
+      return false;
+    }
+
+    // Submit via AJAX when supported
+    if (window.jQuery) {
+      event.preventDefault();
+      const form = $(this);
+      const url = form.attr("action");
+      const data = form.serialize();
+
+      $.ajax({
+        type: "POST",
+        url,
+        data,
+        dataType: "json",
+        headers: {
+          "X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content") || "",
+        },
+        success: function (response) {
+          clearCart();
+          renderCartDrawer();
+          renderCartPage();
+          renderCheckoutSummary();
+
+          const messageContainer = document.getElementById("checkoutMessages");
+          if (messageContainer) {
+            messageContainer.innerHTML = `<div class="alert alert-success">${response.message || "Order placed successfully."}</div>`;
+          } else {
+            alert(response.message || "Order placed successfully.");
+          }
+        },
+        error: function (xhr) {
+          const response = xhr.responseJSON;
+          const message = response?.errors
+            ? Object.values(response.errors)[0][0]
+            : response?.message || "Unable to place the order. Please try again.";
+          const messageContainer = document.getElementById("checkoutMessages");
+          if (messageContainer) {
+            messageContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+          } else {
+            alert(message);
+          }
+        },
+      });
+    }
+  });
+};
+
+const initCartPages = () => {
+  renderCartDrawer();
+  renderCartPage();
+  renderCheckoutSummary();
+  initCartEvents();
+};
+
 syncSharedNavigationAndFooter();
+initCartPages();
 
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(

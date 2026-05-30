@@ -11,6 +11,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Backend\MemberController;
+use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\NotificationController;
 
@@ -102,6 +104,9 @@ Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
         Route::put('profile', 'profileUpdate')->name('profile.update');
         Route::put('password', 'passwordUpdate')->name('password.update');
     });
+
+    Route::get('members', [MemberController::class, 'index'])->name('members.index');
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
 });
 
 Route::name('frontend.')->group(function(){
@@ -110,5 +115,10 @@ Route::name('frontend.')->group(function(){
     Route::get('/',[HomeController::class, 'home'])->name('home');
     Route::get('/add-to-cart',[HomeController::class, 'addToCart'])->name('addtocart');
     Route::get('/checkout',[HomeController::class, 'checkout'])->name('checkout');
+    Route::get('/cards',[HomeController::class, 'cards'])->name('cards');
+    Route::get('/card-apply',[HomeController::class, 'cardApply'])->name('card.apply');
+    Route::post('/members/register',[HomeController::class, 'registerMember'])->name('members.register');
+    Route::post('/golden-card/apply',[HomeController::class, 'applyGoldenCard'])->name('golden.card.apply');
+    Route::post('/order',[HomeController::class, 'storeOrder'])->name('order.store');
 
 });

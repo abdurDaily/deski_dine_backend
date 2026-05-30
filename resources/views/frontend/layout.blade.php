@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
   <title>Degchi Dine | ডেক্সি ডাইন</title>
 
   <link
@@ -26,13 +27,14 @@
   <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+  @stack('front_css')
   <link rel="stylesheet" href="{{ asset('assets/frontend/style.css') }}" />
 </head>
 
 <body class="hero-page">
   <nav id="desktopNavbar" class="navbar py-0 desktop-navbar d-none d-lg-block sticky-top">
     <div class="container px-4 px-xxl-5">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="{{ route('frontend.home') }}">
         <div class="logo-badge-wrapper">
           <img src="{{ asset('assets/frontend/images/logo.webp') }}" alt="Logo" class="nav-logo-img" />
         </div>
@@ -40,22 +42,22 @@
 
       <ul class="navbar-nav flex-row desktop-nav">
         <li class="nav-item">
-          <a class="nav-link" href="index.html#home">Home</a>
+          <a class="nav-link" href="{{ route('frontend.home') }}#home">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="about.html">About</a>
+          <a class="nav-link" href="{{ route('frontend.home') }}#about">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="menu.html">Menu</a>
+          <a class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="cards-page.html">Card</a>
+          <a class="nav-link" href="{{ route('frontend.cards') }}">Card</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="index.html#testimonials">Reviews</a>
+          <a class="nav-link" href="{{ route('frontend.home') }}#testimonials">Reviews</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="contact.html">Contact</a>
+          <a class="nav-link" href="{{ route('frontend.home') }}#contact">Contact</a>
         </li>
       </ul>
 
@@ -78,8 +80,8 @@
           aria-hidden="true"></iconify-icon>
       </button>
 
-      <a class="navbar-brand mobile-nav-brand" href="#home">
-        <img src="./images/logo.webp" class="mobile-logo-img" alt="Restaurant logo" />
+      <a class="navbar-brand mobile-nav-brand" href="{{ route('frontend.home') }}#home">
+        <img src="{{ asset('assets/frontend/images/logo.webp') }}" class="mobile-logo-img" alt="Restaurant logo" />
       </a>
 
       <a href="#cartDrawer" class="mobile-order-icon" aria-label="Open cart" data-bs-toggle="offcanvas" role="button"
@@ -93,29 +95,29 @@
   <div class="offcanvas offcanvas-start mobile-sidebar" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="mobileMenuLabel">
-        <img src="./images/logo.webp" class="offcanvas-logo-img" alt="Restaurant logo" />
+        <img src="{{ asset('assets/frontend/images/logo.webp') }}" class="offcanvas-logo-img" alt="Restaurant logo" />
       </h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
       <ul class="nav flex-column side-nav">
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="index.html#home">Home</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#home">Home</a>
         </li>
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="about.html">About</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#about">About</a>
         </li>
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="menu.html">Menu</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
         </li>
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="cards-page.html">Card</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.cards') }}">Card</a>
         </li>
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="index.html#testimonials">Reviews</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#testimonials">Reviews</a>
         </li>
         <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="contact.html">Contact</a>
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#contact">Contact</a>
         </li>
       </ul>
 
@@ -159,14 +161,13 @@
             <div class="col-lg-2 col-md-6 col-6">
               <h6 class="footer-heading">Quick Links</h6>
               <ul class="footer-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About Us</a></li>
-                <li><a href="menu.html">Menu</a></li>
-                <li><a href="privilege-card.html">Privilege Card</a></li>
-                <li><a href="complete-menu.html">Complete Menu</a></li>
-                <li><a href="#video">Video</a></li>
-                <li><a href="#testimonials">Reviews</a></li>
-                <li><a href="#location">Location</a></li>
+                <li><a href="{{ route('frontend.home') }}#home">Home</a></li>
+                <li><a href="{{ route('frontend.home') }}#about">About Us</a></li>
+                <li><a href="{{ route('frontend.home') }}#menu">Menu</a></li>
+                <li><a href="{{ route('frontend.cards') }}">Privilege Card</a></li>
+                <li><a href="{{ route('frontend.home') }}#video">Video</a></li>
+                <li><a href="{{ route('frontend.home') }}#testimonials">Reviews</a></li>
+                <li><a href="{{ route('frontend.home') }}#location">Location</a></li>
               </ul>
             </div>
 
@@ -258,7 +259,7 @@
                 <span class="mc-price-label">Starts from</span>
                 <span id="mcQuickViewPrice" class="mc-price"></span>
               </div>
-              <a href="menu.html" class="mc-show-more-btn mt-4" data-bs-dismiss="modal">
+              <a href="{{ route('frontend.home') }}#menu" class="mc-show-more-btn mt-4" data-bs-dismiss="modal">
                 Explore Full Menu
                 <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
               </a>
