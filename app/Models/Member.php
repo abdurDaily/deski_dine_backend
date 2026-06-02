@@ -10,6 +10,9 @@ class Member extends Model
         'name',
         'phone',
         'email',
+        'dob',
+        'marriage_date',
+        'address',
         'unique_card_number',
         'last4',
         'is_student',
@@ -23,6 +26,8 @@ class Member extends Model
         'is_student' => 'boolean',
         'first_order_discount_used' => 'boolean',
         'total_purchase' => 'decimal:2',
+        'dob' => 'date',
+        'marriage_date' => 'date',
     ];
 
     public function orders()

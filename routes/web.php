@@ -106,6 +106,15 @@ Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
     });
 
     Route::get('members', [MemberController::class, 'index'])->name('members.index');
+    // Admin menu management
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('menu', App\Http\Controllers\Backend\MenuController::class)->except(['show']);
+        Route::post('menu/{menu}/delete', [App\Http\Controllers\Backend\MenuController::class, 'destroy'])->name('menu.delete');
+    });
+        // User account orders & invoices
+        Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');
+        Route::get('account/orders/{order}', [App\Http\Controllers\Frontend\OrderController::class, 'invoice'])->name('account.invoice.show');
+        Route::get('account/orders/{order}/download', [App\Http\Controllers\Frontend\OrderController::class, 'downloadInvoice'])->name('account.invoice.download');
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
 });
 

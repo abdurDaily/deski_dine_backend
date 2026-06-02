@@ -227,6 +227,8 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   <!-- Floating action button: WhatsApp (right) -->
   <div class="floating-right">
     <a id="whatsappBtn" class="fab fab-whatsapp is-visible"
@@ -346,6 +348,25 @@
           <a href="{{ route('frontend.checkout') }}" class="btn cart-checkout-btn">
             <span>Proceed To Checkout <i class="bi bi-arrow-right ms-1"></i></span>
           </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Membership prompt modal shown at checkout when user is not registered -->
+  <div class="modal fade" id="memberPromptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Become a Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Members get exclusive discounts, priority service and rewards. Register now to apply your membership benefits.</p>
+        </div>
+        <div class="modal-footer">
+          <a href="{{ route('frontend.card.apply') }}" class="btn btn-primary">Register Now</a>
+          <button id="continueAsGuestBtn" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue as Guest</button>
         </div>
       </div>
     </div>

@@ -78,63 +78,89 @@
                     <p>Please provide your details below. Approvals are typically processed within one business day.</p>
                 </div>
 
-                <form class="dd-apply-form-element" onsubmit="event.preventDefault();">
-
-                    <!-- 2-Column Grid for Names -->
-                    <div class="dd-input-grid">
-                        <div class="dd-input-group">
-                            <input type="text" id="dd_fname" class="dd-input-field" placeholder=" " required>
-                            <label for="dd_fname" class="dd-floating-label">First Name</label>
-                        </div>
-                        <div class="dd-input-group">
-                            <input type="text" id="dd_lname" class="dd-input-field" placeholder=" " required>
-                            <label for="dd_lname" class="dd-floating-label">Last Name</label>
-                        </div>
+                <form id="privilegeCardForm" class="dd-apply-form-element" method="POST" action="{{ route('frontend.members.register') }}">
+                    @csrf
+                    <div class="dd-input-group">
+                        <input type="text" name="name" id="dd_name" class="dd-input-field" placeholder=" " required>
+                        <label for="dd_name" class="dd-floating-label">Full Name</label>
                     </div>
 
-                    <!-- 2-Column Grid for Contact -->
                     <div class="dd-input-grid">
                         <div class="dd-input-group">
-                            <input type="email" id="dd_email" class="dd-input-field" placeholder=" " required>
+                            <input type="email" name="email" id="dd_email" class="dd-input-field" placeholder=" ">
                             <label for="dd_email" class="dd-floating-label">Email Address</label>
                         </div>
                         <div class="dd-input-group">
-                            <input type="tel" id="dd_phone" class="dd-input-field" placeholder=" " required>
+                            <input type="tel" name="phone" id="dd_phone" class="dd-input-field" placeholder=" " required>
                             <label for="dd_phone" class="dd-floating-label">Phone Number</label>
                         </div>
                     </div>
 
-                    <!-- Full Width Select -->
-                    <div class="dd-input-group">
-                        <select id="dd_tier" class="dd-input-field dd-select" required>
-                            <option value="" disabled selected hidden></option>
-                            <option value="privilege">Privilege Membership (Tier I)</option>
-                            <option value="membership">VIP Membership (Tier II)</option>
-                        </select>
-                        <label for="dd_tier" class="dd-floating-label">Select Requested Tier</label>
-                        <iconify-icon icon="solar:alt-arrow-down-linear" class="dd-select-arrow"></iconify-icon>
+                    <div class="dd-input-grid">
+                        <div class="dd-input-group">
+                            <input type="date" name="dob" id="dd_dob" class="dd-input-field" placeholder=" ">
+                            <label for="dd_dob" class="dd-floating-label">Date of Birth</label>
+                        </div>
+                        <div class="dd-input-group">
+                            <input type="date" name="marriage_date" id="dd_marriage" class="dd-input-field" placeholder=" ">
+                            <label for="dd_marriage" class="dd-floating-label">Marriage Date (optional)</label>
+                        </div>
                     </div>
 
-                    <!-- Custom Terms Checkbox -->
+                    <div class="dd-input-group">
+                        <textarea name="address" id="dd_address" class="dd-input-field" rows="2" placeholder=" "></textarea>
+                        <label for="dd_address" class="dd-floating-label">Address (optional)</label>
+                    </div>
+
+                    <div class="dd-input-grid">
+                        <div class="dd-input-group">
+                            <label class="form-check form-check-inline">
+                                <input type="checkbox" name="is_student" value="1" class="form-check-input">
+                                <span class="form-check-label">I am a student</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <label class="dd-terms-wrapper">
-                        <input type="checkbox" id="dd_terms" class="dd-hidden-check" required>
+                        <input type="checkbox" id="dd_terms" name="terms" class="dd-hidden-check" required>
                         <div class="dd-visible-check">
                             <iconify-icon icon="solar:check-read-linear"></iconify-icon>
                         </div>
-                        <span class="dd-terms-text">
-                            I confirm that the details provided are accurate and agree to the terms of the Degchi Dine
-                            rewards
-                            program.
-                        </span>
+                        <span class="dd-terms-text">I confirm that the details provided are accurate and agree to the terms of the Degchi Dine rewards program.</span>
                     </label>
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="dd-submit-btn">
+                    <button type="submit" id="privilegeSubmitBtn" class="dd-submit-btn">
                         <span>Submit Application</span>
                         <iconify-icon icon="solar:arrow-right-linear" class="dd-btn-icon"></iconify-icon>
                     </button>
-
                 </form>
+
+                <div id="privilegeThanks" class="d-none mt-3 alert alert-success"></div>
+
+                <script>
+                    $(function(){
+                        $('#privilegeCardForm').on('submit', function(e){
+                            e.preventDefault();
+                            var form = $(this);
+                            $.ajax({
+                                url: form.attr('action'),
+                                method: 'POST',
+                                data: form.serialize(),
+                                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                                success: function(res){
+                                    if(res.success){
+                                        $('#privilegeThanks').removeClass('d-none').text(res.message);
+                                        form[0].reset();
+                                    }
+                                },
+                                error: function(xhr){
+                                    var msg = xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors)[0][0] : xhr.responseJSON?.message || 'Unable to register';
+                                    alert(msg);
+                                }
+                            });
+                        });
+                    });
+                </script>
             </div>
 
         </div>

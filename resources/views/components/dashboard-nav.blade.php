@@ -11,6 +11,9 @@
                 <a href="{{route('orders.index')}}" class="nav-link"><span data-key="t-orders">{{__('Orders')}}</span></a>
             </li>
             <li class="nav-item">
+                <a href="{{route('admin.menu.index')}}" class="nav-link"><span data-key="t-menu">{{__('Menu')}}</span></a>
+            </li>
+            <li class="nav-item">
                 <a href="{{route('members.index')}}" class="nav-link"><span data-key="t-members">{{__('Members')}}</span></a>
             </li>
         </ul>

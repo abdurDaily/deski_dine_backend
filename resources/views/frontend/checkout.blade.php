@@ -106,10 +106,9 @@
                           <i class="bi bi-credit-card checkout-input-icon"></i>
                           <input
                             class="form-control checkout-input"
-                            required
                             type="text"
                             name="member_card_number"
-                            placeholder="Enter your registered card number"
+                            placeholder="Enter your registered card number (leave blank to continue as guest)"
                           />
                         </div>
                     </div>

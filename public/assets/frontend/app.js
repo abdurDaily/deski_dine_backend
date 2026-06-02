@@ -602,11 +602,27 @@ const initCartEvents = () => {
       return false;
     }
 
+    // If user explicitly continued as guest, allow submission (hidden flag)
+    const guestFlag = this.querySelector("input[name='__guest_continue']");
+    if (guestFlag && guestFlag.value === '1') {
+      // remove the helper flag and allow submission
+      guestFlag.parentNode.removeChild(guestFlag);
+    }
+
     const cardInput = document.querySelector("input[name='member_card_number']");
     if (cardInput && !cardInput.value.trim()) {
-      alert("Please register and enter your membership card number before placing an order.");
-      cardInput.focus();
+      // Prompt user to register or continue as guest via modal
       event.preventDefault();
+      const modalEl = document.getElementById('memberPromptModal');
+      if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        // Store reference to the form so the modal action can submit it
+        window.__pendingCheckoutForm = this;
+        modal.show();
+      } else {
+        // Fallback alert
+        alert("Consider registering to get membership benefits. You can continue as guest.");
+      }
       return false;
     }
 
@@ -634,8 +650,15 @@ const initCartEvents = () => {
           const messageContainer = document.getElementById("checkoutMessages");
           if (messageContainer) {
             messageContainer.innerHTML = `<div class="alert alert-success">${response.message || "Order placed successfully."}</div>`;
+          } else if (window.toastr) {
+            toastr.success(response.message || "Order placed successfully.");
           } else {
             alert(response.message || "Order placed successfully.");
+          }
+
+          // If server returned the new order id redirect to the on-site invoice
+          if (response.order_id) {
+            window.location.href = `/account/orders/${response.order_id}`;
           }
         },
         error: function (xhr) {
@@ -646,6 +669,8 @@ const initCartEvents = () => {
           const messageContainer = document.getElementById("checkoutMessages");
           if (messageContainer) {
             messageContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+          } else if (window.toastr) {
+            toastr.error(message);
           } else {
             alert(message);
           }
@@ -794,6 +819,27 @@ window.addEventListener("scroll", () => {
 
 syncNavbarState();
 setupPrivilegeCardForm();
+
+// Handle continue as guest from modal
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('#continueAsGuestBtn');
+  if (!btn) return;
+  const pending = window.__pendingCheckoutForm;
+  if (!pending) return;
+  // inject a hidden flag to bypass the modal prompt
+  let flag = pending.querySelector("input[name='__guest_continue']");
+  if (!flag) {
+    flag = document.createElement('input');
+    flag.type = 'hidden';
+    flag.name = '__guest_continue';
+    flag.value = '1';
+    pending.appendChild(flag);
+  } else {
+    flag.value = '1';
+  }
+  // submit the form (will be intercepted by AJAX handler and proceed)
+  $(pending).submit();
+});
 
 /* ==========================================================================
    06. DISHES HIGHLIGHTS SLIDER INITIALIZATION

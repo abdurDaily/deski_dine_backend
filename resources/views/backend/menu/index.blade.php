@@ -257,28 +257,90 @@
                     let url = id ? "{{ route('admin.menu.update', ':id') }}".replace(':id', id) :
                         "{{ route('admin.menu.store') }}";
 
-                    let formData = new FormData($(this)[0]);
+                    // Build FormData and compress images before upload
+                    async function compressAndSend() {
+                        let formEl = $('#menuForm')[0];
+                        let formData = new FormData();
 
+                        // Append non-file fields first
+                        $(formEl).find(':input').each(function() {
+                            const el = this;
+                            const name = el.name;
+                            if (!name) return;
+                            if (el.type === 'file') return; // handle below
+                            if (el.type === 'checkbox') {
+                                if (el.checked) formData.append(name, el.value || '1');
+                            } else {
+                                formData.append(name, $(el).val() || '');
+                            }
+                        });
 
-                    console.log(formData);
+                        // Helper: compress image to webp via canvas
+                        function compressImage(file, maxWidth = 1200, quality = 0.75) {
+                            return new Promise((resolve, reject) => {
+                                const img = new Image();
+                                img.onload = () => {
+                                    const ratio = img.width / img.height;
+                                    let w = img.width;
+                                    let h = img.height;
+                                    if (w > maxWidth) {
+                                        w = maxWidth;
+                                        h = Math.round(w / ratio);
+                                    }
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = w;
+                                    canvas.height = h;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, 0, 0, w, h);
+                                    canvas.toBlob((blob) => {
+                                        if (blob) resolve(blob);
+                                        else reject(new Error('Compression failed'));
+                                    }, 'image/webp', quality);
+                                };
+                                img.onerror = (e) => reject(e);
+                                img.src = URL.createObjectURL(file);
+                            });
+                        }
 
-                    $.ajax({
-                        url: url,
-                        method: "POST", // DO NOT change this to PUT. Keep it POST.
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(res) {
+                        // Process file inputs
+                        const fileInputs = $(formEl).find('input[type=file]');
+                        for (let i = 0; i < fileInputs.length; i++) {
+                            const input = fileInputs[i];
+                            const name = input.name;
+                            if (!name) continue;
+                            if (input.files && input.files.length) {
+                                // If multiple files only take the first
+                                const file = input.files[0];
+                                try {
+                                    const compressed = await compressImage(file);
+                                    // Use original base name but webp extension
+                                    const fname = (file.name || 'image') .replace(/\.[^.]+$/, '') + '.webp';
+                                    formData.append(name, new File([compressed], fname, { type: 'image/webp' }));
+                                } catch (err) {
+                                    // fallback to original file
+                                    formData.append(name, file);
+                                }
+                            }
+                        }
+
+                        try {
+                            const res = await $.ajax({
+                                url: url,
+                                method: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                            });
                             toastr.success(res.message);
                             location.reload();
-                        },
-                        error: function(xhr) {
-                            // Check the console (F12) to see the actual error page Laravel returns
+                        } catch (xhr) {
                             console.log(xhr.responseText);
                             let message = xhr.responseJSON?.message || "Check console for details";
                             Swal.fire('Error', message, 'error');
                         }
-                    });
+                    }
+
+                    compressAndSend();
                 });
 
 
