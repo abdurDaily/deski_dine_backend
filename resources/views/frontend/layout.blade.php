@@ -373,6 +373,7 @@
   </div>
 
   <script src="{{ asset('assets/frontend/app.js') }}"></script>
+  @stack('front_js')
 </body>
 
 </html>

@@ -6,7 +6,7 @@ use App\Http\Controllers\Backend\MenuController; // Import the Menu Controller
 use Illuminate\Support\Facades\Route;
 
 // --- BRANCH MANAGEMENT ---
-Route::middleware(['auth', 'verified', 'setLocale'])->prefix("branch")->name("branch.")->group(function () {
+Route::middleware(['auth', 'setLocale'])->prefix("branch")->name("branch.")->group(function () {
     Route::get("/index", [BranchController::class, "index"])->name("index");
     Route::post("/store", [BranchController::class, "store"])->name("store");
     Route::get("/{branch}/edit", [BranchController::class, "edit"])->name("edit");
@@ -15,7 +15,7 @@ Route::middleware(['auth', 'verified', 'setLocale'])->prefix("branch")->name("br
 });
 
 // --- CATEGORY MANAGEMENT ---
-Route::middleware(['auth', 'verified', 'setLocale'])->prefix("category")->name("category.")->group(function () {
+Route::middleware(['auth', 'setLocale'])->prefix("category")->name("category.")->group(function () {
     Route::get("/index", [CategoryController::class, "index"])->name("index");
     Route::post("/store", [CategoryController::class, "store"])->name("store");
     Route::get("/{category}/edit", [CategoryController::class, "edit"])->name("edit");
@@ -24,7 +24,7 @@ Route::middleware(['auth', 'verified', 'setLocale'])->prefix("category")->name("
 });
 
 // --- MENU MANAGEMENT (NEW) ---
-Route::middleware(['auth', 'verified', 'setLocale'])->prefix("menu")->name("menu.")->group(function () {
+Route::middleware(['auth', 'setLocale'])->prefix("menu")->name("menu.")->group(function () {
     Route::get("/index", [MenuController::class, "index"])->name("index");
     Route::post("/store", [MenuController::class, "store"])->name("store");
     Route::get("/{menu}/edit", [MenuController::class, "edit"])->name("edit");

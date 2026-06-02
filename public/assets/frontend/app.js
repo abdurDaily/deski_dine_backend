@@ -1,374 +1,395 @@
 const revealItems = document.querySelectorAll(
-  ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade",
+    ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade",
 );
 
 const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      entry.target.classList.toggle("visible", entry.isIntersecting);
-    });
-  },
-  { threshold: 0.16 },
+    (entries) => {
+        entries.forEach((entry) => {
+            entry.target.classList.toggle("visible", entry.isIntersecting);
+        });
+    },
+    { threshold: 0.16 },
 );
 
 revealItems.forEach((item) => observer.observe(item));
 
 const getCurrentPageFile = () => {
-  const pathname = window.location.pathname.replace(/\/$/, "");
-  const file = pathname.substring(pathname.lastIndexOf("/") + 1);
-  return file === "" || file === "index" ? "home" : file;
+    const pathname = window.location.pathname.replace(/\/$/, "");
+    const file = pathname.substring(pathname.lastIndexOf("/") + 1);
+    return file === "" || file === "index" ? "home" : file;
 };
 
 const syncSharedNavigationAndFooter = () => {
-  const currentPage = getCurrentPageFile();
-  const isHomePage = currentPage === "home";
+    const currentPage = getCurrentPageFile();
+    const isHomePage = currentPage === "home";
 
-  const pageKeyMap = {
-    "home": "home",
-    "": "home",
-    "index": "home",
-    "index.html": "home",
-    "about.html": "about",
-    "menu.html": "menu",
-    "complete-menu.html": "menu",
-    "menu-detail.html": "menu",
-    "complete-menu-detail.html": "menu",
-    "cart.html": "menu",
-    "add-to-cart": "menu",
-    "checkout": "menu",
-    "cards-page.html": "privilege",
-    "cards": "privilege",
-    "card-apply": "privilege",
-    "privilege-card.html": "privilege",
-    "contact.html": "contact",
-    "review.html": "reviews",
-  };
+    const pageKeyMap = {
+        home: "home",
+        "": "home",
+        index: "home",
+        "index.html": "home",
+        "about.html": "about",
+        "menu.html": "menu",
+        "complete-menu.html": "menu",
+        "menu-detail.html": "menu",
+        "complete-menu-detail.html": "menu",
+        "cart.html": "menu",
+        "add-to-cart": "menu",
+        checkout: "menu",
+        "cards-page.html": "privilege",
+        cards: "privilege",
+        "card-apply": "privilege",
+        "privilege-card.html": "privilege",
+        "contact.html": "contact",
+        "review.html": "reviews",
+    };
 
-  const activeKey = pageKeyMap[currentPage] || "";
+    const activeKey = pageKeyMap[currentPage] || "";
 
-  const navItems = [
-    {
-      key: "home",
-      label: "Home",
-      homeHref: "#home",
-      otherHref: "index.html#home",
-    },
-    {
-      key: "about",
-      label: "About",
-      homeHref: "about.html",
-      otherHref: "about.html",
-    },
-    {
-      key: "menu",
-      label: "Menu",
-      homeHref: "menu.html",
-      otherHref: "menu.html",
-    },
-    {
-      key: "privilege",
-      label: "Card",
-      homeHref: "cards-page.html",
-      otherHref: "cards-page.html",
-    },
-    {
-      key: "reviews",
-      label: "Reviews",
-      homeHref: "review.html",
-      otherHref: "review.html",
-    },
-    {
-      key: "contact",
-      label: "Contact",
-      homeHref: "contact.html",
-      otherHref: "contact.html",
-    },
-  ];
+    const navItems = [
+        {
+            key: "home",
+            label: "Home",
+            homeHref: "#home",
+            otherHref: "index.html#home",
+        },
+        {
+            key: "about",
+            label: "About",
+            homeHref: "about.html",
+            otherHref: "about.html",
+        },
+        {
+            key: "menu",
+            label: "Menu",
+            homeHref: "menu.html",
+            otherHref: "menu.html",
+        },
+        {
+            key: "privilege",
+            label: "Card",
+            homeHref: "cards-page.html",
+            otherHref: "cards-page.html",
+        },
+        {
+            key: "reviews",
+            label: "Reviews",
+            homeHref: "review.html",
+            otherHref: "review.html",
+        },
+        {
+            key: "contact",
+            label: "Contact",
+            homeHref: "contact.html",
+            otherHref: "contact.html",
+        },
+    ];
 
-  const quickLinks = [
-    {
-      label: "Home",
-      homeHref: "#home",
-      otherHref: "index.html#home",
-    },
-    {
-      label: "about",
-      homeHref: "about.html",
-      otherHref: "about.html",
-    },
-    {
-      label: "menu",
-      homeHref: "menu.html",
-      otherHref: "menu.html",
-    },
-    {
-      label: "card",
-      homeHref: "cards-page.html",
-      otherHref: "cards-page.html",
-    },
-    {
-      label: "contact",
-      homeHref: "contact.html",
-      otherHref: "contact.html",
-    },
-  ];
+    const quickLinks = [
+        {
+            label: "Home",
+            homeHref: "#home",
+            otherHref: "index.html#home",
+        },
+        {
+            label: "about",
+            homeHref: "about.html",
+            otherHref: "about.html",
+        },
+        {
+            label: "menu",
+            homeHref: "menu.html",
+            otherHref: "menu.html",
+        },
+        {
+            label: "card",
+            homeHref: "cards-page.html",
+            otherHref: "cards-page.html",
+        },
+        {
+            label: "contact",
+            homeHref: "contact.html",
+            otherHref: "contact.html",
+        },
+    ];
 
-  const desktopNav = document.querySelector(".desktop-nav");
-  if (desktopNav) {
-    desktopNav.innerHTML = navItems
-      .map((item) => {
-        const href = isHomePage ? item.homeHref : item.otherHref;
-        const activeClass = item.key === activeKey ? " active" : "";
-        const ariaCurrent =
-          item.key === activeKey ? ' aria-current="page"' : "";
-        return `<li class="nav-item"><a class="nav-link${activeClass}"${ariaCurrent} href="${href}">${item.label}</a></li>`;
-      })
-      .join("");
-  }
+    const desktopNav = document.querySelector(".desktop-nav");
+    if (desktopNav) {
+        desktopNav.innerHTML = navItems
+            .map((item) => {
+                const href = isHomePage ? item.homeHref : item.otherHref;
+                const activeClass = item.key === activeKey ? " active" : "";
+                const ariaCurrent =
+                    item.key === activeKey ? ' aria-current="page"' : "";
+                return `<li class="nav-item"><a class="nav-link${activeClass}"${ariaCurrent} href="${href}">${item.label}</a></li>`;
+            })
+            .join("");
+    }
 
-  const sideNav = document.querySelector("#mobileMenu .side-nav");
-  if (sideNav) {
-    sideNav.innerHTML = navItems
-      .map((item) => {
-        const href = isHomePage ? item.homeHref : item.otherHref;
-        const activeClass = item.key === activeKey ? " active" : "";
-        const ariaCurrent =
-          item.key === activeKey ? ' aria-current="page"' : "";
-        return `<li class="nav-item"><a data-bs-dismiss="offcanvas" class="nav-link${activeClass}"${ariaCurrent} href="${href}">${item.label}</a></li>`;
-      })
-      .join("");
-  }
+    const sideNav = document.querySelector("#mobileMenu .side-nav");
+    if (sideNav) {
+        sideNav.innerHTML = navItems
+            .map((item) => {
+                const href = isHomePage ? item.homeHref : item.otherHref;
+                const activeClass = item.key === activeKey ? " active" : "";
+                const ariaCurrent =
+                    item.key === activeKey ? ' aria-current="page"' : "";
+                return `<li class="nav-item"><a data-bs-dismiss="offcanvas" class="nav-link${activeClass}"${ariaCurrent} href="${href}">${item.label}</a></li>`;
+            })
+            .join("");
+    }
 
-  const quickLinksHeading = Array.from(
-    document.querySelectorAll(".footer-heading"),
-  ).find(
-    (heading) => heading.textContent.trim().toLowerCase() === "quick links",
-  );
+    const quickLinksHeading = Array.from(
+        document.querySelectorAll(".footer-heading"),
+    ).find(
+        (heading) => heading.textContent.trim().toLowerCase() === "quick links",
+    );
 
-  const quickLinksList = quickLinksHeading?.nextElementSibling;
-  if (quickLinksList?.classList.contains("footer-links")) {
-    quickLinksList.innerHTML = quickLinks
-      .map((item) => {
-        const href = isHomePage ? item.homeHref : item.otherHref;
-        return `<li><a href="${href}">${item.label}</a></li>`;
-      })
-      .join("");
-  }
+    const quickLinksList = quickLinksHeading?.nextElementSibling;
+    if (quickLinksList?.classList.contains("footer-links")) {
+        quickLinksList.innerHTML = quickLinks
+            .map((item) => {
+                const href = isHomePage ? item.homeHref : item.otherHref;
+                return `<li><a href="${href}">${item.label}</a></li>`;
+            })
+            .join("");
+    }
 };
 
 const setupPrivilegeCardForm = () => {
-  const form = document.getElementById("privilegeCardForm");
-  if (!form) {
-    return;
-  }
-
-  const fields = {
-    name: document.getElementById("applicantName"),
-    email: document.getElementById("applicantEmail"),
-    phone: document.getElementById("applicantPhone"),
-  };
-
-  const submitBtn = document.getElementById("privilegeSubmitBtn");
-  const liveStatus = document.getElementById("privilegeLiveStatus");
-  const thanksBox = document.getElementById("privilegeThanks");
-
-  if (
-    !fields.name ||
-    !fields.email ||
-    !fields.phone ||
-    !submitBtn ||
-    !thanksBox
-  ) {
-    return;
-  }
-
-  const getFieldNote = (fieldId) =>
-    form.querySelector(`[data-note-for="${fieldId}"]`);
-
-  const getValidationState = (field) => {
-    const value = field.value.trim();
-
-    if (field.id === "applicantName") {
-      const isValid = value.length >= 3;
-      return {
-        isValid,
-        message: isValid
-          ? "Looks good."
-          : "Please enter at least 3 characters.",
-      };
+    const form = document.getElementById("privilegeCardForm");
+    if (!form) {
+        return;
     }
 
-    if (field.id === "applicantEmail") {
-      const isValid = field.checkValidity() && value.length > 0;
-      return {
-        isValid,
-        message: isValid ? "Email is valid." : "Enter a valid email address.",
-      };
+    const fields = {
+        name: document.getElementById("applicantName"),
+        email: document.getElementById("applicantEmail"),
+        phone: document.getElementById("applicantPhone"),
+    };
+
+    const submitBtn = document.getElementById("privilegeSubmitBtn");
+    const liveStatus = document.getElementById("privilegeLiveStatus");
+    const thanksBox = document.getElementById("privilegeThanks");
+
+    if (
+        !fields.name ||
+        !fields.email ||
+        !fields.phone ||
+        !submitBtn ||
+        !thanksBox
+    ) {
+        return;
     }
 
-    if (field.id === "applicantPhone") {
-      const digits = value.replace(/\D/g, "");
-      const isValid = digits.length >= 10 && digits.length <= 14;
-      return {
-        isValid,
-        message: isValid
-          ? "Phone number is valid."
-          : "Phone must contain 10 to 14 digits.",
-      };
-    }
+    const getFieldNote = (fieldId) =>
+        form.querySelector(`[data-note-for="${fieldId}"]`);
 
-    return { isValid: false, message: "This field is required." };
-  };
+    const getValidationState = (field) => {
+        const value = field.value.trim();
 
-  const updateFieldState = (field) => {
-    const value = field.value.trim();
-    const note = getFieldNote(field.id);
+        if (field.id === "applicantName") {
+            const isValid = value.length >= 3;
+            return {
+                isValid,
+                message: isValid
+                    ? "Looks good."
+                    : "Please enter at least 3 characters.",
+            };
+        }
 
-    if (!value) {
-      field.classList.remove("is-valid", "is-invalid");
-      if (note) {
-        note.textContent = "Required";
-        note.classList.remove("is-valid");
-      }
-      return false;
-    }
+        if (field.id === "applicantEmail") {
+            const isValid = field.checkValidity() && value.length > 0;
+            return {
+                isValid,
+                message: isValid
+                    ? "Email is valid."
+                    : "Enter a valid email address.",
+            };
+        }
 
-    const { isValid, message } = getValidationState(field);
-    field.classList.toggle("is-valid", isValid);
-    field.classList.toggle("is-invalid", !isValid);
+        if (field.id === "applicantPhone") {
+            const digits = value.replace(/\D/g, "");
+            const isValid = digits.length >= 10 && digits.length <= 14;
+            return {
+                isValid,
+                message: isValid
+                    ? "Phone number is valid."
+                    : "Phone must contain 10 to 14 digits.",
+            };
+        }
 
-    if (note) {
-      note.textContent = message;
-      note.classList.toggle("is-valid", isValid);
-      note.classList.toggle("is-invalid", !isValid);
-    }
+        return { isValid: false, message: "This field is required." };
+    };
 
-    return isValid;
-  };
+    const updateFieldState = (field) => {
+        const value = field.value.trim();
+        const note = getFieldNote(field.id);
 
-  const updateFormState = () => {
-    const fieldList = [fields.name, fields.email, fields.phone];
-    const validCount = fieldList.filter((field) =>
-      updateFieldState(field),
-    ).length;
-    const allValid = validCount === fieldList.length;
+        if (!value) {
+            field.classList.remove("is-valid", "is-invalid");
+            if (note) {
+                note.textContent = "Required";
+                note.classList.remove("is-valid");
+            }
+            return false;
+        }
 
-    submitBtn.disabled = !allValid;
-    if (liveStatus) {
-      liveStatus.textContent = allValid
-        ? "Everything looks good. You can submit now."
-        : `Complete ${validCount} of ${fieldList.length} fields correctly.`;
-    }
+        const { isValid, message } = getValidationState(field);
+        field.classList.toggle("is-valid", isValid);
+        field.classList.toggle("is-invalid", !isValid);
 
-    return allValid;
-  };
+        if (note) {
+            note.textContent = message;
+            note.classList.toggle("is-valid", isValid);
+            note.classList.toggle("is-invalid", !isValid);
+        }
 
-  [fields.name, fields.email, fields.phone].forEach((field) => {
-    field.addEventListener("input", updateFormState);
-    field.addEventListener("blur", updateFormState);
-  });
+        return isValid;
+    };
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
+    const updateFormState = () => {
+        const fieldList = [fields.name, fields.email, fields.phone];
+        const validCount = fieldList.filter((field) =>
+            updateFieldState(field),
+        ).length;
+        const allValid = validCount === fieldList.length;
 
-    if (!updateFormState()) {
-      const firstInvalid = [fields.name, fields.email, fields.phone].find(
-        (field) => !field.classList.contains("is-valid"),
-      );
-      firstInvalid?.focus();
-      return;
-    }
+        submitBtn.disabled = !allValid;
+        if (liveStatus) {
+            liveStatus.textContent = allValid
+                ? "Everything looks good. You can submit now."
+                : `Complete ${validCount} of ${fieldList.length} fields correctly.`;
+        }
 
-    submitBtn.classList.add("is-loading");
-    submitBtn.disabled = true;
+        return allValid;
+    };
 
-    window.setTimeout(() => {
-      const applicantName = fields.name.value.trim();
-      form.classList.add("d-none");
-      if (liveStatus) {
-        liveStatus.classList.add("d-none");
-      }
-      thanksBox.innerHTML = `<i class="bi bi-patch-check-fill me-2"></i>Thank you, ${applicantName}! Your privilege card application has been received.`;
-      thanksBox.classList.remove("d-none");
-      submitBtn.classList.remove("is-loading");
-    }, 650);
-  });
+    [fields.name, fields.email, fields.phone].forEach((field) => {
+        field.addEventListener("input", updateFormState);
+        field.addEventListener("blur", updateFormState);
+    });
 
-  updateFormState();
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!updateFormState()) {
+            const firstInvalid = [fields.name, fields.email, fields.phone].find(
+                (field) => !field.classList.contains("is-valid"),
+            );
+            firstInvalid?.focus();
+            return;
+        }
+
+        submitBtn.classList.add("is-loading");
+        submitBtn.disabled = true;
+
+        window.setTimeout(() => {
+            const applicantName = fields.name.value.trim();
+            form.classList.add("d-none");
+            if (liveStatus) {
+                liveStatus.classList.add("d-none");
+            }
+            thanksBox.innerHTML = `<i class="bi bi-patch-check-fill me-2"></i>Thank you, ${applicantName}! Your privilege card application has been received.`;
+            thanksBox.classList.remove("d-none");
+            submitBtn.classList.remove("is-loading");
+        }, 650);
+    });
+
+    updateFormState();
 };
 
 const CART_STORAGE_KEY = "degchi_cart";
 
 const getCartData = () => {
-  try {
-    const raw = localStorage.getItem(CART_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (error) {
-    return [];
-  }
+    try {
+        const raw = localStorage.getItem(CART_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (error) {
+        return [];
+    }
 };
 
 const saveCartData = (cart) => {
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
 };
 
 const formatCurrency = (value) => {
-  return `৳ ${Number(value || 0).toFixed(2)}`;
+    return `৳ ${Number(value || 0).toFixed(2)}`;
 };
 
 const getCartTotal = (cart) => {
-  return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.reduce((total, item) => {
+        const price = Number(item.price || 0);
+        const quantity = Number(item.quantity || 0);
+        return total + price * quantity;
+    }, 0);
 };
 
 const buildCartItemId = (item) => {
-  return `${item.title}`.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    return `${item.title}`
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-");
 };
 
 const createMenuItemFromCard = (button) => {
-  const card = button.closest(".menu-slide-item") || button.closest(".menu-offer-card");
-  if (!card) return null;
+    const card =
+        button.closest(".menu-slide-item") ||
+        button.closest(".menu-offer-card");
+    if (!card) return null;
 
-  const title = card.querySelector(".menu-offer-title")?.textContent.trim();
-  const priceText = card.querySelector(".menu-offer-price")?.textContent || "0";
-  const image = card.querySelector(".menu-offer-image")?.getAttribute("src") || "";
-  const quantityText = card.querySelector(".menu-offer-serve")?.textContent || "1 person";
+    const title = card.querySelector(".menu-offer-title")?.textContent.trim();
+    const priceText =
+        card.querySelector(".menu-offer-price")?.textContent || "0";
+    const image =
+        card.querySelector(".menu-offer-image")?.getAttribute("src") || "";
+    const quantityText =
+        card.querySelector(".menu-offer-serve")?.textContent || "1 person";
 
-  const price = Number(priceText.replace(/[^\\d.]/g, "")) || 0;
-  return {
-    id: buildCartItemId({ title }),
-    title: title || "Menu item",
-    price,
-    quantity: 1,
-    image,
-    note: quantityText.trim() || "1 person",
-  };
+    const normalizedPriceText = priceText
+        .replace(/,/g, "")
+        .replace(/[^\d.]/g, "")
+        .trim();
+    const price = parseFloat(normalizedPriceText) || 0;
+    return {
+        id: buildCartItemId({ title }),
+        title: title || "Menu item",
+        price,
+        quantity: 1,
+        image,
+        note: quantityText.trim() || "1 person",
+    };
 };
 
 const updateCartBadges = (cart) => {
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  document.querySelectorAll(".desktop-order-qty, .mobile-order-qty").forEach((node) => {
-    node.textContent = totalCount;
-    node.setAttribute("aria-label", `${totalCount} items`);
-  });
+    const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document
+        .querySelectorAll(".desktop-order-qty, .mobile-order-qty")
+        .forEach((node) => {
+            node.textContent = totalCount;
+            node.setAttribute("aria-label", `${totalCount} items`);
+        });
 };
 
 const renderCartDrawer = () => {
-  const cart = getCartData();
-  const cartDrawerItems = document.getElementById("cartDrawerItems");
-  const subtotalNode = document.getElementById("cartDrawerSubtotal");
+    const cart = getCartData();
+    const cartDrawerItems = document.getElementById("cartDrawerItems");
+    const subtotalNode = document.getElementById("cartDrawerSubtotal");
 
-  if (!cartDrawerItems || !subtotalNode) return;
+    if (!cartDrawerItems || !subtotalNode) return;
 
-  if (!cart.length) {
-    cartDrawerItems.innerHTML = `
+    if (!cart.length) {
+        cartDrawerItems.innerHTML = `
       <div class="text-center py-5">
         <i class="bi bi-bag-x cart-empty-icon"></i>
         <p class="mt-3 mb-0">Your cart is empty.</p>
       </div>
     `;
-  } else {
-    cartDrawerItems.innerHTML = cart
-      .map((item) => `
+    } else {
+        cartDrawerItems.innerHTML = cart
+            .map(
+                (item) => `
         <article class="cart-item" data-item-id="${item.id}">
           <div class="cart-item-image-wrap">
             <img src="${item.image}" alt="${item.title}" class="cart-item-image" />
@@ -390,36 +411,38 @@ const renderCartDrawer = () => {
             </div>
           </div>
         </article>
-      `)
-      .join("");
-  }
+      `,
+            )
+            .join("");
+    }
 
-  subtotalNode.textContent = formatCurrency(getCartTotal(cart));
-  updateCartBadges(cart);
+    subtotalNode.textContent = formatCurrency(getCartTotal(cart));
+    updateCartBadges(cart);
 };
 
 const renderCartPage = () => {
-  const cart = getCartData();
-  const cartPageItems = document.getElementById("cartPageItems");
-  const cartPageSubtotal = document.getElementById("cartPageSubtotal");
-  const cartPageTotal = document.getElementById("cartPageTotal");
-  const cartCountBadge = document.querySelector(".cart-count-badge");
-  const cartPageEmpty = document.getElementById("cartPageEmpty");
+    const cart = getCartData();
+    const cartPageItems = document.getElementById("cartPageItems");
+    const cartPageSubtotal = document.getElementById("cartPageSubtotal");
+    const cartPageTotal = document.getElementById("cartPageTotal");
+    const cartCountBadge = document.querySelector(".cart-count-badge");
+    const cartPageEmpty = document.getElementById("cartPageEmpty");
 
-  if (!cartPageItems || !cartPageSubtotal || !cartPageTotal) return;
+    if (!cartPageItems || !cartPageSubtotal || !cartPageTotal) return;
 
-  if (!cart.length) {
-    if (cartPageEmpty) cartPageEmpty.style.display = "block";
-    cartPageItems.innerHTML = "";
-    cartPageSubtotal.textContent = formatCurrency(0);
-    cartPageTotal.textContent = formatCurrency(0);
-    if (cartCountBadge) cartCountBadge.textContent = "0 Items";
-    return;
-  }
+    if (!cart.length) {
+        if (cartPageEmpty) cartPageEmpty.style.display = "block";
+        cartPageItems.innerHTML = "";
+        cartPageSubtotal.textContent = formatCurrency(0);
+        cartPageTotal.textContent = formatCurrency(0);
+        if (cartCountBadge) cartCountBadge.textContent = "0 Items";
+        return;
+    }
 
-  if (cartPageEmpty) cartPageEmpty.style.display = "none";
-  cartPageItems.innerHTML = cart
-    .map((item) => `
+    if (cartPageEmpty) cartPageEmpty.style.display = "none";
+    cartPageItems.innerHTML = cart
+        .map(
+            (item) => `
       <div class="cart-product-card" data-item-id="${item.id}">
         <div class="cart-product-img-wrap">
           <img src="${item.image}" alt="${item.title}" class="cart-product-img" />
@@ -451,42 +474,50 @@ const renderCartPage = () => {
           </div>
         </div>
       </div>
-    `)
-    .join("");
+    `,
+        )
+        .join("");
 
-  cartPageSubtotal.textContent = formatCurrency(getCartTotal(cart));
-  cartPageTotal.textContent = formatCurrency(getCartTotal(cart));
+    cartPageSubtotal.textContent = formatCurrency(getCartTotal(cart));
+    cartPageTotal.textContent = formatCurrency(getCartTotal(cart));
 
-  const cartSectionLabel = document.querySelector(".cart-section-label");
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  if (cartSectionLabel) {
-    cartSectionLabel.innerHTML = `<i class="bi bi-list-check me-2"></i>${itemCount} item${itemCount === 1 ? "" : "s"} in your cart`;
-  }
+    const cartSectionLabel = document.querySelector(".cart-section-label");
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (cartSectionLabel) {
+        cartSectionLabel.innerHTML = `<i class="bi bi-list-check me-2"></i>${itemCount} item${itemCount === 1 ? "" : "s"} in your cart`;
+    }
 
-  if (cartCountBadge) cartCountBadge.textContent = `${itemCount} Items`;
+    if (cartCountBadge) cartCountBadge.textContent = `${itemCount} Items`;
 };
 
 const renderCheckoutSummary = () => {
-  const cart = getCartData();
-  const checkoutItemsWrap = document.querySelector(".checkout-summary-items-wrap");
-  const checkoutSubtotal = document.getElementById("checkoutSubtotal");
-  const checkoutTotal = document.getElementById("checkoutTotal");
-  const orderTotalInput = document.querySelector("input[name='order_total']");
-  const itemsInput = document.querySelector("input[name='items']");
+    const cart = getCartData();
+    const checkoutItemsWrap = document.querySelector(
+        ".checkout-summary-items-wrap",
+    );
+    const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+    const checkoutTotal = document.getElementById("checkoutTotal");
+    const orderTotalInput = document.querySelector("input[name='order_total']");
+    const itemsInput = document.querySelector("input[name='items']");
+    const itemCountHint = document.querySelector(
+        ".cart-summary-row small.text-muted",
+    );
 
-  if (!checkoutItemsWrap || !checkoutSubtotal || !checkoutTotal) return;
+    if (!checkoutItemsWrap || !checkoutSubtotal || !checkoutTotal) return;
 
-  if (!cart.length) {
-    checkoutItemsWrap.innerHTML = `<div class="text-center py-5"><p class="mb-0">Your cart is empty. Add items before checking out.</p></div>`;
-    checkoutSubtotal.textContent = formatCurrency(0);
-    checkoutTotal.textContent = formatCurrency(0);
-    if (orderTotalInput) orderTotalInput.value = "0";
-    if (itemsInput) itemsInput.value = JSON.stringify([]);
-    return;
-  }
+    if (!cart.length) {
+        checkoutItemsWrap.innerHTML = `<div class="text-center py-5"><p class="mb-0">Your cart is empty. Add items before checking out.</p></div>`;
+        checkoutSubtotal.textContent = formatCurrency(0);
+        checkoutTotal.textContent = formatCurrency(0);
+        if (orderTotalInput) orderTotalInput.value = "0";
+        if (itemsInput) itemsInput.value = JSON.stringify([]);
+        if (itemCountHint) itemCountHint.textContent = "(0 items)";
+        return;
+    }
 
-  checkoutItemsWrap.innerHTML = cart
-    .map((item) => `
+    checkoutItemsWrap.innerHTML = cart
+        .map(
+            (item) => `
       <div class="checkout-order-item">
         <img src="${item.image}" alt="${item.title}" class="checkout-order-img" />
         <div class="checkout-order-info">
@@ -495,196 +526,245 @@ const renderCheckoutSummary = () => {
         </div>
         <strong class="checkout-order-subtotal">${formatCurrency(item.price * item.quantity)}</strong>
       </div>
-    `)
-    .join("");
+    `,
+        )
+        .join("");
 
-  const total = getCartTotal(cart);
-  checkoutSubtotal.textContent = formatCurrency(total);
-  checkoutTotal.textContent = formatCurrency(total);
-  if (orderTotalInput) orderTotalInput.value = total.toFixed(2);
-  if (itemsInput) itemsInput.value = JSON.stringify(cart);
+    const total = getCartTotal(cart);
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    checkoutSubtotal.textContent = formatCurrency(total);
+    checkoutTotal.textContent = formatCurrency(total);
+    if (orderTotalInput) orderTotalInput.value = total.toFixed(2);
+    if (itemsInput) itemsInput.value = JSON.stringify(cart);
+    if (itemCountHint) {
+        itemCountHint.textContent = `(${itemCount} item${itemCount === 1 ? "" : "s"})`;
+    }
 };
 
 const addToCart = (item) => {
-  const cart = getCartData();
-  const existing = cart.find((entry) => entry.id === item.id);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push(item);
-  }
-  saveCartData(cart);
-  renderCartDrawer();
-  renderCartPage();
-  renderCheckoutSummary();
+    const cart = getCartData();
+    const existing = cart.find((entry) => entry.id === item.id);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push(item);
+    }
+    saveCartData(cart);
+    renderCartDrawer();
+    renderCartPage();
+    renderCheckoutSummary();
 };
 
 const removeFromCart = (itemId) => {
-  const cart = getCartData().filter((item) => item.id !== itemId);
-  saveCartData(cart);
-  renderCartDrawer();
-  renderCartPage();
-  renderCheckoutSummary();
+    const cart = getCartData().filter((item) => item.id !== itemId);
+    saveCartData(cart);
+    renderCartDrawer();
+    renderCartPage();
+    renderCheckoutSummary();
 };
 
 const changeCartQuantity = (itemId, delta) => {
-  const cart = getCartData().map((item) => {
-    if (item.id !== itemId) return item;
-    return { ...item, quantity: Math.max(1, item.quantity + delta) };
-  });
-  saveCartData(cart.filter((item) => item.quantity > 0));
-  renderCartDrawer();
-  renderCartPage();
-  renderCheckoutSummary();
+    const cart = getCartData().map((item) => {
+        if (item.id !== itemId) return item;
+        return { ...item, quantity: Math.max(1, item.quantity + delta) };
+    });
+    saveCartData(cart.filter((item) => item.quantity > 0));
+    renderCartDrawer();
+    renderCartPage();
+    renderCheckoutSummary();
 };
 
 const clearCart = () => {
-  saveCartData([]);
-  renderCartDrawer();
-  renderCartPage();
-  renderCheckoutSummary();
+    saveCartData([]);
+    renderCartDrawer();
+    renderCartPage();
+    renderCheckoutSummary();
 };
 
 const openCartDrawer = () => {
-  const drawerEl = document.getElementById("cartDrawer");
-  if (!drawerEl || !window.bootstrap?.Offcanvas) return;
-  const drawer = bootstrap.Offcanvas.getOrCreateInstance(drawerEl);
-  drawer.show();
+    const drawerEl = document.getElementById("cartDrawer");
+    if (!drawerEl || !window.bootstrap?.Offcanvas) return;
+    const drawer = bootstrap.Offcanvas.getOrCreateInstance(drawerEl);
+    drawer.show();
 };
 
 const initCartEvents = () => {
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest(".menu-offer-cart-btn");
-    if (button) {
-      event.preventDefault();
-      const item = createMenuItemFromCard(button);
-      if (item) {
-        addToCart(item);
-        openCartDrawer();
-      }
-      return;
-    }
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest(".menu-offer-cart-btn");
+        if (button) {
+            event.preventDefault();
+            const item = createMenuItemFromCard(button);
+            if (item) {
+                addToCart(item);
+                openCartDrawer();
+            }
+            return;
+        }
 
-    const removeButton = event.target.closest(".cart-item-remove-btn, .cart-remove-btn");
-    if (removeButton) {
-      const card = removeButton.closest("[data-item-id]");
-      if (card) {
-        const itemId = card.getAttribute("data-item-id");
-        removeFromCart(itemId);
-      }
-      return;
-    }
+        const removeButton = event.target.closest(
+            ".cart-item-remove-btn, .cart-remove-btn",
+        );
+        if (removeButton) {
+            const card = removeButton.closest("[data-item-id]");
+            if (card) {
+                const itemId = card.getAttribute("data-item-id");
+                removeFromCart(itemId);
+            }
+            return;
+        }
 
-    const qtyButton = event.target.closest(".qty-adjust-btn, .cart-qty-btn");
-    if (qtyButton) {
-      const change = Number(qtyButton.dataset.change || qtyButton.getAttribute("data-change") || 0);
-      const card = qtyButton.closest("[data-item-id]");
-      if (card && change !== 0) {
-        const itemId = card.getAttribute("data-item-id");
-        changeCartQuantity(itemId, change);
-      }
-      return;
-    }
+        const qtyButton = event.target.closest(
+            ".qty-adjust-btn, .cart-qty-btn",
+        );
+        if (qtyButton) {
+            const change = Number(
+                qtyButton.dataset.change ||
+                    qtyButton.getAttribute("data-change") ||
+                    0,
+            );
+            const card = qtyButton.closest("[data-item-id]");
+            if (card && change !== 0) {
+                const itemId = card.getAttribute("data-item-id");
+                changeCartQuantity(itemId, change);
+            }
+            return;
+        }
 
-    const clearBtn = event.target.closest(".cart-clear-btn");
-    if (clearBtn) {
-      event.preventDefault();
-      clearCart();
-      return;
-    }
-  });
+        const clearBtn = event.target.closest(".cart-clear-btn");
+        if (clearBtn) {
+            event.preventDefault();
+            clearCart();
+            return;
+        }
+    });
 
-  $(document).on("submit", "#checkoutForm", function (event) {
-    const cart = getCartData();
-    if (!cart.length) {
-      alert("Please add items to your cart before placing an order.");
-      event.preventDefault();
-      return false;
-    }
+    $(document).on("submit", "#checkoutForm", function (event) {
+        const cart = getCartData();
+        if (!cart.length) {
+            alert("Please add items to your cart before placing an order.");
+            event.preventDefault();
+            return false;
+        }
 
-    // If user explicitly continued as guest, allow submission (hidden flag)
-    const guestFlag = this.querySelector("input[name='__guest_continue']");
-    if (guestFlag && guestFlag.value === '1') {
-      // remove the helper flag and allow submission
-      guestFlag.parentNode.removeChild(guestFlag);
-    }
+        const selectedPaymentMethod =
+            this.querySelector("input[name='payment_method']:checked")?.value ||
+            "cod";
 
-    const cardInput = document.querySelector("input[name='member_card_number']");
-    if (cardInput && !cardInput.value.trim()) {
-      // Prompt user to register or continue as guest via modal
-      event.preventDefault();
-      const modalEl = document.getElementById('memberPromptModal');
-      if (modalEl) {
-        const modal = new bootstrap.Modal(modalEl);
-        // Store reference to the form so the modal action can submit it
-        window.__pendingCheckoutForm = this;
-        modal.show();
-      } else {
-        // Fallback alert
-        alert("Consider registering to get membership benefits. You can continue as guest.");
-      }
-      return false;
-    }
+        let paymentPopup = null;
+        const isSslCommerz = selectedPaymentMethod === "sslcommerz";
+        if (isSslCommerz) {
+            paymentPopup = window.open(
+                "",
+                "sslcommerz_payment",
+                "width=900,height=800,resizable=yes,scrollbars=yes",
+            );
+            if (!paymentPopup) {
+                alert(
+                    "Please allow popups for this site to complete SSLCommerz payment.",
+                );
+            }
+        }
 
-    // Submit via AJAX when supported
-    if (window.jQuery) {
-      event.preventDefault();
-      const form = $(this);
-      const url = form.attr("action");
-      const data = form.serialize();
+        // Submit via AJAX when supported
+        if (window.jQuery) {
+            event.preventDefault();
+            const form = $(this);
+            const url = form.attr("action");
+            const data = form.serialize();
 
-      $.ajax({
-        type: "POST",
-        url,
-        data,
-        dataType: "json",
-        headers: {
-          "X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content") || "",
-        },
-        success: function (response) {
-          clearCart();
-          renderCartDrawer();
-          renderCartPage();
-          renderCheckoutSummary();
+            $.ajax({
+                type: "POST",
+                url,
+                data,
+                dataType: "json",
+                headers: {
+                    "X-CSRF-TOKEN":
+                        $("meta[name='csrf-token']").attr("content") || "",
+                },
+                success: function (response) {
+                    if (response.success === false) {
+                        const message =
+                            response.message ||
+                            "Unable to place the order. Please try again.";
+                        const messageContainer =
+                            document.getElementById("checkoutMessages");
+                        if (messageContainer) {
+                            messageContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+                        } else if (window.toastr) {
+                            toastr.error(message);
+                        } else {
+                            alert(message);
+                        }
+                        return;
+                    }
 
-          const messageContainer = document.getElementById("checkoutMessages");
-          if (messageContainer) {
-            messageContainer.innerHTML = `<div class="alert alert-success">${response.message || "Order placed successfully."}</div>`;
-          } else if (window.toastr) {
-            toastr.success(response.message || "Order placed successfully.");
-          } else {
-            alert(response.message || "Order placed successfully.");
-          }
+                    if (response.redirect_url) {
+                        if (
+                            isSslCommerz &&
+                            paymentPopup &&
+                            !paymentPopup.closed
+                        ) {
+                            paymentPopup.location.href = response.redirect_url;
+                        } else {
+                            window.location.href = response.redirect_url;
+                        }
+                        return;
+                    }
 
-          // If server returned the new order id redirect to the on-site invoice
-          if (response.order_id) {
-            window.location.href = `/account/orders/${response.order_id}`;
-          }
-        },
-        error: function (xhr) {
-          const response = xhr.responseJSON;
-          const message = response?.errors
-            ? Object.values(response.errors)[0][0]
-            : response?.message || "Unable to place the order. Please try again.";
-          const messageContainer = document.getElementById("checkoutMessages");
-          if (messageContainer) {
-            messageContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
-          } else if (window.toastr) {
-            toastr.error(message);
-          } else {
-            alert(message);
-          }
-        },
-      });
-    }
-  });
+                    if (paymentPopup && !paymentPopup.closed) {
+                        paymentPopup.close();
+                    }
+
+                    clearCart();
+                    renderCartDrawer();
+                    renderCartPage();
+                    renderCheckoutSummary();
+
+                    const messageContainer =
+                        document.getElementById("checkoutMessages");
+                    if (messageContainer) {
+                        messageContainer.innerHTML = `<div class="alert alert-success">${response.message || "Order placed successfully."}</div>`;
+                    } else if (window.toastr) {
+                        toastr.success(
+                            response.message || "Order placed successfully.",
+                        );
+                    } else {
+                        alert(response.message || "Order placed successfully.");
+                    }
+
+                    // Order created successfully. Users can continue shopping or review
+                    // their order from their account if they are logged in.
+                },
+                error: function (xhr) {
+                    if (paymentPopup && !paymentPopup.closed) {
+                        paymentPopup.close();
+                    }
+
+                    const response = xhr.responseJSON;
+                    const message = response?.errors
+                        ? Object.values(response.errors)[0][0]
+                        : response?.message ||
+                          "Unable to place the order. Please try again.";
+                    const messageContainer =
+                        document.getElementById("checkoutMessages");
+                    if (messageContainer) {
+                        messageContainer.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+                    } else if (window.toastr) {
+                        toastr.error(message);
+                    } else {
+                        alert(message);
+                    }
+                },
+            });
+        }
+    });
 };
 
 const initCartPages = () => {
-  renderCartDrawer();
-  renderCartPage();
-  renderCheckoutSummary();
-  initCartEvents();
+    renderCartDrawer();
+    renderCartPage();
+    renderCheckoutSummary();
+    initCartEvents();
 };
 
 syncSharedNavigationAndFooter();
@@ -692,7 +772,7 @@ initCartPages();
 
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(
-  ".side-nav .nav-link, .offcanvas .nav-link, .desktop-nav .nav-link",
+    ".side-nav .nav-link, .offcanvas .nav-link, .desktop-nav .nav-link",
 );
 const desktopNavbar = document.querySelector("#desktopNavbar");
 const mobileMenuToggle = document.querySelector("#mobileMenuToggle");
@@ -701,644 +781,649 @@ const mobileMenuLinks = document.querySelectorAll("#mobileMenu .nav-link");
 let mobileOffcanvas = null;
 
 if (mobileMenuToggle && mobileMenu && window.bootstrap?.Offcanvas) {
-  mobileOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileMenu);
-  mobileMenuToggle.addEventListener("click", () => {
-    mobileOffcanvas.toggle();
-  });
+    mobileOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileMenu);
+    mobileMenuToggle.addEventListener("click", () => {
+        mobileOffcanvas.toggle();
+    });
 }
 
 const getNavbarOffset = () => {
-  const mobileTopbar = document.querySelector(".mobile-topbar");
-  const activeNavbar =
-    window.innerWidth < 992
-      ? mobileTopbar
-      : document.querySelector("#desktopNavbar");
-  const navHeight = activeNavbar ? activeNavbar.offsetHeight : 0;
-  return navHeight + 12;
+    const mobileTopbar = document.querySelector(".mobile-topbar");
+    const activeNavbar =
+        window.innerWidth < 992
+            ? mobileTopbar
+            : document.querySelector("#desktopNavbar");
+    const navHeight = activeNavbar ? activeNavbar.offsetHeight : 0;
+    return navHeight + 12;
 };
 
 mobileMenuLinks.forEach((link) => {
-  link.addEventListener("click", (event) => {
-    const href = link.getAttribute("href");
-    if (!href || href === "#") {
-      return;
-    }
+    link.addEventListener("click", (event) => {
+        const href = link.getAttribute("href");
+        if (!href || href === "#") {
+            return;
+        }
 
-    const linkUrl = new URL(href, window.location.href);
-    const isSamePage =
-      linkUrl.origin === window.location.origin &&
-      linkUrl.pathname === window.location.pathname;
+        const linkUrl = new URL(href, window.location.href);
+        const isSamePage =
+            linkUrl.origin === window.location.origin &&
+            linkUrl.pathname === window.location.pathname;
 
-    if (isSamePage && linkUrl.hash) {
-      const target = document.querySelector(linkUrl.hash);
-      if (!target) {
-        return;
-      }
+        if (isSamePage && linkUrl.hash) {
+            const target = document.querySelector(linkUrl.hash);
+            if (!target) {
+                return;
+            }
 
-      event.preventDefault();
-      const top =
-        target.getBoundingClientRect().top + window.scrollY - getNavbarOffset();
-      window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
-      if (mobileOffcanvas) {
-        mobileOffcanvas.hide();
-      }
-      window.history.replaceState(null, "", linkUrl.hash);
-      return;
-    }
+            event.preventDefault();
+            const top =
+                target.getBoundingClientRect().top +
+                window.scrollY -
+                getNavbarOffset();
+            window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+            if (mobileOffcanvas) {
+                mobileOffcanvas.hide();
+            }
+            window.history.replaceState(null, "", linkUrl.hash);
+            return;
+        }
 
-    event.preventDefault();
-    if (mobileOffcanvas) {
-      mobileOffcanvas.hide();
-      window.setTimeout(() => {
+        event.preventDefault();
+        if (mobileOffcanvas) {
+            mobileOffcanvas.hide();
+            window.setTimeout(() => {
+                window.location.assign(linkUrl.href);
+            }, 220);
+            return;
+        }
+
         window.location.assign(linkUrl.href);
-      }, 220);
-      return;
-    }
-
-    window.location.assign(linkUrl.href);
-  });
+    });
 });
 
 const syncNavbarState = () => {
-  if (desktopNavbar) {
-    desktopNavbar.classList.toggle("is-scrolled", window.scrollY > 24);
-  }
+    if (desktopNavbar) {
+        desktopNavbar.classList.toggle("is-scrolled", window.scrollY > 24);
+    }
 };
 
 const currentPageFile = getCurrentPageFile();
 
 // Preserve initial page-level active classes produced by syncSharedNavigationAndFooter()
 navLinks.forEach((link) => {
-  if (link.getAttribute("aria-current") === "page") {
-    link.classList.add("active");
-  }
+    if (link.getAttribute("aria-current") === "page") {
+        link.classList.add("active");
+    }
 });
 
 window.addEventListener("scroll", () => {
-  syncNavbarState();
+    syncNavbarState();
 
-  // Only run anchor/scroll-based active link detection on the home page
-  if (currentPageFile !== "index.html") return;
+    // Only run anchor/scroll-based active link detection on the home page
+    if (currentPageFile !== "index.html") return;
 
-  const current = Array.from(sections).find((section) => {
-    const top = section.offsetTop - 120;
-    const bottom = top + section.offsetHeight;
-    return window.scrollY >= top && window.scrollY < bottom;
-  });
-  // If no section is in view, keep existing page-level active states
-  if (!current) return;
+    const current = Array.from(sections).find((section) => {
+        const top = section.offsetTop - 120;
+        const bottom = top + section.offsetHeight;
+        return window.scrollY >= top && window.scrollY < bottom;
+    });
+    // If no section is in view, keep existing page-level active states
+    if (!current) return;
 
-  // Only consider nav links that are same-page anchors (e.g. index.html#home)
-  const anchorLinks = Array.from(navLinks).filter((link) => {
-    const href = link.getAttribute("href") || "";
-    const linkUrl = new URL(href, window.location.href);
-    return (
-      linkUrl.origin === window.location.origin &&
-      linkUrl.pathname === window.location.pathname &&
-      linkUrl.hash
-    );
-  });
+    // Only consider nav links that are same-page anchors (e.g. index.html#home)
+    const anchorLinks = Array.from(navLinks).filter((link) => {
+        const href = link.getAttribute("href") || "";
+        const linkUrl = new URL(href, window.location.href);
+        return (
+            linkUrl.origin === window.location.origin &&
+            linkUrl.pathname === window.location.pathname &&
+            linkUrl.hash
+        );
+    });
 
-  // If the current section does not correspond to any anchor link, do nothing
-  const matchingAnchorExists = anchorLinks.some((link) => {
-    const linkUrl = new URL(link.getAttribute("href"), window.location.href);
-    return linkUrl.hash === `#${current.id}`;
-  });
+    // If the current section does not correspond to any anchor link, do nothing
+    const matchingAnchorExists = anchorLinks.some((link) => {
+        const linkUrl = new URL(
+            link.getAttribute("href"),
+            window.location.href,
+        );
+        return linkUrl.hash === `#${current.id}`;
+    });
 
-  if (!matchingAnchorExists) return;
+    if (!matchingAnchorExists) return;
 
-  anchorLinks.forEach((link) => {
-    const linkUrl = new URL(link.getAttribute("href"), window.location.href);
-    if (linkUrl.hash === `#${current.id}`) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
-  });
+    anchorLinks.forEach((link) => {
+        const linkUrl = new URL(
+            link.getAttribute("href"),
+            window.location.href,
+        );
+        if (linkUrl.hash === `#${current.id}`) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
 });
 
 syncNavbarState();
 setupPrivilegeCardForm();
 
 // Handle continue as guest from modal
-document.addEventListener('click', function (e) {
-  const btn = e.target.closest('#continueAsGuestBtn');
-  if (!btn) return;
-  const pending = window.__pendingCheckoutForm;
-  if (!pending) return;
-  // inject a hidden flag to bypass the modal prompt
-  let flag = pending.querySelector("input[name='__guest_continue']");
-  if (!flag) {
-    flag = document.createElement('input');
-    flag.type = 'hidden';
-    flag.name = '__guest_continue';
-    flag.value = '1';
-    pending.appendChild(flag);
-  } else {
-    flag.value = '1';
-  }
-  // submit the form (will be intercepted by AJAX handler and proceed)
-  $(pending).submit();
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest("#continueAsGuestBtn");
+    if (!btn) return;
+    const pending = window.__pendingCheckoutForm;
+    if (!pending) return;
+    // inject a hidden flag to bypass the modal prompt
+    let flag = pending.querySelector("input[name='__guest_continue']");
+    if (!flag) {
+        flag = document.createElement("input");
+        flag.type = "hidden";
+        flag.name = "__guest_continue";
+        flag.value = "1";
+        pending.appendChild(flag);
+    } else {
+        flag.value = "1";
+    }
+    // submit the form (will be intercepted by AJAX handler and proceed)
+    $(pending).submit();
 });
 
 /* ==========================================================================
    06. DISHES HIGHLIGHTS SLIDER INITIALIZATION
    ========================================================================== */
 $(function () {
-  const $mcSliderWrap = $(".mc-slider-wrap");
-  if (!$mcSliderWrap.length) return;
+    const $mcSliderWrap = $(".mc-slider-wrap");
+    if (!$mcSliderWrap.length) return;
 
-  const $mcSlider = $mcSliderWrap.find("#mcSlider");
+    const $mcSlider = $mcSliderWrap.find("#mcSlider");
 
-  $mcSlider.slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: true,
-    dots: true,
-    infinite: true,
-    autoplay: false,
-    autoplaySpeed: 2800,
-    pauseOnHover: true,
-    speed: 450,
-    swipe: true,
-    touchThreshold: 12,
-    prevArrow: $mcSliderWrap.find(".mc-nav-prev"),
-    nextArrow: $mcSliderWrap.find(".mc-nav-next"),
-    appendDots: $mcSliderWrap.find(".mc-slider-dots"),
-    customPaging: function (slider, i) {
-      return (
-        '<button class="menu-dot" aria-label="Go to slide ' +
-        (i + 1) +
-        '"></button>'
-      );
-    },
-    responsive: [
-      {
-        breakpoint: 1200,
-        settings: { slidesToShow: 3 },
-      },
-      {
-        breakpoint: 992,
-        settings: { slidesToShow: 2 },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          arrows: false,
-          dots: true,
+    $mcSlider.slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: true,
+        infinite: true,
+        autoplay: false,
+        autoplaySpeed: 2800,
+        pauseOnHover: true,
+        speed: 450,
+        swipe: true,
+        touchThreshold: 12,
+        prevArrow: $mcSliderWrap.find(".mc-nav-prev"),
+        nextArrow: $mcSliderWrap.find(".mc-nav-next"),
+        appendDots: $mcSliderWrap.find(".mc-slider-dots"),
+        customPaging: function (slider, i) {
+            return (
+                '<button class="menu-dot" aria-label="Go to slide ' +
+                (i + 1) +
+                '"></button>'
+            );
         },
-      },
-      {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 1,
-          arrows: false,
-          dots: true,
-          centerMode: true,
-          centerPadding: "20px",
-        },
-      },
-    ],
-  });
+        responsive: [
+            {
+                breakpoint: 1200,
+                settings: { slidesToShow: 3 },
+            },
+            {
+                breakpoint: 992,
+                settings: { slidesToShow: 2 },
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 2,
+                    arrows: false,
+                    dots: true,
+                },
+            },
+            {
+                breakpoint: 576,
+                settings: {
+                    slidesToShow: 1,
+                    arrows: false,
+                    dots: true,
+                    centerMode: true,
+                    centerPadding: "20px",
+                },
+            },
+        ],
+    });
 });
 
 /* ── Featured Dishes Quick View Modal ─────────────────────── */
 (function () {
-  const modalEl = document.getElementById("mcQuickViewModal");
+    const modalEl = document.getElementById("mcQuickViewModal");
 
-  if (!modalEl || !window.bootstrap?.Modal) {
-    return;
-  }
-
-  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-  const modalImage = document.getElementById("mcQuickViewImage");
-  const modalBadge = document.getElementById("mcQuickViewBadge");
-  const modalTitle = document.getElementById("mcQuickViewTitle");
-  const modalDesc = document.getElementById("mcQuickViewDesc");
-  const modalServe = document.getElementById("mcQuickViewServe");
-  const modalPrice = document.getElementById("mcQuickViewPrice");
-
-  const openQuickView = (card) => {
-    const img = card.querySelector(".mc-img");
-    const badge = card.querySelector(".mc-badge");
-    const title = card.querySelector(".mc-title");
-    const desc = card.querySelector(".mc-desc");
-    const serve = card.querySelector(".mc-serve-info");
-    const price = card.querySelector(".mc-price");
-
-    if (!img || !badge || !title || !desc || !serve || !price) {
-      return;
+    if (!modalEl || !window.bootstrap?.Modal) {
+        return;
     }
 
-    modalImage.src = img.getAttribute("src") || "";
-    modalImage.alt =
-      img.getAttribute("alt") || title.textContent?.trim() || "Dish preview";
-    modalBadge.textContent = badge.textContent?.trim() || "Dish";
-    modalBadge.classList.toggle(
-      "mc-badge--gold",
-      badge.classList.contains("mc-badge--gold"),
-    );
-    modalTitle.textContent = title.textContent?.trim() || "";
-    modalDesc.textContent = desc.textContent?.trim() || "";
-    modalServe.innerHTML = serve.innerHTML;
-    modalPrice.textContent = price.textContent?.trim() || "";
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    const modalImage = document.getElementById("mcQuickViewImage");
+    const modalBadge = document.getElementById("mcQuickViewBadge");
+    const modalTitle = document.getElementById("mcQuickViewTitle");
+    const modalDesc = document.getElementById("mcQuickViewDesc");
+    const modalServe = document.getElementById("mcQuickViewServe");
+    const modalPrice = document.getElementById("mcQuickViewPrice");
 
-    modal.show();
-  };
+    const openQuickView = (card) => {
+        const img = card.querySelector(".mc-img");
+        const badge = card.querySelector(".mc-badge");
+        const title = card.querySelector(".mc-title");
+        const desc = card.querySelector(".mc-desc");
+        const serve = card.querySelector(".mc-serve-info");
+        const price = card.querySelector(".mc-price");
 
-  document.addEventListener("click", (event) => {
-    const card = event.target.closest(".mc-card-trigger");
-    if (!card) {
-      return;
-    }
+        if (!img || !badge || !title || !desc || !serve || !price) {
+            return;
+        }
 
-    // Ignore drag-end clicks from Slick while the slider is being swiped.
-    if (card.closest(".slick-slider")?.querySelector(".slick-list.dragging")) {
-      return;
-    }
+        modalImage.src = img.getAttribute("src") || "";
+        modalImage.alt =
+            img.getAttribute("alt") ||
+            title.textContent?.trim() ||
+            "Dish preview";
+        modalBadge.textContent = badge.textContent?.trim() || "Dish";
+        modalBadge.classList.toggle(
+            "mc-badge--gold",
+            badge.classList.contains("mc-badge--gold"),
+        );
+        modalTitle.textContent = title.textContent?.trim() || "";
+        modalDesc.textContent = desc.textContent?.trim() || "";
+        modalServe.innerHTML = serve.innerHTML;
+        modalPrice.textContent = price.textContent?.trim() || "";
 
-    openQuickView(card);
-  });
+        modal.show();
+    };
 
-  document.addEventListener("keydown", (event) => {
-    const card = event.target.closest(".mc-card-trigger");
-    if (!card) {
-      return;
-    }
+    document.addEventListener("click", (event) => {
+        const card = event.target.closest(".mc-card-trigger");
+        if (!card) {
+            return;
+        }
 
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      openQuickView(card);
-    }
-  });
+        // Ignore drag-end clicks from Slick while the slider is being swiped.
+        if (
+            card.closest(".slick-slider")?.querySelector(".slick-list.dragging")
+        ) {
+            return;
+        }
+
+        openQuickView(card);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        const card = event.target.closest(".mc-card-trigger");
+        if (!card) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openQuickView(card);
+        }
+    });
 })();
 
 /* ==========================================================================
    05. HOUSE SIGNATURES & MAIN MENU SLIDER (FIXED INITIALIZATION)
    ========================================================================== */
 $(function () {
-  // Target the main slider shell instead of a nested track selector
-  const $menuSlider = $("#menuSlider");
-  if (!$menuSlider.length) return;
+    // Target the main slider shell instead of a nested track selector
+    const $menuSlider = $("#menuSlider");
+    if (!$menuSlider.length) return;
 
-  // Find the slider viewport container holding the slide items directly
-  const $sliderViewport = $menuSlider.find(".menu-slider-track");
+    // Find the slider viewport container holding the slide items directly
+    const $sliderViewport = $menuSlider.find(".menu-slider-track");
 
-  $sliderViewport.slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: true,
-    dots: false, // FIXED: Enabled dots so our custom CSS metric bars render properly
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 2600,
-    pauseOnHover: true,
-    pauseOnFocus: true,
-    speed: 420,
-    swipe: true,
-    touchThreshold: 10,
-    prevArrow: $menuSlider.find(".menu-slider-prev"), // Clean contextual selectors
-    nextArrow: $menuSlider.find(".menu-slider-next"),
-    appendDots: $menuSlider.find(".menu-slider-dots"),
-    customPaging: function (slider, i) {
-      // Formats slick dots into clean custom markup matching our CSS .menu-dot class
-      return (
-        '<button class="menu-dot" aria-label="Go to slide ' +
-        (i + 1) +
-        '"></button>'
-      );
-    },
-    responsive: [
-      {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
+    $sliderViewport.slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: false, // FIXED: Enabled dots so our custom CSS metric bars render properly
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 2600,
+        pauseOnHover: true,
+        pauseOnFocus: true,
+        speed: 420,
+        swipe: true,
+        touchThreshold: 10,
+        prevArrow: $menuSlider.find(".menu-slider-prev"), // Clean contextual selectors
+        nextArrow: $menuSlider.find(".menu-slider-next"),
+        appendDots: $menuSlider.find(".menu-slider-dots"),
+        customPaging: function (slider, i) {
+            // Formats slick dots into clean custom markup matching our CSS .menu-dot class
+            return (
+                '<button class="menu-dot" aria-label="Go to slide ' +
+                (i + 1) +
+                '"></button>'
+            );
         },
-      },
-      {
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          arrows: false,
-          dots: true, // Keeps the sleek custom dash bars active on mobile touch screens
-        },
-      },
-      {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          arrows: false,
-          dots: false,
-          centerMode: true,
-          centerPadding: "20px", // Adjusted slightly for perfect geometric card balance
-        },
-      },
-    ],
-  });
+        responsive: [
+            {
+                breakpoint: 1200,
+                settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                },
+            },
+            {
+                breakpoint: 992,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                },
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                    arrows: false,
+                    dots: true, // Keeps the sleek custom dash bars active on mobile touch screens
+                },
+            },
+            {
+                breakpoint: 576,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    arrows: false,
+                    dots: false,
+                    centerMode: true,
+                    centerPadding: "20px", // Adjusted slightly for perfect geometric card balance
+                },
+            },
+        ],
+    });
 });
 
 /* ==========================================================================
    07. WATCH US ON REELS HUB SLIDER INITIALIZATION (EXACT ICON MARKUP FIX)
    ========================================================================== */
 $(function () {
-  const $reelsSlider = $("#reelsSlider");
-  if (!$reelsSlider.length) return;
+    const $reelsSlider = $("#reelsSlider");
+    if (!$reelsSlider.length) return;
 
-  $reelsSlider.slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: true,
-    dots: true,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true,
-    speed: 500,
-    swipe: true,
-    touchThreshold: 15,
+    $reelsSlider.slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: true,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        pauseOnHover: true,
+        speed: 500,
+        swipe: true,
+        touchThreshold: 15,
 
-    /* FIX: Changed from bi-arrow-left to bi-chevron-left inside the inner span 
+        /* FIX: Changed from bi-arrow-left to bi-chevron-left inside the inner span 
        to match your existing menu slider structure perfectly.
     */
-    prevArrow:
-      '<button type="button" class="slick-prev"><span class="menu-control-icon" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></button>',
-    nextArrow:
-      '<button type="button" class="slick-next"><span class="menu-control-icon" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></button>',
+        prevArrow:
+            '<button type="button" class="slick-prev"><span class="menu-control-icon" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></button>',
+        nextArrow:
+            '<button type="button" class="slick-next"><span class="menu-control-icon" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></button>',
 
-    appendDots: $(".reels-section").find(".menu-slider-dots"),
-    customPaging: function (slider, i) {
-      return (
-        '<button class="menu-dot" aria-label="Go to slide ' +
-        (i + 1) +
-        '"></button>'
-      );
-    },
-    responsive: [
-      {
-        breakpoint: 1200,
-        settings: { slidesToShow: 3 },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          arrows: false,
-          dots: true,
+        appendDots: $(".reels-section").find(".menu-slider-dots"),
+        customPaging: function (slider, i) {
+            return (
+                '<button class="menu-dot" aria-label="Go to slide ' +
+                (i + 1) +
+                '"></button>'
+            );
         },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          arrows: false,
-          dots: true,
-          centerMode: true,
-          centerPadding: "40px",
-        },
-      },
-    ],
-  });
+        responsive: [
+            {
+                breakpoint: 1200,
+                settings: { slidesToShow: 3 },
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 2,
+                    arrows: false,
+                    dots: true,
+                },
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: 1,
+                    arrows: false,
+                    dots: true,
+                    centerMode: true,
+                    centerPadding: "40px",
+                },
+            },
+        ],
+    });
 });
 
 /* ── Floating Action Button: WhatsApp ────────────────────── */
 (function () {
-  const whatsappBtn = document.getElementById("whatsappBtn");
-  if (!whatsappBtn) return;
+    const whatsappBtn = document.getElementById("whatsappBtn");
+    if (!whatsappBtn) return;
 
-  // Click feedback animation.
-  whatsappBtn.addEventListener("click", () => {
-    whatsappBtn.animate(
-      [
-        { transform: "translateY(0) scale(1)" },
-        { transform: "translateY(-2px) scale(0.95)" },
-        { transform: "translateY(0) scale(1.05)" },
-        { transform: "translateY(0) scale(1)" },
-      ],
-      { duration: 320, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
-    );
-  });
+    // Click feedback animation.
+    whatsappBtn.addEventListener("click", () => {
+        whatsappBtn.animate(
+            [
+                { transform: "translateY(0) scale(1)" },
+                { transform: "translateY(-2px) scale(0.95)" },
+                { transform: "translateY(0) scale(1.05)" },
+                { transform: "translateY(0) scale(1)" },
+            ],
+            { duration: 320, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+        );
+    });
 
-  // Periodic nudge to draw attention without being distracting.
-  setInterval(() => {
-    whatsappBtn.classList.add("is-nudging");
-    setTimeout(() => whatsappBtn.classList.remove("is-nudging"), 700);
-  }, 7000);
+    // Periodic nudge to draw attention without being distracting.
+    setInterval(() => {
+        whatsappBtn.classList.add("is-nudging");
+        setTimeout(() => whatsappBtn.classList.remove("is-nudging"), 700);
+    }, 7000);
 })();
 
 // review
 $(".reviews-slider").slick({
-  centerMode: true,
-  centerPadding: "0px",
-  slidesToShow: 3,
-  infinite: true,
-  speed: 900, // Slightly slower for a more "expensive" feel
-  // This curve provides a very smooth, soft deceleration
-  cssEase: "cubic-bezier(0.23, 1, 0.32, 1)",
-  autoplay: true,
-  autoplaySpeed: 4000,
-  dots: true,
-  arrows: false,
-  useTransform: true, // Forces GPU acceleration
-  responsive: [
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: "20px",
-      },
-    },
-  ],
+    centerMode: true,
+    centerPadding: "0px",
+    slidesToShow: 3,
+    infinite: true,
+    speed: 900, // Slightly slower for a more "expensive" feel
+    // This curve provides a very smooth, soft deceleration
+    cssEase: "cubic-bezier(0.23, 1, 0.32, 1)",
+    autoplay: true,
+    autoplaySpeed: 4000,
+    dots: true,
+    arrows: false,
+    useTransform: true, // Forces GPU acceleration
+    responsive: [
+        {
+            breakpoint: 768,
+            settings: {
+                slidesToShow: 1,
+                centerMode: true,
+                centerPadding: "20px",
+            },
+        },
+    ],
 });
 
 //menu card slider
 $(document).ready(function () {
-  // 1. Initialize Main Carousel Engine
-  const $mainCarousel = $(".js-main-carousel").slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2800,
-    infinite: true,
-    arrows: true,
-    prevArrow: $(".prev-main"),
-    nextArrow: $(".next-main"),
-    responsive: [
-      { breakpoint: 991, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 2 } },
-      { breakpoint: 480, settings: { slidesToShow: 1 } },
-    ],
-  });
+    // 1. Initialize Main Carousel Engine
+    const $mainCarousel = $(".js-main-carousel").slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 2800,
+        infinite: true,
+        arrows: true,
+        prevArrow: $(".prev-main"),
+        nextArrow: $(".next-main"),
+        responsive: [
+            { breakpoint: 991, settings: { slidesToShow: 3 } },
+            { breakpoint: 768, settings: { slidesToShow: 2 } },
+            { breakpoint: 480, settings: { slidesToShow: 1 } },
+        ],
+    });
 
-  // 2. Active Adaptive Layout Flag Variable
-  let isMobile = window.innerWidth <= 991;
+    // 2. Active Adaptive Layout Flag Variable
+    let isMobile = window.innerWidth <= 991;
 
-  // 3. Initialize Interactive Popup Image Thumbnail Swiper Engine
-  const $modalCarousel = $(".js-modal-nav-carousel").slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    vertical: !isMobile,
-    verticalSwiping: !isMobile,
-    arrows: !isMobile,
-    prevArrow: $(".vert-prev"),
-    nextArrow: $(".vert-next"),
-    infinite: true,
-    focusOnSelect: true,
-    responsive: [
-      {
-        breakpoint: 991,
-        settings: {
-          vertical: false,
-          verticalSwiping: false,
-          arrows: false,
-          slidesToShow: 3,
-          variableWidth: true,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          vertical: false,
-          verticalSwiping: false,
-          arrows: false,
-          slidesToShow: 2,
-          variableWidth: true,
-        },
-      },
-    ],
-  });
+    // 3. Initialize Interactive Popup Image Thumbnail Swiper Engine
+    const $modalCarousel = $(".js-modal-nav-carousel").slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        vertical: !isMobile,
+        verticalSwiping: !isMobile,
+        arrows: !isMobile,
+        prevArrow: $(".vert-prev"),
+        nextArrow: $(".vert-next"),
+        infinite: true,
+        focusOnSelect: true,
+        responsive: [
+            {
+                breakpoint: 991,
+                settings: {
+                    vertical: false,
+                    verticalSwiping: false,
+                    arrows: false,
+                    slidesToShow: 3,
+                    variableWidth: true,
+                },
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    vertical: false,
+                    verticalSwiping: false,
+                    arrows: false,
+                    slidesToShow: 2,
+                    variableWidth: true,
+                },
+            },
+        ],
+    });
 
-  // 4. Handle viewport updates
-  $(window).on("resize", function () {
-    const checkMobile = window.innerWidth <= 991;
-    if (checkMobile !== isMobile) {
-      isMobile = checkMobile;
-      location.reload();
-    }
-  });
+    // 4. Handle viewport updates
+    $(window).on("resize", function () {
+        const checkMobile = window.innerWidth <= 991;
+        if (checkMobile !== isMobile) {
+            isMobile = checkMobile;
+            location.reload();
+        }
+    });
 
-  // 5. Instantly swap active big menu card photo frame elements
-  $modalCarousel.on("afterChange", function (event, slick, currentSlide) {
-    const activeImgSrc = $(slick.$slides[currentSlide]).attr("data-img");
-    $("#modal-active-display-img").attr("src", activeImgSrc);
-  });
+    // 5. Instantly swap active big menu card photo frame elements
+    $modalCarousel.on("afterChange", function (event, slick, currentSlide) {
+        const activeImgSrc = $(slick.$slides[currentSlide]).attr("data-img");
+        $("#modal-active-display-img").attr("src", activeImgSrc);
+    });
 
-  // 6. Interaction Event: Popup Window Open Action
-  $(".menu-thumb-card").on("click", function () {
-    // ADD THESE TWO LINES:
-    $(".menu-thumb-card").removeClass("active-card");
-    $(this).addClass("active-card");
+    // 6. Interaction Event: Popup Window Open Action
+    $(".menu-thumb-card").on("click", function () {
+        // ADD THESE TWO LINES:
+        $(".menu-thumb-card").removeClass("active-card");
+        $(this).addClass("active-card");
 
-    const targetIndex = $(this).data("index");
-    const targetImg = $(this).data("img");
+        const targetIndex = $(this).data("index");
+        const targetImg = $(this).data("img");
 
-    $mainCarousel.slick("slickPause");
+        $mainCarousel.slick("slickPause");
 
-    $("#modal-active-display-img").attr("src", targetImg);
-    $(".js-modal-overlay").addClass("active");
+        $("#modal-active-display-img").attr("src", targetImg);
+        $(".js-modal-overlay").addClass("active");
 
-    setTimeout(() => {
-      $modalCarousel.slick("setPosition");
-      $modalCarousel.slick("slickGoTo", targetIndex, true);
-    }, 60);
-  });
+        setTimeout(() => {
+            $modalCarousel.slick("setPosition");
+            $modalCarousel.slick("slickGoTo", targetIndex, true);
+        }, 60);
+    });
 
-  // 7. Interaction Event: Popup Window Close Action
-  $(".js-close-modal, .js-modal-overlay").on("click", function (e) {
-    if (
-      e.target === this ||
-      $(this).hasClass("js-close-modal") ||
-      $(this).parents(".js-close-modal").length
-    ) {
-      $(".js-modal-overlay").removeClass("active");
-      $mainCarousel.slick("slickPlay");
-    }
-  });
+    // 7. Interaction Event: Popup Window Close Action
+    $(".js-close-modal, .js-modal-overlay").on("click", function (e) {
+        if (
+            e.target === this ||
+            $(this).hasClass("js-close-modal") ||
+            $(this).parents(".js-close-modal").length
+        ) {
+            $(".js-modal-overlay").removeClass("active");
+            $mainCarousel.slick("slickPlay");
+        }
+    });
 });
 
+$(document).ready(function () {
+    // 1. Text Content Slider
+    $(".slider-for").slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+        fade: true,
+        cssEase: "cubic-bezier(0.25, 1, 0.5, 1)",
+        speed: 800 /* Synchronized with CSS transition */,
+        asNavFor: ".slider-nav",
+        prevArrow: $(".custom-prev"),
+        nextArrow: $(".custom-next"),
+    });
 
+    // 2. Image Thumbnail Slider
+    $(".slider-nav").slick({
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        asNavFor: ".slider-for",
+        dots: false,
+        arrows: false,
+        centerMode: true,
+        focusOnSelect: true,
+        vertical: true,
+        verticalSwiping: true,
+        centerPadding: "0px",
+        cssEase: "cubic-bezier(0.25, 1, 0.5, 1)",
+        speed: 800 /* Synchronized with CSS transition */,
+        responsive: [
+            {
+                breakpoint: 991,
+                settings: {
+                    vertical: false,
+                    verticalSwiping: false,
+                    centerMode: true,
+                    centerPadding: "0px",
+                    slidesToShow: 3,
+                },
+            },
+            {
+                breakpoint: 575,
+                settings: {
+                    vertical: false,
+                    verticalSwiping: false,
+                    centerMode: true,
+                    centerPadding: "0px",
+                    slidesToShow: 3,
+                },
+            },
+        ],
+    });
 
+    // 3. Popup Modal Logic
+    $(document).on("click", ".trigger-menu-popup", function (e) {
+        e.preventDefault();
+        $("#menuPopup").css("display", "flex").hide().fadeIn(300);
+    });
 
-
-
-
-
-
-
-$(document).ready(function(){
-  
-  // 1. Text Content Slider 
-  $('.slider-for').slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    fade: true,
-    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    speed: 800, /* Synchronized with CSS transition */
-    asNavFor: '.slider-nav',
-    prevArrow: $('.custom-prev'),
-    nextArrow: $('.custom-next')
-  });
-  
-  // 2. Image Thumbnail Slider
-  $('.slider-nav').slick({
-    slidesToShow: 3,         
-    slidesToScroll: 1,
-    asNavFor: '.slider-for',
-    dots: false,
-    arrows: false,
-    centerMode: true,        
-    focusOnSelect: true,
-    vertical: true,          
-    verticalSwiping: true,
-    centerPadding: '0px',
-    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    speed: 800, /* Synchronized with CSS transition */
-    responsive: [
-      {
-        breakpoint: 991, 
-        settings: {
-          vertical: false,         
-          verticalSwiping: false,
-          centerMode: true,
-          centerPadding: '0px',
-          slidesToShow: 3          
+    $("#menuPopup, .menu-modal-close").on("click", function (e) {
+        if (
+            e.target === this ||
+            $(this).hasClass("menu-modal-close") ||
+            $(this).closest(".menu-modal-close").length
+        ) {
+            $("#menuPopup").fadeOut(300);
         }
-      },
-      {
-        breakpoint: 575,
-        settings: {
-          vertical: false,
-          verticalSwiping: false,
-          centerMode: true,
-          centerPadding: '0px',
-          slidesToShow: 3          
-        }
-      }
-    ]
-  });
-
-  // 3. Popup Modal Logic
-  $(document).on('click', '.trigger-menu-popup', function(e) {
-    e.preventDefault();
-    $('#menuPopup').css('display', 'flex').hide().fadeIn(300);
-  });
-
-  $('#menuPopup, .menu-modal-close').on('click', function(e) {
-    if (e.target === this || $(this).hasClass('menu-modal-close') || $(this).closest('.menu-modal-close').length) {
-      $('#menuPopup').fadeOut(300);
-    }
-  });
-
+    });
 });

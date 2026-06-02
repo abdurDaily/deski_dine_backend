@@ -6,13 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\Offer;
 use App\Models\Order;
+use App\Services\SSLCommerzService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
     public function home()
     {
-        return view('index');
+        $categories = \App\Models\Category::with(['menus' => function ($query) {
+            $query->where('is_available', 1)->with('variations');
+        }])->where('status', 1)->get();
+
+        return view('index', compact('categories'));
     }
 
     public function addToCart()
@@ -91,72 +99,112 @@ class HomeController extends Controller
 
     public function storeOrder(Request $request)
     {
+        // 1. Validate the Request
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
-            'customer_address' => 'required|string|max:1000',
-            'payment_method' => 'required|in:cod,bkash,other',
-            'order_total' => 'required|numeric|min:0',
-            'member_card_number' => 'nullable|string',
-            'student_card' => 'sometimes|boolean',
-            'items' => 'nullable|string',
+            'customer_address' => 'required|string',
+            'order_total' => 'required|numeric|min:1',
+            'items' => 'required|json',
+            'payment_method' => 'required|in:cod,sslcommerz',
         ]);
 
-        $member = null;
-        if ($request->filled('member_card_number')) {
-            $member = Member::where('unique_card_number', $request->member_card_number)->first();
-            if (! $member) {
-                return back()->withErrors(['member_card_number' => 'Membership card number not found. Please register first.'])->withInput();
+        // 2. Generate unique Transaction ID
+        $tranId = uniqid('ORDER_');
+
+        // 3. Prepare Order payload and save to Database
+        // Map payment method to a safe DB value if enum doesn't support it yet
+        $paymentMethod = $request->payment_method;
+        if (Schema::hasColumn('orders', 'payment_method')) {
+            $col = DB::select("SHOW COLUMNS FROM `orders` LIKE 'payment_method'");
+            if (!empty($col) && isset($col[0]->Type) && strpos($col[0]->Type, 'enum(') === 0) {
+                $typeDef = $col[0]->Type; // e.g. enum('cod','bkash','other')
+                if (strpos($typeDef, "'{$paymentMethod}'") === false) {
+                    // fallback to 'other' when DB enum doesn't include the requested value
+                    $paymentMethod = 'other';
+                }
             }
         }
-        $discountPercent = 0;
-        $studentCardUsed = $request->boolean('student_card');
-        $orderTotal = (float) $request->order_total;
 
-        if ($member && $member->orders()->count() === 0) {
-            if ($studentCardUsed || $member->is_student) {
-                $discountPercent = 35;
-            } else {
-                $discountPercent = 30;
-            }
-        }
-
-        $discountAmount = round($orderTotal * ($discountPercent / 100), 2);
-        $finalAmount = round($orderTotal - $discountAmount, 2);
-
-        $order = Order::create([
-            'user_id' => auth()->id(),
-            'member_id' => $member?->id,
-            'unique_card_number' => $member?->unique_card_number,
+        $orderData = [
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'customer_address' => $request->customer_address,
-            'payment_method' => $request->payment_method,
-            'total_amount' => $orderTotal,
-            'discount_amount' => $discountAmount,
-            'final_amount' => $finalAmount,
-            'student_card_used' => $studentCardUsed,
-            'items' => $request->filled('items') ? json_decode($request->items, true) : [],
+            'total_amount' => $request->order_total,
+            'final_amount' => $request->order_total, // Add logic if discounts apply
+            'items' => json_decode($request->items, true),
+            'payment_method' => $paymentMethod,
             'status' => 'pending',
-        ]);
+        ];
 
-        if ($member) {
-            $member->total_purchase += $orderTotal;
-            $member->first_order_discount_used = $member->first_order_discount_used || $discountAmount > 0;
+        // Conditionally include transaction_id and payment_status only if the columns exist
+        if (Schema::hasColumn('orders', 'transaction_id')) {
+            $orderData['transaction_id'] = $tranId;
+        }
 
-            if ($member->type !== 'golden' && $orderTotal >= 2000) {
-                $member->type = 'golden';
+        if (Schema::hasColumn('orders', 'payment_status')) {
+            $orderData['payment_status'] = 'unpaid';
+        }
+
+        $order = Order::create($orderData);
+
+        // ============================================
+        // 4. Handle Payment Logic
+        // ============================================
+
+        // --- CASH ON DELIVERY ---
+        if ($request->payment_method === 'cod') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order placed successfully via Cash on Delivery!',
+                'order_id' => $order->id,
+                'clear_cart' => true,
+            ]);
+        }
+
+        // --- SSLCOMMERZ (EASYCHECKOUT POPUP) ---
+        if ($request->payment_method === 'sslcommerz') {
+            try {
+                $sslcommerz = new SSLCommerzService();
+
+                $post_data = [
+                    'total_amount' => $order->total_amount,
+                    'currency' => 'BDT',
+                    'tran_id' => $tranId,
+                    'success_url' => route('payment.success'),
+                    'fail_url' => route('payment.fail'),
+                    'cancel_url' => route('payment.cancel'),
+                    'ipn_url' => route('payment.ipn'),
+                    'cus_name' => $order->customer_name,
+                    'cus_email' => 'customer@example.com',
+                    'cus_phone' => $order->customer_phone,
+                    'cus_add1' => $order->customer_address,
+                    'cus_city' => 'Dhaka',
+                    'cus_country' => 'Bangladesh',
+                    'shipping_method' => 'NO',
+                    'product_name' => 'Food Order',
+                    'product_category' => 'Food',
+                    'product_profile' => 'general',
+                ];
+
+                $sslResponse = $sslcommerz->initiatePayment($post_data);
+
+                if (!empty($sslResponse['success']) && !empty($sslResponse['gateway_url'])) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect_url' => $sslResponse['gateway_url'],
+                        'order_id' => $order->id,
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $sslResponse['message'] ?? 'Payment initialization failed.',
+                ], 422);
+            } catch (\Exception $e) {
+                Log::error('SSLCommerz Init Error: ' . $e->getMessage());
+                return response()->json(['success' => false, 'message' => 'System error during payment initiation.'], 500);
             }
-
-            $member->save();
         }
-
-        $successMessage = 'Order placed successfully. Total: ৳' . number_format($finalAmount, 2);
-
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => $successMessage, 'order_id' => $order->id]);
-        }
-
-        return redirect()->route('frontend.checkout')->with('success', $successMessage);
     }
 }

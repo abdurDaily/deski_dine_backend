@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
                 CurrencySeeder::class,
                 CurrencyPermissionSeeder::class,
                 CurrencySettingSeeder::class,
-
+                MenuSeeder::class,
             ]
         );
     }

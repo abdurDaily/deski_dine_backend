@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Backend\MemberController;
 use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\PermissionController;
@@ -21,12 +22,10 @@ use App\Http\Controllers\NotificationController;
 //     return to_route('login');
 // });
 
-Auth::routes(['register' => false, 'verify' => true]);
+Auth::routes(['register' => true, 'verify' => false]);
 
-Route::get('/run-migrations', function (Request $request)
-{
-    if ($request->input('key') !== MIGRATION_KEY)
-    {
+Route::get('/run-migrations', function (Request $request) {
+    if ($request->input('key') !== MIGRATION_KEY) {
         abort(403, 'Unauthorized');
     }
     Artisan::call('migrate', ["--force" => true]);
@@ -34,23 +33,18 @@ Route::get('/run-migrations', function (Request $request)
     return 'Migrations ran successfully';
 });
 
-Route::get('/linkstorage', function ()
-{
+Route::get('/linkstorage', function () {
     Artisan::call('storage:link');
 });
 
-Route::get('cache-clear', function ()
-{
-    try
-    {
+Route::get('cache-clear', function () {
+    try {
         Artisan::call('cache:clear');
         Artisan::call('optimize:clear');
         Cache::flush();
         Artisan::call('cache:forget spatie.permission.cache');
         return response()->json(['status' => 'success', 'msg' => 'Cache cleared successfully.'], 200);
-    }
-    catch (\Throwable $th)
-    {
+    } catch (\Throwable $th) {
         //throw $th;
         return response()->json(['message' => $th->getMessage()], 500);
     }
@@ -58,24 +52,22 @@ Route::get('cache-clear', function ()
 
 
 
-Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
-{
+Route::middleware(['auth', 'setLocale'])->group(function () {
 
-      // System Settings Routes
-      Route::get('settings', [SettingController::class, 'settings'])->name('system-setting');
-      Route::post('customize', [SettingController::class, 'customize'])->name('theme.customize')->middleware('can:theme-customization');
-      Route::get('general-setting', [SettingController::class, 'generalSetting'])->name('general-setting')->middleware('can:general-setting');
-      Route::post('general-setting', [SettingController::class, 'generalSettingStore'])->name('general-setting.store')->middleware('can:general-setting');
-      Route::post('logo-upload', [SettingController::class, 'logoUpload'])->name('general-setting-logo.store')->middleware('can:general-setting');
-      Route::post('favicon-upload', [SettingController::class, 'faviconUpload'])->name('general-setting-favicon.store')->middleware('can:general-setting');
-      Route::get('email-setting', [SettingController::class, 'emailSetting'])->name('email-setting')->middleware('can:email-setting');
-      Route::post('email-setting', [SettingController::class, 'emailSettingUpdate'])->name('email-setting.store')->middleware('can:email-setting');
-      Route::get('pusher-setting', [SettingController::class, 'pusherSetting'])->name('pusher-setting')->middleware('can:pusher-setting');
-      Route::post('pusher-setting', [SettingController::class, 'pusherSettingStore'])->name('pusher-setting.store')->middleware('can:pusher-setting');
+    // System Settings Routes
+    Route::get('settings', [SettingController::class, 'settings'])->name('system-setting');
+    Route::post('customize', [SettingController::class, 'customize'])->name('theme.customize')->middleware('can:theme-customization');
+    Route::get('general-setting', [SettingController::class, 'generalSetting'])->name('general-setting')->middleware('can:general-setting');
+    Route::post('general-setting', [SettingController::class, 'generalSettingStore'])->name('general-setting.store')->middleware('can:general-setting');
+    Route::post('logo-upload', [SettingController::class, 'logoUpload'])->name('general-setting-logo.store')->middleware('can:general-setting');
+    Route::post('favicon-upload', [SettingController::class, 'faviconUpload'])->name('general-setting-favicon.store')->middleware('can:general-setting');
+    Route::get('email-setting', [SettingController::class, 'emailSetting'])->name('email-setting')->middleware('can:email-setting');
+    Route::post('email-setting', [SettingController::class, 'emailSettingUpdate'])->name('email-setting.store')->middleware('can:email-setting');
+    Route::get('pusher-setting', [SettingController::class, 'pusherSetting'])->name('pusher-setting')->middleware('can:pusher-setting');
+    Route::post('pusher-setting', [SettingController::class, 'pusherSettingStore'])->name('pusher-setting.store')->middleware('can:pusher-setting');
 
 
-    Route::middleware('role:Super Admin')->group(function ()
-    {
+    Route::middleware('role:Super Admin')->group(function () {
         // Role Route
         Route::resource('roles', RoleController::class);
         Route::get('roles/{role}/users', [RoleController::class, 'users'])->name('roles.users');
@@ -91,15 +83,13 @@ Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     # Notifications
-    Route::controller(NotificationController::class)->prefix('notifications/')->name('notify.')->group(function ()
-    {
+    Route::controller(NotificationController::class)->prefix('notifications/')->name('notify.')->group(function () {
         Route::get('/', 'index')->name('index');
     });
 
     Route::resource('users', UserController::class)->except(['show']);
 
-    Route::controller(ProfileController::class)->group(function ()
-    {
+    Route::controller(ProfileController::class)->group(function () {
         Route::get('profile', 'profile')->name('profile');
         Route::put('profile', 'profileUpdate')->name('profile.update');
         Route::put('password', 'passwordUpdate')->name('password.update');
@@ -111,23 +101,29 @@ Route::middleware(['auth', 'verified', 'setLocale'])->group(function ()
         Route::resource('menu', App\Http\Controllers\Backend\MenuController::class)->except(['show']);
         Route::post('menu/{menu}/delete', [App\Http\Controllers\Backend\MenuController::class, 'destroy'])->name('menu.delete');
     });
-        // User account orders & invoices
-        Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');
-        Route::get('account/orders/{order}', [App\Http\Controllers\Frontend\OrderController::class, 'invoice'])->name('account.invoice.show');
-        Route::get('account/orders/{order}/download', [App\Http\Controllers\Frontend\OrderController::class, 'downloadInvoice'])->name('account.invoice.download');
+    // User account orders & invoices
+    Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');
+    Route::get('account/orders/{order}', [App\Http\Controllers\Frontend\OrderController::class, 'invoice'])->name('account.invoice.show');
+    Route::get('account/orders/{order}/download', [App\Http\Controllers\Frontend\OrderController::class, 'downloadInvoice'])->name('account.invoice.download');
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
 });
 
-Route::name('frontend.')->group(function(){
+Route::name('frontend.')->group(function () {
 
     //* HOME PAGE
-    Route::get('/',[HomeController::class, 'home'])->name('home');
-    Route::get('/add-to-cart',[HomeController::class, 'addToCart'])->name('addtocart');
-    Route::get('/checkout',[HomeController::class, 'checkout'])->name('checkout');
-    Route::get('/cards',[HomeController::class, 'cards'])->name('cards');
-    Route::get('/card-apply',[HomeController::class, 'cardApply'])->name('card.apply');
-    Route::post('/members/register',[HomeController::class, 'registerMember'])->name('members.register');
-    Route::post('/golden-card/apply',[HomeController::class, 'applyGoldenCard'])->name('golden.card.apply');
-    Route::post('/order',[HomeController::class, 'storeOrder'])->name('order.store');
+    Route::get('/', [HomeController::class, 'home'])->name('home');
+    Route::get('/add-to-cart', [HomeController::class, 'addToCart'])->name('addtocart');
+    Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
+    Route::get('/cards', [HomeController::class, 'cards'])->name('cards');
+    Route::get('/card-apply', [HomeController::class, 'cardApply'])->name('card.apply');
+    Route::post('/members/register', [HomeController::class, 'registerMember'])->name('members.register');
+    Route::post('/golden-card/apply', [HomeController::class, 'applyGoldenCard'])->name('golden.card.apply');
+    Route::post('/order', [HomeController::class, 'storeOrder'])->name('order.store');
+});
 
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::match(['get', 'post'], '/success', [PaymentController::class, 'success'])->name('success');
+    Route::match(['get', 'post'], '/fail', [PaymentController::class, 'fail'])->name('fail');
+    Route::match(['get', 'post'], '/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+    Route::match(['get', 'post'], '/ipn', [PaymentController::class, 'ipn'])->name('ipn');
 });

@@ -182,149 +182,59 @@
         <div id="menuSlider" class="menu-slider reveal">
           <div class="menu-slider-viewport">
             <div class="menu-slider-track">
-              <div class="menu-slide-item">
-                <a href="https://sadias.kitchen/CHK" class="menu-offer-card">
-                  <div class="menu-offer-image-wrap">
-                    <img src="{{ asset('assets/frontend/images/signature_menu/1.jpg') }}" alt="Mutton Kacchi" class="menu-offer-image" />
-                  </div>
-                  <div class="menu-offer-body">
-                    <h5 class="menu-offer-title">Mutton Kacchi</h5>
-                    <p class="menu-offer-meta mb-0">
-                      Fragrant basmati rice layered with marinated mutton,
-                      saffron, and signature .
-                    </p>
-                    <div class="menu-offer-divider"></div>
-                    <div class="menu-offer-footer">
-                      <div class="menu-offer-price-wrap">
-                        <span class="menu-offer-price-label">Starts from</span>
-                        <span class="menu-offer-price">৳ 420</span>
-                      </div>
-                      <span class="menu-offer-serve"><i class="bi bi-people"></i> 2 persons</span>
-                    </div>
-                    <div class="menu-offer-actions" onclick="event.preventDefault()">
-                      <button class="menu-offer-cart-btn" type="button">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i>
-                        Order Now
-                      </button>
-                    </div>
-                  </div>
-                </a>
-              </div>
+              @php
+                $sliderMenus = $categories
+                    ->pluck('menus')
+                    ->flatten()
+                    ->filter(fn($menu) => $menu->variations->isNotEmpty())
+                    ->take(10);
+              @endphp
 
-              <div class="menu-slide-item">
-                <a href="complete-menu-detail.html" class="menu-offer-card">
-                  <div class="menu-offer-image-wrap">
-                    <img class="menu-offer-image" src="{{ asset('assets/frontend/images/signature_menu/2.jpg') }}" alt="Purān Dhākār Kacchi" />
-                  </div>
-                  <div class="menu-offer-body">
-                    <h5 class="menu-offer-title">Purān Dhākār Kacchi</h5>
-                    <p class="menu-offer-meta mb-0">
-                      Tender beef in a rich, aromatic white gravy with whole
-                      spices and a silky finish.
-                    </p>
-                    <div class="menu-offer-divider"></div>
-                    <div class="menu-offer-footer">
-                      <div class="menu-offer-price-wrap">
-                        <span class="menu-offer-price-label">Starts from</span>
-                        <span class="menu-offer-price">৳ 340</span>
+              @forelse($sliderMenus as $menu)
+                @php
+                  $firstVariation = $menu->variations->sortBy('price')->first();
+                  $imagePath = $firstVariation?->image ?? 'assets/frontend/images/signature_menu/2.jpg';
+                  $imageUrl = \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://'])
+                      ? $imagePath
+                      : asset($imagePath);
+                @endphp
+                <div class="menu-slide-item">
+                  <a href="#" class="menu-offer-card">
+                    <div class="menu-offer-image-wrap">
+                      <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" />
+                    </div>
+                    <div class="menu-offer-body">
+                      <h5 class="menu-offer-title">{{ $menu->name }}</h5>
+                      <p class="menu-offer-meta mb-0">
+                        {{ \Illuminate\Support\Str::limit($menu->description ?? 'Freshly prepared signature dish from Degchi Dine.', 95) }}
+                      </p>
+                      <div class="menu-offer-divider"></div>
+                      <div class="menu-offer-footer">
+                        <div class="menu-offer-price-wrap">
+                          <span class="menu-offer-price-label">Starts from</span>
+                          <span class="menu-offer-price">৳ {{ number_format((float) ($firstVariation?->price ?? 0), 2) }}</span>
+                        </div>
+                        <span class="menu-offer-serve"><i class="bi bi-collection"></i> {{ $menu->variations->count() }} option{{ $menu->variations->count() > 1 ? 's' : '' }}</span>
                       </div>
-                      <span class="menu-offer-serve"><i class="bi bi-person"></i> 1 person</span>
-                    </div>
-                    <div class="menu-offer-actions" onclick="event.preventDefault()">
-                      <button class="menu-offer-cart-btn" type="button">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i>
-                        Order Now
-                      </button>
-                    </div>
-                  </div>
-                </a>
-              </div>
-
-              <div class="menu-slide-item">
-                <a href="complete-menu-detail.html" class="menu-offer-card">
-                  <div class="menu-offer-image-wrap">
-                    <img class="menu-offer-image" src="{{ asset('assets/frontend/images/signature_menu/3.jpg') }}" alt="Mutton Kacchi Platter" />
-                  </div>
-                  <div class="menu-offer-body">
-                    <h5 class="menu-offer-title">Mutton Kacchi Platter</h5>
-                    <p class="menu-offer-meta mb-0">
-                      Freshly brewed coffee paired with crunchy, savory bites
-                      for a perfect evening break.
-                    </p>
-                    <div class="menu-offer-divider"></div>
-                    <div class="menu-offer-footer">
-                      <div class="menu-offer-price-wrap">
-                        <span class="menu-offer-price-label">Starts from</span>
-                        <span class="menu-offer-price">৳ 290</span>
+                      <div class="menu-offer-actions" onclick="event.preventDefault()">
+                        <button class="menu-offer-cart-btn" type="button">
+                          <i class="bi bi-bag-plus" aria-hidden="true"></i>
+                          Order Now
+                        </button>
                       </div>
-                      <span class="menu-offer-serve"><i class="bi bi-person"></i> 1 person</span>
                     </div>
-                    <div class="menu-offer-actions" onclick="event.preventDefault()">
-                      <button class="menu-offer-cart-btn" type="button">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i>
-                        Order Now
-                      </button>
-                    </div>
-                  </div>
-                </a>
-              </div>
-
-              <div class="menu-slide-item">
-                <a href="complete-menu-detail.html" class="menu-offer-card">
-                  <div class="menu-offer-image-wrap">
-                    <img class="menu-offer-image" src="{{ asset('assets/frontend/images/signature_menu/4.jpg') }}" alt="Kacchi Biryani Duo" />
-                  </div>
-                  <div class="menu-offer-body">
-                    <h5 class="menu-offer-title">Kacchi Biryani</h5>
-                    <p class="menu-offer-meta mb-0">
-                      Juicy kebabs and soft shawarma wraps served with house
-                      sauces and fresh pickles.
-                    </p>
-                    <div class="menu-offer-divider"></div>
-                    <div class="menu-offer-footer">
-                      <div class="menu-offer-price-wrap">
-                        <span class="menu-offer-price-label">Starts from</span>
-                        <span class="menu-offer-price">৳ 360</span>
-                      </div>
-                      <span class="menu-offer-serve"><i class="bi bi-people"></i> 2 persons</span>
-                    </div>
-                    <div class="menu-offer-actions" onclick="event.preventDefault()">
-                      <button class="menu-offer-cart-btn" type="button">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i>
-                        Order Now
-                      </button>
+                  </a>
+                </div>
+              @empty
+                <div class="menu-slide-item">
+                  <div class="menu-offer-card">
+                    <div class="menu-offer-body">
+                      <h5 class="menu-offer-title">Menu coming soon</h5>
+                      <p class="menu-offer-meta mb-0">New dishes will be added shortly.</p>
                     </div>
                   </div>
-                </a>
-              </div>
-              <div class="menu-slide-item">
-                <a href="complete-menu-detail.html" class="menu-offer-card">
-                  <div class="menu-offer-image-wrap">
-                    <img class="menu-offer-image" src="{{ asset('assets/frontend/images/signature_menu/1.jpg') }}" alt="Kacchi Biryani Duo" />
-                  </div>
-                  <div class="menu-offer-body">
-                    <h5 class="menu-offer-title">Kacchi Biryani Duo</h5>
-                    <p class="menu-offer-meta mb-0">
-                      Juicy kebabs and soft shawarma wraps served with house
-                      sauces and fresh pickles.
-                    </p>
-                    <div class="menu-offer-divider"></div>
-                    <div class="menu-offer-footer">
-                      <div class="menu-offer-price-wrap">
-                        <span class="menu-offer-price-label">Starts from</span>
-                        <span class="menu-offer-price">৳ 360</span>
-                      </div>
-                      <span class="menu-offer-serve"><i class="bi bi-people"></i> 2 persons</span>
-                    </div>
-                    <div class="menu-offer-actions" onclick="event.preventDefault()">
-                      <button class="menu-offer-cart-btn" type="button">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i>
-                        Order Now
-                      </button>
-                    </div>
-                  </div>
-                </a>
-              </div>
+                </div>
+              @endforelse
             </div>
           </div>
 
