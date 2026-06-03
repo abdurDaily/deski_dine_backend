@@ -650,20 +650,7 @@ const initCartEvents = () => {
             this.querySelector("input[name='payment_method']:checked")?.value ||
             "cod";
 
-        let paymentPopup = null;
         const isSslCommerz = selectedPaymentMethod === "sslcommerz";
-        if (isSslCommerz) {
-            paymentPopup = window.open(
-                "",
-                "sslcommerz_payment",
-                "width=900,height=800,resizable=yes,scrollbars=yes",
-            );
-            if (!paymentPopup) {
-                alert(
-                    "Please allow popups for this site to complete SSLCommerz payment.",
-                );
-            }
-        }
 
         // Submit via AJAX when supported
         if (window.jQuery) {
@@ -699,20 +686,8 @@ const initCartEvents = () => {
                     }
 
                     if (response.redirect_url) {
-                        if (
-                            isSslCommerz &&
-                            paymentPopup &&
-                            !paymentPopup.closed
-                        ) {
-                            paymentPopup.location.href = response.redirect_url;
-                        } else {
-                            window.location.href = response.redirect_url;
-                        }
+                        window.location.href = response.redirect_url;
                         return;
-                    }
-
-                    if (paymentPopup && !paymentPopup.closed) {
-                        paymentPopup.close();
                     }
 
                     clearCart();
@@ -736,10 +711,6 @@ const initCartEvents = () => {
                     // their order from their account if they are logged in.
                 },
                 error: function (xhr) {
-                    if (paymentPopup && !paymentPopup.closed) {
-                        paymentPopup.close();
-                    }
-
                     const response = xhr.responseJSON;
                     const message = response?.errors
                         ? Object.values(response.errors)[0][0]

@@ -86,9 +86,10 @@
                                     <label class="form-label">Membership Card Number</label>
                                     <div class="checkout-input-wrap">
                                         <i class="bi bi-credit-card checkout-input-icon"></i>
-                                        <input class="form-control checkout-input" type="text" name="member_card_number"
+                                        <input class="form-control checkout-input" type="text" name="member_card_number" id="memberCardNumber"
                                             placeholder="Enter your registered card number (leave blank to continue as guest)" />
                                     </div>
+                                    <div id="membershipFeedback" class="form-text text-muted mt-2">Enter your membership card number to check eligibility for a 10% discount.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-check mt-4 pt-2">
@@ -150,9 +151,13 @@
                         </div>
 
                         <div class="cart-summary-body">
-                            <div class="cart-summary-row">
+                                <div class="cart-summary-row">
                                 <span>Subtotal <small class="text-muted" id="itemCount">(0 items)</small></span>
                                 <span id="checkoutSubtotal">৳ 0.00</span>
+                            </div>
+                            <div class="cart-summary-row">
+                                <span>Membership Discount</span>
+                                <span id="checkoutDiscount">৳ 0.00</span>
                             </div>
                             <div class="cart-summary-row">
                                 <span>Delivery</span>
@@ -189,27 +194,162 @@
     @push('front_js')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const messagesContainer = document.getElementById('checkoutMessages');
+                const checkoutForm = document.getElementById('checkoutForm');
+                const submitButton = document.getElementById('placeOrderBtn');
+                const memberCardInput = document.getElementById('memberCardNumber');
+                const membershipFeedback = document.getElementById('membershipFeedback');
+                const discountDisplay = document.getElementById('checkoutDiscount');
+                const totalDisplay = document.getElementById('checkoutTotal');
+                const subtotalDisplay = document.getElementById('checkoutSubtotal');
+                const orderTotalInput = document.getElementById('order_total');
 
-                if (!messagesContainer) {
-                    return;
+                function showToast(type, text) {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: 'toast-top-right',
+                        };
+                        toastr[type](text);
+                    } else {
+                        alert(text);
+                    }
                 }
 
-                const params = new URLSearchParams(window.location.search);
-                const result = params.get('payment_result');
-                if (!result) {
-                    return;
+                function updateDiscountDisplay(discountAmount) {
+                    discountDisplay.textContent = `৳ ${discountAmount.toFixed(2)}`;
+                    const subtotal = parseFloat(orderTotalInput.value) || 0;
+                    totalDisplay.textContent = `৳ ${(subtotal - discountAmount).toFixed(2)}`;
                 }
 
-                const message = params.get('payment_message') || (result === 'success' ? 'Payment completed.' :
-                    'Payment failed.');
-                messagesContainer.innerHTML =
-                    `<div class="alert alert-${result === 'success' ? 'success' : 'danger'}">${message}</div>`;
-                if (params.get('clear_cart') === '1') {
-                    localStorage.removeItem('degchi_cart');
+                function handleQueryMessage() {
+                    const params = new URLSearchParams(window.location.search);
+                    const result = params.get('payment_result');
+                    if (!result) {
+                        return;
+                    }
+                    const message = params.get('payment_message') || (result === 'success' ? 'Payment completed.' : 'Payment failed.');
+                    showToast(result === 'success' ? 'success' : 'error', message);
+                    if (params.get('clear_cart') === '1') {
+                        localStorage.removeItem('degchi_cart');
+                    }
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
 
-                window.history.replaceState({}, document.title, window.location.pathname);
+                async function checkMemberCardEligibility(cardNumber) {
+                    if (!cardNumber) {
+                        membershipFeedback.textContent = 'Enter your membership card number to check eligibility for a 10% discount.';
+                        membershipFeedback.classList.remove('text-success', 'text-danger');
+                        updateDiscountDisplay(0);
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`{{ route('frontend.member.check') }}?member_card_number=${encodeURIComponent(cardNumber)}`);
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            membershipFeedback.textContent = result.message || 'Unable to verify membership card.';
+                            membershipFeedback.classList.remove('text-success');
+                            membershipFeedback.classList.add('text-danger');
+                            updateDiscountDisplay(0);
+                            return;
+                        }
+
+                        membershipFeedback.textContent = result.message;
+                        membershipFeedback.classList.remove('text-danger');
+                        membershipFeedback.classList.add('text-success');
+
+                        const subtotal = parseFloat(orderTotalInput.value) || 0;
+                        const discountAmount = result.eligible ? parseFloat((subtotal * (result.discount_rate / 100)).toFixed(2)) : 0;
+                        updateDiscountDisplay(discountAmount);
+                    } catch (error) {
+                        membershipFeedback.textContent = 'Unable to verify membership card at the moment.';
+                        membershipFeedback.classList.remove('text-success');
+                        membershipFeedback.classList.add('text-danger');
+                        updateDiscountDisplay(0);
+                    }
+                }
+
+                function buildFormData(form) {
+                    const formData = new FormData(form);
+                    formData.set('_token', document.querySelector('input[name="_token"]').value);
+                    return formData;
+                }
+
+                if (memberCardInput) {
+                    memberCardInput.addEventListener('change', function() {
+                        checkMemberCardEligibility(this.value.trim());
+                    });
+                }
+
+                if (checkoutForm) {
+                    checkoutForm.addEventListener('submit', async function(event) {
+                        event.preventDefault();
+
+                        if (!submitButton) {
+                            return;
+                        }
+
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+
+                        try {
+                            const response = await fetch(checkoutForm.action, {
+                                method: 'POST',
+                                body: buildFormData(checkoutForm),
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            });
+
+                            const result = await response.json();
+
+                            if (!response.ok) {
+                                if (result.errors) {
+                                    const messages = Object.values(result.errors).flat().join('\n');
+                                    showToast('error', messages);
+                                } else {
+                                    showToast('error', result.message || 'Unable to place order.');
+                                }
+                                return;
+                            }
+
+                            if (result.redirect_url) {
+                                window.location.href = result.redirect_url;
+                                return;
+                            }
+
+                            if (result.success) {
+                                if (result.clear_cart) {
+                                    localStorage.removeItem('degchi_cart');
+                                }
+                                showToast('success', result.message || 'Order placed successfully.');
+                                checkoutForm.reset();
+                                document.getElementById('orderSummaryList').innerHTML = '<div class="text-center py-3 text-muted">Your selected products will appear here.</div>';
+                                subtotalDisplay.textContent = '৳ 0.00';
+                                totalDisplay.textContent = '৳ 0.00';
+                                discountDisplay.textContent = '৳ 0.00';
+                                document.getElementById('itemCount').textContent = '(0 items)';
+                                membershipFeedback.textContent = 'Enter your membership card number to check eligibility for a 10% discount.';
+                                membershipFeedback.classList.remove('text-success', 'text-danger');
+                            }
+                        } catch (error) {
+                            showToast('error', error.message || 'Server error while placing order.');
+                        } finally {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = '<i class="bi bi-bag-check me-2"></i>Place Order';
+                        }
+                    });
+                }
+
+                handleQueryMessage();
+
+                const flashMessage = @json(session('success') ?? session('error'));
+                const flashType = @json(session('success') ? 'success' : 'error');
+                if (flashMessage) {
+                    showToast(flashType, flashMessage);
+                }
             });
         </script>
     @endpush

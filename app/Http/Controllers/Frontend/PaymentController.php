@@ -41,7 +41,7 @@ class PaymentController extends Controller
         if (($validation['status'] ?? null) === 'VALID' || ($validation['status'] ?? null) === 'VALIDATED') {
             $this->markOrderAsPaid($order, $validation);
 
-            return $this->renderPopupRedirect(
+            return $this->redirectToCheckoutWithStatus(
                 'success',
                 'Payment successful! Order #' . $order->id . ' confirmed.',
                 true
@@ -53,7 +53,7 @@ class PaymentController extends Controller
             'payment_details' => json_encode($validation ?: $request->all()),
         ]);
 
-        return $this->renderPopupRedirect(
+        return $this->redirectToCheckoutWithStatus(
             'fail',
             'Payment was not completed. Please try again.'
         );
@@ -75,7 +75,7 @@ class PaymentController extends Controller
             ]);
         }
 
-        return $this->renderPopupRedirect(
+        return $this->redirectToCheckoutWithStatus(
             'fail',
             'Payment failed. Please try again or choose a different method.'
         );
@@ -97,7 +97,7 @@ class PaymentController extends Controller
             ]);
         }
 
-        return $this->renderPopupRedirect(
+        return $this->redirectToCheckoutWithStatus(
             'cancel',
             'Payment was cancelled.'
         );
@@ -135,13 +135,18 @@ class PaymentController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    private function renderPopupRedirect(string $status, string $message, bool $clearCart = false)
+    private function redirectToCheckoutWithStatus(string $status, string $message, bool $clearCart = false)
     {
-        return response()->view('frontend.payment-popup-redirect', [
-            'status' => $status,
-            'message' => $message,
-            'clearCart' => $clearCart,
-        ]);
+        $query = [
+            'payment_result' => $status,
+            'payment_message' => $message,
+        ];
+
+        if ($clearCart) {
+            $query['clear_cart'] = '1';
+        }
+
+        return redirect()->route('frontend.checkout', $query);
     }
 
     private function markOrderAsPaid(Order $order, array $details): void
@@ -164,7 +169,7 @@ class PaymentController extends Controller
             return;
         }
 
-        $member->total_purchase += (float) $order->total_amount;
+        $member->total_purchase += (float) $order->final_amount;
         $member->first_order_discount_used = $member->first_order_discount_used || ((float) $order->discount_amount > 0);
 
         if ($member->type !== 'golden' && (float) $order->total_amount >= 2000) {

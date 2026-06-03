@@ -7,14 +7,13 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Orders</h4>
-                    <form method="GET" class="d-flex align-items-center" action="{{ route('orders.index') }}">
-                        <input type="search" name="search" value="{{ $search ?? '' }}" class="form-control me-2" placeholder="Search by name, phone, card number" />
-                        <button class="btn btn-primary" type="submit">Search</button>
-                    </form>
+                    <div class="d-flex align-items-center">
+                        <input id="ordersSearch" type="search" class="form-control me-2" placeholder="Search by name, phone, card number" />
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered mb-0">
+                        <table class="table table-striped table-bordered yajra-datatable w-100">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -29,31 +28,48 @@
                                     <th>Date</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @forelse($orders as $order)
-                                    <tr>
-                                        <td>{{ $order->id }}</td>
-                                        <td>{{ $order->customer_name }}</td>
-                                        <td>{{ $order->customer_phone }}</td>
-                                        <td>{{ $order->unique_card_number ?? '-' }}</td>
-                                        <td>{{ $order->member?->name ?? '-' }}</td>
-                                        <td>৳ {{ number_format($order->total_amount, 2) }}</td>
-                                        <td>৳ {{ number_format($order->discount_amount, 2) }}</td>
-                                        <td>৳ {{ number_format($order->final_amount, 2) }}</td>
-                                        <td>{{ ucfirst($order->status) }}</td>
-                                        <td>{{ $order->created_at->format('Y-m-d') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="text-center">No orders found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
-                    <div class="mt-3">{{ $orders->links() }}</div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(function() {
+            const table = $('.yajra-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('orders.index') }}',
+                    data: function(d) {
+                        d.search.value = $('#ordersSearch').val();
+                    }
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'customer_name', name: 'customer_name' },
+                    { data: 'customer_phone', name: 'customer_phone' },
+                    { data: 'card_number', name: 'unique_card_number' },
+                    { data: 'member', name: 'member.name', orderable: false, searchable: false },
+                    { data: 'total', name: 'total_amount' },
+                    { data: 'discount', name: 'discount_amount' },
+                    { data: 'final', name: 'final_amount' },
+                    { data: 'status_name', name: 'status' },
+                    { data: 'date', name: 'created_at' }
+                ],
+                order: [[9, 'desc']],
+                drawCallback: function() {
+                    $('[data-bs-toggle="tooltip"]').tooltip();
+                }
+            });
+
+            $('#ordersSearch').on('keyup change clear', function() {
+                table.search(this.value).draw();
+            });
+        });
+    </script>
+@endpush

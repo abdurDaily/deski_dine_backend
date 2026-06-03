@@ -5,21 +5,28 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
-        $orders = Order::with('member')
-            ->when($search, function ($query, $search) {
-                return $query->where('customer_name', 'like', "%{$search}%")
-                    ->orWhere('customer_phone', 'like', "%{$search}%")
-                    ->orWhere('unique_card_number', 'like', "%{$search}%");
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        if ($request->ajax()) {
+            $query = Order::with('member')->select(['id', 'member_id', 'unique_card_number', 'customer_name', 'customer_phone', 'total_amount', 'discount_amount', 'final_amount', 'status', 'created_at']);
 
-        return view('backend.orders.index', compact('orders', 'search'));
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('member', fn($order) => $order->member?->name ?? '-')
+                ->addColumn('card_number', fn($order) => $order->unique_card_number ?? '-')
+                ->addColumn('total', fn($order) => '৳ ' . number_format($order->total_amount, 2))
+                ->addColumn('discount', fn($order) => '৳ ' . number_format($order->discount_amount, 2))
+                ->addColumn('final', fn($order) => '৳ ' . number_format($order->final_amount, 2))
+                ->addColumn('status_name', fn($order) => ucfirst($order->status))
+                ->addColumn('date', fn($order) => $order->created_at->format('Y-m-d'))
+                ->rawColumns(['member', 'card_number', 'total', 'discount', 'final', 'status_name', 'date'])
+                ->make(true);
+        }
+
+        return view('backend.orders.index');
     }
 }

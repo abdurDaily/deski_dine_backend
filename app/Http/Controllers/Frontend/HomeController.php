@@ -107,10 +107,17 @@ class HomeController extends Controller
             'order_total' => 'required|numeric|min:1',
             'items' => 'required|json',
             'payment_method' => 'required|in:cod,sslcommerz',
+            'member_card_number' => 'nullable|string|exists:members,unique_card_number',
+            'student_card' => 'sometimes|boolean',
         ]);
 
         // 2. Generate unique Transaction ID
         $tranId = uniqid('ORDER_');
+
+        $member = null;
+        if ($request->filled('member_card_number')) {
+            $member = Member::where('unique_card_number', $request->member_card_number)->first();
+        }
 
         // 3. Prepare Order payload and save to Database
         // Map payment method to a safe DB value if enum doesn't support it yet
@@ -118,7 +125,7 @@ class HomeController extends Controller
         if (Schema::hasColumn('orders', 'payment_method')) {
             $col = DB::select("SHOW COLUMNS FROM `orders` LIKE 'payment_method'");
             if (!empty($col) && isset($col[0]->Type) && strpos($col[0]->Type, 'enum(') === 0) {
-                $typeDef = $col[0]->Type; // e.g. enum('cod','bkash','other')
+                $typeDef = $col[0]->Type; // e.g. enum('cod','bkash','sslcommerz','other')
                 if (strpos($typeDef, "'{$paymentMethod}'") === false) {
                     // fallback to 'other' when DB enum doesn't include the requested value
                     $paymentMethod = 'other';
@@ -126,16 +133,28 @@ class HomeController extends Controller
             }
         }
 
+        $discountAmount = 0;
+        if ($member && $member->total_purchase <= 2000 && ! $member->first_order_discount_used) {
+            $discountAmount = round($request->order_total * 0.10, 2);
+        }
+
         $orderData = [
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'customer_address' => $request->customer_address,
             'total_amount' => $request->order_total,
-            'final_amount' => $request->order_total, // Add logic if discounts apply
+            'discount_amount' => $discountAmount,
+            'final_amount' => max(0, $request->order_total - $discountAmount),
             'items' => json_decode($request->items, true),
             'payment_method' => $paymentMethod,
             'status' => 'pending',
+            'student_card_used' => $request->boolean('student_card'),
         ];
+
+        if ($member) {
+            $orderData['member_id'] = $member->id;
+            $orderData['unique_card_number'] = $member->unique_card_number;
+        }
 
         // Conditionally include transaction_id and payment_status only if the columns exist
         if (Schema::hasColumn('orders', 'transaction_id')) {
@@ -154,12 +173,16 @@ class HomeController extends Controller
 
         // --- CASH ON DELIVERY ---
         if ($request->payment_method === 'cod') {
-            return response()->json([
-                'success' => true,
-                'message' => 'Order placed successfully via Cash on Delivery!',
-                'order_id' => $order->id,
-                'clear_cart' => true,
-            ]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order placed successfully via Cash on Delivery!',
+                    'order_id' => $order->id,
+                    'clear_cart' => true,
+                ]);
+            }
+
+            return redirect()->route('frontend.checkout')->with([ 'success' => 'Order placed successfully via Cash on Delivery!', 'clear_cart' => true ]);
         }
 
         // --- SSLCOMMERZ (EASYCHECKOUT POPUP) ---
@@ -190,21 +213,59 @@ class HomeController extends Controller
                 $sslResponse = $sslcommerz->initiatePayment($post_data);
 
                 if (!empty($sslResponse['success']) && !empty($sslResponse['gateway_url'])) {
-                    return response()->json([
-                        'success' => true,
-                        'redirect_url' => $sslResponse['gateway_url'],
-                        'order_id' => $order->id,
-                    ]);
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => true,
+                            'redirect_url' => $sslResponse['gateway_url'],
+                            'order_id' => $order->id,
+                        ]);
+                    }
+
+                    return redirect()->away($sslResponse['gateway_url']);
                 }
 
-                return response()->json([
-                    'success' => false,
-                    'message' => $sslResponse['message'] ?? 'Payment initialization failed.',
-                ], 422);
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $sslResponse['message'] ?? 'Payment initialization failed.',
+                    ], 422);
+                }
+
+                return back()->withErrors(['payment' => $sslResponse['message'] ?? 'Payment initialization failed.']);
             } catch (\Exception $e) {
                 Log::error('SSLCommerz Init Error: ' . $e->getMessage());
-                return response()->json(['success' => false, 'message' => 'System error during payment initiation.'], 500);
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'System error during payment initiation.'], 500);
+                }
+                return back()->withErrors(['payment' => 'System error during payment initiation.']);
             }
         }
+    }
+
+    public function checkMemberCard(Request $request)
+    {
+        $request->validate([
+            'member_card_number' => 'required|string|exists:members,unique_card_number',
+        ]);
+
+        $member = Member::where('unique_card_number', $request->member_card_number)->first();
+        if (! $member) {
+            return response()->json([
+                'eligible' => false,
+                'message' => 'Membership card not found.',
+            ], 404);
+        }
+
+        $eligible = $member->total_purchase <= 2000 && ! $member->first_order_discount_used;
+
+        return response()->json([
+            'eligible' => $eligible,
+            'member_name' => $member->name,
+            'total_purchase' => (float) $member->total_purchase,
+            'discount_rate' => $eligible ? 10 : 0,
+            'message' => $eligible
+                ? 'You are eligible for 10% membership discount on this order.'
+                : 'No membership discount available. Your previous purchase amount is already above the eligible threshold or discount was already used.',
+        ]);
     }
 }
