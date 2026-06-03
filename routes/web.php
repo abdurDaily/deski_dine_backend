@@ -118,7 +118,7 @@ Route::name('frontend.')->group(function () {
     Route::get('/card-apply', [HomeController::class, 'cardApply'])->name('card.apply');
     Route::post('/members/register', [HomeController::class, 'registerMember'])->name('members.register');
     Route::post('/golden-card/apply', [HomeController::class, 'applyGoldenCard'])->name('golden.card.apply');
-    Route::get('/order', [HomeController::class, 'storeOrder'])->name('order.store');
+    Route::post('/order', [HomeController::class, 'storeOrder'])->name('order.store');
     Route::get('/member/check', [HomeController::class, 'checkMemberCard'])->name('member.check');
     Route::get('/menu', [HomeController::class, 'completeMenu'])->name('completeMenu');
 });
