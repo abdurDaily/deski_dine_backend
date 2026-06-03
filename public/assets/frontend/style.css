@@ -4032,6 +4032,9 @@ footer[id],
   align-items: center;
 }
 
+
+
+
 /* --- Shopping Cart Base Dashboard (cart.html) --- */
 .cart-page-section {
   min-height: calc(100vh - 200px);
@@ -9288,6 +9291,188 @@ body {
   .dd-apply-right-form { padding: 40px 25px; }
   .dd-apply-left-showcase { padding: 40px 25px; }
   .dd-apply-form-header h2 { font-size: 1.8rem; }
+}
+
+/* ==========================================================================
+   08. COMPLETE MENU PAGE OVERRIDES & CONTROLS
+   ========================================================================== */
+
+.menu-hero-section {
+  background: linear-gradient(135deg, rgba(239, 139, 31, 0.08), rgba(127, 36, 48, 0.03)), #ffffff;
+  border-bottom: 1px solid rgba(127, 36, 48, 0.08);
+  padding: 5rem 0 4rem 0;
+}
+.luxury-meta-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--brand);
+  display: block;
+}
+.luxury-title {
+  font-family: 'Poppins', sans-serif;
+  color: var(--brand-dark);
+  font-weight: 700;
+  font-size: 2.8rem;
+  letter-spacing: 1px;
+}
+.luxury-accent-line {
+  width: 60px;
+  height: 3px;
+  background-color: var(--brand);
+  border-radius: 2px;
+}
+.filter-sidebar {
+  background: #ffffff;
+  border: 1px solid rgba(127, 36, 48, 0.1);
+  border-radius: 12px;
+  position: sticky;
+  top: 110px;
+  z-index: 20;
+}
+.filter-title {
+  color: var(--brand-dark);
+  font-weight: 600;
+  font-size: 1.15rem;
+  border-bottom: 1px solid rgba(127, 36, 48, 0.08);
+  padding-bottom: 0.75rem;
+}
+.filter-group-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+}
+
+/* Category Pill styles */
+.category-pill-btn {
+  border: 1px solid rgba(127, 36, 48, 0.08);
+  background: #fffdf9;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+.category-pill-btn:hover {
+  background: rgba(239, 139, 31, 0.05);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.category-pill-btn.active {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: #ffffff !important;
+}
+
+/* Dual Range Slider Styles */
+.dual-range-slider {
+  height: 6px;
+  margin-top: 15px;
+}
+.slider-track {
+  height: 6px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  border-radius: 5px;
+  background: #e9ecef;
+}
+.slider-input {
+  position: absolute;
+  width: 100%;
+  background: none;
+  pointer-events: none;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.slider-input::-webkit-slider-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--brand);
+  border: 2px solid #ffffff;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+.slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.slider-input::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--brand);
+  border: 2px solid #ffffff;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+.slider-input::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+.price-badge {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Modern Pagination Override */
+.modern-pagination .page-link {
+  color: var(--brand-dark);
+  border: 1px solid rgba(127, 36, 48, 0.1);
+  background-color: #ffffff;
+  font-weight: 600;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.95rem;
+  margin: 0 0.15rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 4px;
+}
+.modern-pagination .page-link:hover {
+  background-color: var(--brand);
+  border-color: var(--brand);
+  color: #ffffff;
+}
+.modern-pagination .page-item.active .page-link {
+  background-color: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: #ffffff;
+}
+.modern-pagination .page-item.disabled .page-link {
+  color: #c0c0c0;
+  background-color: #fafafa;
+  border-color: rgba(127, 36, 48, 0.05);
+}
+
+/* AJAX Loader style */
+.menu-loader-overlay {
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 100;
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+.spinner-border.text-brand {
+  color: var(--brand) !important;
+  width: 3rem;
+  height: 3rem;
 }
 
 

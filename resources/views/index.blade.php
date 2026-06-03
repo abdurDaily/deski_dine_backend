@@ -64,102 +64,24 @@
         </p>
       </div>
 
-      <div class="branch-grid">
-        <a href="tel:01615445566" class="branch-card">
-          <div class="default-state">
-            <h3>Chawkbazar</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 016 1544 5566
-            </span>
+        <div class="branch-grid">
+        @forelse($branches as $branch)
+          <a href="tel:{{ $branch->phone }}" class="branch-card">
+            <div class="default-state">
+              <h3>{{ $branch->name }}</h3>
+              <span class="phone-number">
+                <i class="fa-solid fa-phone"></i> {{ $branch->phone }}
+              </span>
+            </div>
+            <div class="hover-state">
+              <p class="branch-address">{{ $branch->location }}</p>
+            </div>
+          </a>
+        @empty
+          <div class="text-center">
+            <p class="text-muted">No branches are available at the moment.</p>
           </div>
-          <div class="hover-state">
-            <p class="branch-address">College Rd., Chawkbazar</p>
-          </div>
-        </a>
-
-        <a href="tel:01618445566" class="branch-card">
-          <div class="default-state">
-            <h3>GEC</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 016 1844 5566
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">CDA Avenue, Bata Goli, GEC</p>
-          </div>
-        </a>
-
-        <a href="tel:01619445577" class="branch-card">
-          <div class="default-state">
-            <h3>Agrabad</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 016 1944 5577
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">Sk Mujib Rd., Badamtali Mor</p>
-          </div>
-        </a>
-
-        <a href="tel:01615445577" class="branch-card">
-          <div class="default-state">
-            <h3>Muradpur</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 016 1544 5577
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">Jalal Plaza, CDA Avenue</p>
-          </div>
-        </a>
-
-        <a href="tel:01634859060" class="branch-card">
-          <div class="default-state">
-            <h3>Darul Fazal Market</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 016 3485 9060
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">01 Jubilee Road, Riazuddin Bazar</p>
-          </div>
-        </a>
-
-        <a href="tel:01904111067" class="branch-card">
-          <div class="default-state">
-            <h3>Jamal Khan</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 019 0411 1067
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">Jamal Khan Road</p>
-          </div>
-        </a>
-
-        <a href="tel:01904111068" class="branch-card">
-          <div class="default-state">
-            <h3>Hat Hazari</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 019 0411 1068
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">Kachari Rd., Hathazari</p>
-          </div>
-        </a>
-
-        <a href="tel:01904111066" class="branch-card">
-          <div class="default-state">
-            <h3>Navy Gate</h3>
-            <span class="phone-number">
-              <i class="fa-solid fa-phone"></i> 019 0411 1066
-            </span>
-          </div>
-          <div class="hover-state">
-            <p class="branch-address">Navy Hospital Gate, Airport Road</p>
-          </div>
-        </a>
+        @endforelse
       </div>
     </section>
 
@@ -249,7 +171,7 @@
         </div>
 
         <div class="menu-slider-footer">
-          <a href="complete-menu.html" class="btn menu-show-more-btn">
+          <a href="{{ route('frontend.completeMenu') }}" class="btn menu-show-more-btn">
             <span>View Complete Menu <i class="bi bi-arrow-right-short ms-1"></i></span>
           </a>
         </div>

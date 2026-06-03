@@ -51,6 +51,9 @@
           <a class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="{{ route('frontend.completeMenu') }}">Full Menu</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{{ route('frontend.cards') }}">Card</a>
         </li>
         <li class="nav-item">
@@ -111,6 +114,9 @@
           <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
         </li>
         <li class="nav-item">
+          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.completeMenu') }}">Full Menu</a>
+        </li>
+        <li class="nav-item">
           <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.cards') }}">Card</a>
         </li>
         <li class="nav-item">
@@ -164,6 +170,7 @@
                 <li><a href="{{ route('frontend.home') }}#home">Home</a></li>
                 <li><a href="{{ route('frontend.home') }}#about">About Us</a></li>
                 <li><a href="{{ route('frontend.home') }}#menu">Menu</a></li>
+                <li><a href="{{ route('frontend.completeMenu') }}">Full Menu</a></li>
                 <li><a href="{{ route('frontend.cards') }}">Privilege Card</a></li>
                 <li><a href="{{ route('frontend.home') }}#video">Video</a></li>
                 <li><a href="{{ route('frontend.home') }}#testimonials">Reviews</a></li>

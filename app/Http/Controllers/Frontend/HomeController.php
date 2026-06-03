@@ -20,7 +20,9 @@ class HomeController extends Controller
             $query->where('is_available', 1)->with('variations');
         }])->where('status', 1)->get();
 
-        return view('index', compact('categories'));
+        $branches = \App\Models\Branch::orderBy('name')->get();
+
+        return view('index', compact('categories', 'branches'));
     }
 
     public function addToCart()
@@ -267,5 +269,54 @@ class HomeController extends Controller
                 ? 'You are eligible for 10% membership discount on this order.'
                 : 'No membership discount available. Your previous purchase amount is already above the eligible threshold or discount was already used.',
         ]);
+    }
+
+    public function completeMenu(Request $request)
+    {
+        // 1. Fetch active categories
+        $categories = \App\Models\Category::where('status', 1)->get();
+
+        // 2. Fetch min and max price limits dynamically from menu variations
+        $minPriceLimit = (float) (\App\Models\MenuVariation::min('price') ?? 0);
+        $maxPriceLimit = (float) (\App\Models\MenuVariation::max('price') ?? 1000);
+
+        // 3. Get search/filter params
+        $selectedCategorySlug = $request->query('category');
+        $minPrice = $request->query('min_price', $minPriceLimit);
+        $maxPrice = $request->query('max_price', $maxPriceLimit);
+
+        // 4. Build query
+        $query = \App\Models\Menu::where('is_available', 1)
+            ->with(['variations', 'category']);
+
+        // Filter by category slug
+        if ($selectedCategorySlug) {
+            $query->whereHas('category', function ($q) use ($selectedCategorySlug) {
+                $q->where('slug', $selectedCategorySlug);
+            });
+        }
+
+        // Filter by price range
+        $query->whereHas('variations', function ($q) use ($minPrice, $maxPrice) {
+            $q->whereBetween('price', [$minPrice, $maxPrice]);
+        });
+
+        // 5. Paginate items (9 per page for perfect grid)
+        $menus = $query->orderBy('name')->paginate(9)->withQueryString();
+
+        // 6. Handle AJAX request
+        if ($request->ajax()) {
+            return view('frontend.partials.menu_grid', compact('menus'))->render();
+        }
+
+        return view('frontend.completeMenu', compact(
+            'categories',
+            'menus',
+            'minPriceLimit',
+            'maxPriceLimit',
+            'selectedCategorySlug',
+            'minPrice',
+            'maxPrice'
+        ));
     }
 }
