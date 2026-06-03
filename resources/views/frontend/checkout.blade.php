@@ -813,3 +813,13 @@
         </script>
     @endpush
 @endsection
+
+
+
+{{-- *
+
+  When user will place order (COD/online payment) then autometically based on user info [name, email, phone]
+  there will  create a dashboard. whereas they will see just ther orders records. and after 
+  creating the account he will recevie a SMS with dashboard access credientials. 
+
+* --}}
