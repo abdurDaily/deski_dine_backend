@@ -11,7 +11,7 @@
       <div class="hero-mobile-stack d-flex d-lg-none align-items-end justify-content-center text-center">
         <div class="container hero-mobile-inner px-3 px-sm-4 pb-4 pb-md-5">
           <p class="hero-mobile-kicker mb-2">Degchi Dine · হালিশহার</p>
-          <h2 class="hero-mobile-title">Delightful Experience</h2>
+          <h2 class="hero-mobile-title">Home of Authentic Kacchi & Biriyani</h2>
           <p class="hero-mobile-copy mx-auto mb-0">
             Formal hospitality meets bold local flavor — dine in or order for
             takeaway in Chittagong.
@@ -34,13 +34,11 @@
       <div class="container hero-content px-4 px-lg-5 d-none d-lg-flex align-items-center justify-content-center">
         <div class="text-center w-100">
           <h2 class="hero-title">
-            Delightful<br class="d-sm-none" />
-            Experience
+            Home of Authentic Kacchi & Biriyani
           </h2>
-          <!-- <p class="hero-copy mt-3 mb-4 mx-auto">
-              Degchi Dine blends formal hospitality with bold local flavor,
-              serving a memorable dining experience in Chittagong.
-            </p> -->
+          <p class="hero-copy mt-3 mb-4 mx-auto">
+             From slow-cooked Kacchi to flavorful Biriyani, we bring generations of tradition, rich spices, and unforgettable aromas together to create a dining experience that feels like a celebration in every bite.
+            </p> 
           <div class="hero-cta-group d-flex flex-wrap gap-3 justify-content-center">
             <a href="{{ route('frontend.home') }}#menu" class="btn btn-brand btn-lg px-4">Order Now</a>
             <a href="{{ route('frontend.home') }}#menu" class="btn btn-brand-outline btn-lg px-4">Explore Menu</a>

@@ -1,7 +1,7 @@
 /* --- External Fonts & Icons Framework --- */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css");
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-
+@import url('https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&display=swap');
 /* ==========================================================================
    01. DESIGN SYSTEM VARIABLES & ROOT CONFIG
    ========================================================================== */
@@ -580,12 +580,10 @@ h6,
 }
 
 .hero-overlay {
-  position: absolute;
-  inset: 0px;
-  z-index: 1;
-  background:
-    linear-gradient(#ef8b1f9e, rgba(0, 0, 0, 0.72)),
-    radial-gradient(circle, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.34));
+    position: absolute;
+    inset: 0px;
+    z-index: 1;
+    background: linear-gradient(135deg, #7ce4ffbf 0%, #ffb8005c 100%), radial-gradient(circle, rgb(17 17 17 / 70%) 0%, rgb(17 17 17 / 63%) 100%);
 }
 
 .hero-content {
@@ -614,7 +612,6 @@ h6,
 .hero-title {
   font-size: clamp(2.8rem, 6.2vw, 5.1rem);
   line-height: 1;
-  font-family: senjalara;
   margin-top: 1.2rem;
 }
 
@@ -622,7 +619,6 @@ h6,
   font-size: 1rem;
   max-width: 900px;
   color: rgba(255, 248, 236, 0.92);
-  font-family: stylish;
 }
 
 .hero-reserve-btn {
@@ -4031,6 +4027,8 @@ footer[id],
   display: flex;
   align-items: center;
 }
+
+
 
 
 
