@@ -191,10 +191,30 @@ class HomeController extends Controller
             $isExpired = $member->expires_at && $member->expires_at < now();
             if (!$isExpired) {
                 if ($member->type === 'golden') {
+                    // Golden Card: 10% on every order
                     $discountAmount = round($request->order_total * 0.10, 2);
                 } elseif (!$member->first_order_discount_used) {
+                    // First order only: 35% for students, 30% for regular members
                     $rate = $member->is_student ? 0.35 : 0.30;
                     $discountAmount = round($request->order_total * $rate, 2);
+                } else {
+                    // First-order discount already used.
+                    // Calculate live total: credited total_purchase + any orders not yet credited
+                    $uncreditedTotal = $member->orders()
+                        ->where('member_credited', false)
+                        ->whereNotIn('status', ['canceled'])
+                        ->sum('final_amount');
+
+                    $liveTotalPurchase = (float) $member->total_purchase + (float) $uncreditedTotal;
+
+                    if ($liveTotalPurchase >= 2000) {
+                        // Auto-upgrade to Golden Card immediately
+                        $member->update([
+                            'type'       => 'golden',
+                            'expires_at' => now()->addYears(5),
+                        ]);
+                        $discountAmount = round($request->order_total * 0.10, 2);
+                    }
                 }
             }
         }
@@ -234,6 +254,9 @@ class HomeController extends Controller
 
         // --- CASH ON DELIVERY ---
         if ($request->payment_method === 'cod') {
+            // Credit member purchase and mark first-order discount as used for COD orders immediately
+            $order->creditMemberPurchase();
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -252,7 +275,7 @@ class HomeController extends Controller
                 $sslcommerz = new SSLCommerzService();
 
                 $post_data = [
-                    'total_amount' => $order->total_amount,
+                    'total_amount' => $order->final_amount,
                     'currency' => 'BDT',
                     'tran_id' => $tranId,
                     'success_url' => route('payment.success'),
@@ -340,12 +363,38 @@ class HomeController extends Controller
         }
 
         if ($member->first_order_discount_used) {
+            // Calculate live total: credited total_purchase + any orders not yet credited
+            $uncreditedTotal = $member->orders()
+                ->where('member_credited', false)
+                ->whereNotIn('status', ['canceled'])
+                ->sum('final_amount');
+
+            $liveTotalPurchase = (float) $member->total_purchase + (float) $uncreditedTotal;
+
+            if ($liveTotalPurchase >= 2000) {
+                // Auto-upgrade to Golden Card immediately
+                if ($member->type !== 'golden') {
+                    $member->update([
+                        'type'       => 'golden',
+                        'expires_at' => now()->addYears(5),
+                    ]);
+                }
+
+                return response()->json([
+                    'eligible'       => true,
+                    'member_name'    => $member->name,
+                    'total_purchase' => $liveTotalPurchase,
+                    'discount_rate'  => 10,
+                    'message'        => 'Golden Card Holder: 10% discount applied to all food items.',
+                ]);
+            }
+
             return response()->json([
-                'eligible' => false,
-                'member_name' => $member->name,
-                'total_purchase' => (float) $member->total_purchase,
-                'discount_rate' => 0,
-                'message' => 'No membership discount available. The first order discount has already been used.',
+                'eligible'       => false,
+                'member_name'    => $member->name,
+                'total_purchase' => $liveTotalPurchase,
+                'discount_rate'  => 0,
+                'message'        => 'No discount available. Spend ৳' . number_format(2000 - $liveTotalPurchase, 2) . ' more to unlock Golden Card with 10% discount on every order.',
             ]);
         }
 

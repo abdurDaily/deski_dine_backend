@@ -56,12 +56,18 @@ class Order extends Model
             $member = $this->member;
             if ($member) {
                 $member->total_purchase += (float) $this->final_amount;
-                $member->first_order_discount_used = $member->first_order_discount_used || ((float) $this->discount_amount > 0);
 
+                // Mark first-order discount as used if a discount was applied on this order
+                if ((float) $this->discount_amount > 0) {
+                    $member->first_order_discount_used = true;
+                }
+
+                // Auto-upgrade to Golden Card when total purchase reaches ৳2,000
                 if ($member->type !== 'golden' && $member->total_purchase >= 2000) {
                     $member->type = 'golden';
                     $member->expires_at = now()->addYears(5);
                 }
+
                 $member->save();
 
                 $this->update(['member_credited' => true]);
