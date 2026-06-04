@@ -16,6 +16,7 @@ class Member extends Model
         'unique_card_number',
         'last4',
         'is_student',
+        'profile_image_path',
         'student_card_path',
         'type',
         'status',
@@ -38,3 +39,5 @@ class Member extends Model
         return $this->hasMany(Order::class);
     }
 }
+
+

@@ -128,6 +128,17 @@
                         <label for="dd_address" class="dd-floating-label">Address (optional)</label>
                     </div>
 
+                    <!-- Profile Image Upload -->
+                    <div class="dd-input-group">
+                        <input type="file" name="profile_image" id="dd_profile_image" class="dd-input-field" accept="image/webp,image/png,image/jpeg" required>
+                        <label for="dd_profile_image" class="dd-floating-label">Upload Profile Image (WebP, PNG, JPG)*</label>
+                    </div>
+
+                    <!-- Profile Image Preview -->
+                    <div class="d-none mb-3" id="profile_image_preview_wrap" style="text-align:center;">
+                        <img id="profile_image_preview" src="" alt="Profile Image Preview" style="max-height:180px;border-radius:10px;border:2px solid rgba(40,167,69,0.3);box-shadow:0 2px 12px rgba(0,0,0,0.08);" />
+                        <div style="margin-top:6px;font-size:0.78rem;color:#888;">Preview of your profile image</div>
+                    </div>
                     <div class="dd-input-grid align-items-center">
                         <div class="dd-input-group">
                             <label class="form-check form-check-inline" style="cursor: pointer;">
@@ -185,6 +196,38 @@
                             } else {
                                 $('#student_card_group').addClass('d-none');
                                 $('#dd_student_card').prop('required', false).val('');
+                            }
+                        });
+
+                        // Profile image preview
+                        $('#dd_profile_image').on('change', function(){
+                            var file = this.files[0];
+                            if(file){
+                                var reader = new FileReader();
+                                reader.onload = function(e){
+                                    $('#profile_image_preview').attr('src', e.target.result);
+                                    $('#profile_image_preview_wrap').removeClass('d-none');
+                                };
+                                reader.readAsDataURL(file);
+                            } else {
+                                $('#profile_image_preview_wrap').addClass('d-none');
+                                $('#profile_image_preview').attr('src', '');
+                            }
+                        });
+                        
+                        // Student card preview
+                        $('#dd_student_card').on('change', function(){
+                            var file = this.files[0];
+                            if(file){
+                                var reader = new FileReader();
+                                reader.onload = function(e){
+                                    $('#student_card_preview').attr('src', e.target.result);
+                                    $('#student_card_preview_wrap').removeClass('d-none');
+                                };
+                                reader.readAsDataURL(file);
+                            } else {
+                                $('#student_card_preview_wrap').addClass('d-none');
+                                $('#student_card_preview').attr('src', '');
                             }
                         });
 

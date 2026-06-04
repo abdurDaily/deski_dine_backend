@@ -54,6 +54,7 @@ class MemberController extends Controller
                 'type' => $member->type,
                 'status' => $member->status,
                 'is_student' => $member->is_student,
+                'profile_image_url' => $member->profile_image_path ? asset('storage/' . $member->profile_image_path) : null,
                 'student_card_url' => $member->student_card_path ? asset('storage/' . $member->student_card_path) : null,
                 'total_purchase' => (float) ($member->computed_total_purchase ?? 0),
                 'orders_count' => $member->orders_count,

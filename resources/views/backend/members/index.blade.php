@@ -18,6 +18,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Photo</th>
                                     <th>Name</th>
                                     <th>Phone</th>
                                     <th>Card Number</th>
@@ -25,19 +26,26 @@
                                     <th>Student</th>
                                     <th>Total Purchase</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <th><i class="ri-more-fill"></i> Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($members as $member)
                                     <tr id="member-row-{{ $member->id }}">
                                         <td>{{ $member->id }}</td>
+                                        <td>
+                                            @if($member->profile_image_path)
+                                                <img src="{{ asset('storage/' . $member->profile_image_path) }}" alt="{{ $member->name }}" class="rounded-circle" style="width:38px;height:38px;object-fit:cover;border:2px solid #e2e8f0;">
+                                            @else
+                                                <span class="avatar-sm rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width:38px;height:38px;"><i class="ri-user-line text-muted fs-16"></i></span>
+                                            @endif
+                                        </td>
                                         <td>{{ $member->name }}</td>
                                         <td>{{ $member->phone }}</td>
                                         <td><code>{{ $member->unique_card_number }}</code></td>
                                         <td>
                                             @if($member->type === 'golden')
-                                                <span class="badge bg-warning text-dark"><i class="fas fa-crown me-1"></i>Golden</span>
+                                                <span class="badge bg-warning text-dark"><i class="ri-vip-crown-fill me-1"></i>Golden</span>
                                             @else
                                                 <span class="badge bg-info">Membership</span>
                                             @endif
@@ -58,21 +66,21 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-primary view-member-btn" data-id="{{ $member->id }}" data-url="{{ route('members.show', $member->id) }}" title="View Details">
-                                                    <i class="fas fa-eye"></i>
+                                                <button type="button" class="btn btn-outline-primary view-member-btn" data-id="{{ $member->id }}" data-url="{{ route('members.show', $member->id) }}" title="View Details" data-bs-toggle="tooltip">
+                                                    <i class="ri-eye-line"></i>
                                                 </button>
-                                                <button type="button" class="btn btn-outline-{{ $member->status === 'active' ? 'warning' : 'success' }} toggle-status-btn" data-id="{{ $member->id }}" data-url="{{ route('members.toggleStatus', $member->id) }}" title="{{ $member->status === 'active' ? 'Suspend' : 'Activate' }}">
-                                                    <i class="fas fa-{{ $member->status === 'active' ? 'ban' : 'check-circle' }}"></i>
+                                                <button type="button" class="btn btn-outline-{{ $member->status === 'active' ? 'warning' : 'success' }} toggle-status-btn" data-id="{{ $member->id }}" data-url="{{ route('members.toggleStatus', $member->id) }}" title="{{ $member->status === 'active' ? 'Suspend' : 'Activate' }}" data-bs-toggle="tooltip">
+                                                    <i class="ri-{{ $member->status === 'active' ? 'forbid-line' : 'checkbox-circle-line' }}"></i>
                                                 </button>
-                                                <button type="button" class="btn btn-outline-info sync-purchase-btn" data-id="{{ $member->id }}" data-url="{{ route('members.syncPurchase', $member->id) }}" title="Sync Purchase Total">
-                                                    <i class="fas fa-sync-alt"></i>
+                                                <button type="button" class="btn btn-outline-info sync-purchase-btn" data-id="{{ $member->id }}" data-url="{{ route('members.syncPurchase', $member->id) }}" title="Sync Purchase Total" data-bs-toggle="tooltip">
+                                                    <i class="ri-refresh-line"></i>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center">No members found.</td>
+                                        <td colspan="10" class="text-center">No members found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -120,12 +128,17 @@ $(function () {
             if (res.success) {
                 var m = res.member;
                 var typeBadge = m.type === 'golden'
-                    ? '<span class="badge bg-warning text-dark"><i class="fas fa-crown me-1"></i>Golden</span>'
+                    ? '<span class="badge bg-warning text-dark"><i class="ri-vip-crown-fill me-1"></i>Golden</span>'
                     : '<span class="badge bg-info">Membership</span>';
                 var statusBadge = '<span class="badge bg-' + (m.status === 'active' ? 'success' : 'danger') + '">' + m.status.charAt(0).toUpperCase() + m.status.slice(1) + '</span>';
                 var studentBadge = m.is_student
-                    ? '<span class="badge bg-success"><i class="fas fa-graduation-cap me-1"></i>Student (35% first-order)</span>'
+                    ? '<span class="badge bg-success"><i class="ri-graduation-cap-line me-1"></i>Student (35% first-order)</span>'
                     : '<span class="badge bg-secondary">Non-Student (30% first-order)</span>';
+
+                var profileImageHtml = '';
+                if (m.profile_image_url) {
+                    profileImageHtml = '<div class="text-center mb-3"><img src="' + m.profile_image_url + '" alt="' + m.name + '" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;border:3px solid #e2e8f0;"></div>';
+                }
 
                 var studentCardHtml = '';
                 if (m.student_card_url) {
@@ -142,7 +155,8 @@ $(function () {
                     ordersHtml += '</tbody></table></div>';
                 }
 
-                var html = '<div class="row">' +
+                var html = profileImageHtml +
+                    '<div class="row">' +
                     '<div class="col-md-6">' +
                         '<table class="table table-borderless mb-0">' +
                             '<tr><th width="40%">Name</th><td>' + m.name + '</td></tr>' +
@@ -200,7 +214,7 @@ $(function () {
                     btn.removeClass('btn-outline-warning btn-outline-success')
                         .addClass(isActive ? 'btn-outline-warning' : 'btn-outline-success')
                         .attr('title', isActive ? 'Suspend' : 'Activate')
-                        .html('<i class="fas fa-' + (isActive ? 'ban' : 'check-circle') + '"></i>');
+                        .html('<i class="ri-' + (isActive ? 'forbid-line' : 'checkbox-circle-line') + '"></i>');
 
                     toastr ? toastr.success(res.message) : alert(res.message);
                 }

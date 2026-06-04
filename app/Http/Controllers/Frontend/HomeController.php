@@ -57,6 +57,7 @@ class HomeController extends Controller
             'marriage_date' => 'nullable|date',
             'address' => 'nullable|string|max:1000',
             'is_student' => 'sometimes|boolean',
+            'profile_image' => 'required|file|image|mimes:webp,png,jpg|max:2048',
         ];
 
         if ($request->boolean('is_student')) {
@@ -70,6 +71,8 @@ class HomeController extends Controller
             $studentCardPath = $request->file('student_card')->store('student_cards', 'public');
         }
 
+        $profileImagePath = $request->file('profile_image')->store('profile_images', 'public');
+
         $member = Member::create([
             'name' => $request->name,
             'phone' => $request->phone,
@@ -80,6 +83,7 @@ class HomeController extends Controller
             'last4' => substr(preg_replace('/\D+/', '', $request->phone), -4),
             'is_student' => $request->boolean('is_student'),
             'student_card_path' => $studentCardPath,
+            'profile_image_path' => $profileImagePath,
             'type' => 'membership',
             'status' => 'active',
             'expires_at' => now()->addYear(),
