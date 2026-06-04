@@ -96,6 +96,9 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
     });
 
     Route::get('members', [MemberController::class, 'index'])->name('members.index');
+    Route::get('members/{member}', [MemberController::class, 'show'])->name('members.show');
+    Route::post('members/{member}/toggle-status', [MemberController::class, 'toggleStatus'])->name('members.toggleStatus');
+    Route::post('members/{member}/sync-purchase', [MemberController::class, 'syncPurchase'])->name('members.syncPurchase');
     // Admin menu management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('menu', App\Http\Controllers\Backend\MenuController::class)->except(['show']);

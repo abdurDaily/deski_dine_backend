@@ -25,23 +25,54 @@
                                     <th>Student</th>
                                     <th>Total Purchase</th>
                                     <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($members as $member)
-                                    <tr>
+                                    <tr id="member-row-{{ $member->id }}">
                                         <td>{{ $member->id }}</td>
                                         <td>{{ $member->name }}</td>
                                         <td>{{ $member->phone }}</td>
-                                        <td>{{ $member->unique_card_number }}</td>
-                                        <td>{{ ucfirst($member->type) }}</td>
-                                        <td>{{ $member->is_student ? 'Yes' : 'No' }}</td>
-                                        <td>৳ {{ number_format($member->total_purchase, 2) }}</td>
-                                        <td>{{ ucfirst($member->status) }}</td>
+                                        <td><code>{{ $member->unique_card_number }}</code></td>
+                                        <td>
+                                            @if($member->type === 'golden')
+                                                <span class="badge bg-warning text-dark"><i class="fas fa-crown me-1"></i>Golden</span>
+                                            @else
+                                                <span class="badge bg-info">Membership</span>
+                                            @endif
+                                        </td>
+<td>
+    <span class="badge bg-{{ $member->is_student ? 'success' : 'secondary' }}">
+        {{ $member->is_student ? 'Student (35% first-order)' : 'Non-Student (30% first-order)' }}
+    </span>
+</td>
+<td>
+    <span id="purchase-{{ $member->id }}">৳ {{ number_format($member->computed_total_purchase ?? 0, 2) }}</span>
+    <small class="text-muted d-block">{{ $member->orders_count }} order{{ $member->orders_count !== 1 ? 's' : '' }}</small>
+</td>
+                                        <td>
+                                            <span id="status-badge-{{ $member->id }}" class="badge bg-{{ $member->status === 'active' ? 'success' : ($member->status === 'suspended' ? 'danger' : 'secondary') }}">
+                                                {{ ucfirst($member->status) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-primary view-member-btn" data-id="{{ $member->id }}" data-url="{{ route('members.show', $member->id) }}" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-{{ $member->status === 'active' ? 'warning' : 'success' }} toggle-status-btn" data-id="{{ $member->id }}" data-url="{{ route('members.toggleStatus', $member->id) }}" title="{{ $member->status === 'active' ? 'Suspend' : 'Activate' }}">
+                                                    <i class="fas fa-{{ $member->status === 'active' ? 'ban' : 'check-circle' }}"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-info sync-purchase-btn" data-id="{{ $member->id }}" data-url="{{ route('members.syncPurchase', $member->id) }}" title="Sync Purchase Total">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">No members found.</td>
+                                        <td colspan="9" class="text-center">No members found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -52,4 +83,158 @@
             </div>
         </div>
     </div>
+
+    {{-- Member Detail Modal --}}
+    <div class="modal fade" id="memberDetailModal" tabindex="-1" aria-labelledby="memberDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="memberDetailModalLabel">Member Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="memberDetailBody">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+$(function () {
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    // ---- View Member Detail ----
+    $(document).on('click', '.view-member-btn', function () {
+        var url = $(this).data('url');
+        var modal = new bootstrap.Modal(document.getElementById('memberDetailModal'));
+        $('#memberDetailBody').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        modal.show();
+
+        $.getJSON(url, function (res) {
+            if (res.success) {
+                var m = res.member;
+                var typeBadge = m.type === 'golden'
+                    ? '<span class="badge bg-warning text-dark"><i class="fas fa-crown me-1"></i>Golden</span>'
+                    : '<span class="badge bg-info">Membership</span>';
+                var statusBadge = '<span class="badge bg-' + (m.status === 'active' ? 'success' : 'danger') + '">' + m.status.charAt(0).toUpperCase() + m.status.slice(1) + '</span>';
+                var studentBadge = m.is_student
+                    ? '<span class="badge bg-success"><i class="fas fa-graduation-cap me-1"></i>Student (35% first-order)</span>'
+                    : '<span class="badge bg-secondary">Non-Student (30% first-order)</span>';
+
+                var studentCardHtml = '';
+                if (m.student_card_url) {
+                    studentCardHtml = '<div class="mt-3"><h6 class="fw-bold">Student Card</h6><a href="' + m.student_card_url + '" target="_blank"><img src="' + m.student_card_url + '" alt="Student Card" class="img-fluid rounded border" style="max-height:200px;"></a></div>';
+                }
+
+                var ordersHtml = '';
+                if (m.recent_orders && m.recent_orders.length > 0) {
+                    ordersHtml = '<div class="mt-3"><h6 class="fw-bold">Recent Orders</h6><table class="table table-sm table-bordered"><thead><tr><th>#</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+                    $.each(m.recent_orders, function (i, o) {
+                        var sBadge = o.status === 'completed' ? 'success' : (o.status === 'confirmed' ? 'info' : (o.status === 'canceled' ? 'danger' : 'warning'));
+                        ordersHtml += '<tr><td>' + o.id + '</td><td>৳ ' + o.final_amount + '</td><td><span class="badge bg-' + sBadge + '">' + o.status.charAt(0).toUpperCase() + o.status.slice(1) + '</span></td><td>' + o.date + '</td></tr>';
+                    });
+                    ordersHtml += '</tbody></table></div>';
+                }
+
+                var html = '<div class="row">' +
+                    '<div class="col-md-6">' +
+                        '<table class="table table-borderless mb-0">' +
+                            '<tr><th width="40%">Name</th><td>' + m.name + '</td></tr>' +
+                            '<tr><th>Phone</th><td>' + m.phone + '</td></tr>' +
+                            '<tr><th>Email</th><td>' + (m.email || '<span class="text-muted">N/A</span>') + '</td></tr>' +
+                            '<tr><th>Card Number</th><td><code>' + m.unique_card_number + '</code></td></tr>' +
+                            '<tr><th>Type</th><td>' + typeBadge + '</td></tr>' +
+                            '<tr><th>Status</th><td>' + statusBadge + '</td></tr>' +
+                            '<tr><th>Student</th><td>' + studentBadge + '</td></tr>' +
+                        '</table>' +
+                    '</div>' +
+                    '<div class="col-md-6">' +
+                        '<table class="table table-borderless mb-0">' +
+                            '<tr><th width="40%">Date of Birth</th><td>' + (m.dob || '<span class="text-muted">N/A</span>') + '</td></tr>' +
+                            '<tr><th>Marriage Date</th><td>' + (m.marriage_date || '<span class="text-muted">N/A</span>') + '</td></tr>' +
+                            '<tr><th>Address</th><td>' + (m.address || '<span class="text-muted">N/A</span>') + '</td></tr>' +
+                            '<tr><th>Total Purchase</th><td><strong class="text-success">৳ ' + m.total_purchase.toFixed(2) + '</strong></td></tr>' +
+                            '<tr><th>Total Orders</th><td>' + m.orders_count + '</td></tr>' +
+                            '<tr><th>Discount Used</th><td>' + (m.first_order_discount_used ? '<span class="badge bg-secondary">Used</span>' : '<span class="badge bg-primary">Available</span>') + '</td></tr>' +
+                            '<tr><th>Expires At</th><td>' + (m.expires_at || '<span class="text-muted">N/A</span>') + '</td></tr>' +
+                        '</table>' +
+                    '</div>' +
+                '</div>' +
+                studentCardHtml +
+                ordersHtml;
+
+                $('#memberDetailBody').html(html);
+            }
+        }).fail(function () {
+            $('#memberDetailBody').html('<div class="alert alert-danger">Failed to load member details.</div>');
+        });
+    });
+
+    // ---- Toggle Status ----
+    $(document).on('click', '.toggle-status-btn', function () {
+        var btn = $(this);
+        var memberId = btn.data('id');
+        var url = btn.data('url');
+
+        if (!confirm('Are you sure you want to change this member\'s status?')) return;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken },
+            success: function (res) {
+                if (res.success) {
+                    var isActive = res.new_status === 'active';
+                    // Update status badge
+                    $('#status-badge-' + memberId)
+                        .removeClass('bg-success bg-danger bg-secondary')
+                        .addClass(isActive ? 'bg-success' : 'bg-danger')
+                        .text(res.new_status.charAt(0).toUpperCase() + res.new_status.slice(1));
+                    // Update toggle button
+                    btn.removeClass('btn-outline-warning btn-outline-success')
+                        .addClass(isActive ? 'btn-outline-warning' : 'btn-outline-success')
+                        .attr('title', isActive ? 'Suspend' : 'Activate')
+                        .html('<i class="fas fa-' + (isActive ? 'ban' : 'check-circle') + '"></i>');
+
+                    toastr ? toastr.success(res.message) : alert(res.message);
+                }
+            },
+            error: function () {
+                toastr ? toastr.error('Failed to toggle status.') : alert('Failed to toggle status.');
+            }
+        });
+    });
+
+    // ---- Sync Purchase ----
+    $(document).on('click', '.sync-purchase-btn', function () {
+        var btn = $(this);
+        var memberId = btn.data('id');
+        var url = btn.data('url');
+        btn.prop('disabled', true).find('i').addClass('fa-spin');
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken },
+            success: function (res) {
+                btn.prop('disabled', false).find('i').removeClass('fa-spin');
+                if (res.success) {
+                    $('#purchase-' + memberId).text('৳ ' + res.total_purchase.toFixed(2));
+                    toastr ? toastr.success(res.message) : alert(res.message);
+                }
+            },
+            error: function () {
+                btn.prop('disabled', false).find('i').removeClass('fa-spin');
+                toastr ? toastr.error('Failed to sync purchase.') : alert('Failed to sync purchase.');
+            }
+        });
+    });
+});
+</script>
+@endpush

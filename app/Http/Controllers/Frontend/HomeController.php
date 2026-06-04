@@ -111,8 +111,12 @@ class HomeController extends Controller
             return back()->withErrors(['unique_card_number' => $msg]);
         }
 
-        if ($member->total_purchase < 2000) {
-            $msg = 'You are not eligible for a Golden Card yet. Your total purchase is ৳' . number_format($member->total_purchase, 2) . ', but the eligibility requirement is ৳2,000.00.';
+        // Calculate total purchase dynamically from confirmed/completed orders
+        $totalPurchase = $member->orders()
+            ->whereIn('status', ['completed', 'confirmed'])
+            ->sum('final_amount');
+        if ($totalPurchase < 2000) {
+            $msg = 'You are not eligible for a Golden Card yet. Your total purchase is ৳' . number_format($totalPurchase, 2) . ', but the eligibility requirement is ৳2,000.00.';
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }

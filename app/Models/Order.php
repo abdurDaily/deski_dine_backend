@@ -92,3 +92,13 @@ class Order extends Model
         };
     }
 }
+
+
+
+/**
+ * "/card-apply" page have to add a input filed for accept student card image. cz if student card can show then first time he will get 35% discount. and if he is not  student then he will get 30% discount. but it nullable. 
+ * 
+ * "/members" page "Total Purchase" column not count the amount. need to fix it also add a "Action" column. whereas what you feel better for improve the user experience 
+ * 
+ * 
+ */
