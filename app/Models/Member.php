@@ -16,10 +16,12 @@ class Member extends Model
         'unique_card_number',
         'last4',
         'is_student',
+        'student_card_path',
         'type',
         'status',
         'total_purchase',
         'first_order_discount_used',
+        'expires_at',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class Member extends Model
         'total_purchase' => 'decimal:2',
         'dob' => 'date',
         'marriage_date' => 'date',
+        'expires_at' => 'date',
     ];
 
     public function orders()

@@ -151,8 +151,6 @@ class PaymentController extends Controller
 
     private function markOrderAsPaid(Order $order, array $details): void
     {
-        $wasAlreadyPaid = $order->payment_status === 'paid';
-
         $order->update([
             'payment_status'  => 'paid',
             'payment_date'    => now(),
@@ -160,22 +158,6 @@ class PaymentController extends Controller
             'payment_details' => json_encode($details),
         ]);
 
-        if ($wasAlreadyPaid || !$order->member_id) {
-            return;
-        }
-
-        $member = Member::find($order->member_id);
-        if (!$member) {
-            return;
-        }
-
-        $member->total_purchase += (float) $order->final_amount;
-        $member->first_order_discount_used = $member->first_order_discount_used || ((float) $order->discount_amount > 0);
-
-        if ($member->type !== 'golden' && (float) $order->total_amount >= 2000) {
-            $member->type = 'golden';
-        }
-
-        $member->save();
+        $order->creditMemberPurchase();
     }
 }

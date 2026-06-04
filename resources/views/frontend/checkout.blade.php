@@ -819,7 +819,21 @@
 {{-- *
 
   When user will place order (COD/online payment) then autometically based on user info [name, email, phone]
-  there will  create a dashboard. whereas they will see just ther orders records. and after 
-  creating the account he will recevie a SMS with dashboard access credientials. 
+  there will  create a dashboard. whereas they will see just there orders records. and after 
+  creating the account he will recevie a SMS in phone number with dashboard access credientials. 
+
+  01. for first register [membership card] user will get 30% discount upto every food item [based on there card number]
+     - membership card holder validity is one year 
+  02. if the card holder purchase upto 2000 then he will be converted into goden card holder.
+     - golden card holder will get 10% for every food item
+     - validity of the golden card is 5 years
+     - when user will directly apply for the golden card then it will show a popup to show be eligible for the
+     goden card turm and conditions
+  03. order table dashboard have to add "Action" column to show particular user order details and add other stuffs 
+  that you are thinking to make it better experience 
+  04. if user is a student then he will get 35% for the first time order. but condition is he have to submit his 
+  student card [student card is nullable for other applients]
+  05. in /card-apply page application form have to be update 
+
 
 * --}}

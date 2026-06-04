@@ -49,7 +49,7 @@ class HomeController extends Controller
 
     public function registerMember(Request $request)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -57,7 +57,18 @@ class HomeController extends Controller
             'marriage_date' => 'nullable|date',
             'address' => 'nullable|string|max:1000',
             'is_student' => 'sometimes|boolean',
-        ]);
+        ];
+
+        if ($request->boolean('is_student')) {
+            $rules['student_card'] = 'required|file|image|max:2048';
+        }
+
+        $request->validate($rules);
+
+        $studentCardPath = null;
+        if ($request->boolean('is_student') && $request->hasFile('student_card')) {
+            $studentCardPath = $request->file('student_card')->store('student_cards', 'public');
+        }
 
         $member = Member::create([
             'name' => $request->name,
@@ -68,8 +79,10 @@ class HomeController extends Controller
             'address' => $request->address,
             'last4' => substr(preg_replace('/\D+/', '', $request->phone), -4),
             'is_student' => $request->boolean('is_student'),
+            'student_card_path' => $studentCardPath,
             'type' => 'membership',
             'status' => 'active',
+            'expires_at' => now()->addYear(),
         ]);
 
         $member->unique_card_number = sprintf('MEM%s_%s', str_pad($member->id, 4, '0', STR_PAD_LEFT), $member->last4);
@@ -90,13 +103,40 @@ class HomeController extends Controller
 
         $member = Member::where('unique_card_number', $request->unique_card_number)->first();
 
-        if (! $member) {
-            return back()->withErrors(['unique_card_number' => 'Membership card number not found.']);
+        if (!$member) {
+            $msg = 'Membership card number not found.';
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 404);
+            }
+            return back()->withErrors(['unique_card_number' => $msg]);
         }
 
-        $member->update(['type' => 'golden']);
+        if ($member->total_purchase < 2000) {
+            $msg = 'You are not eligible for a Golden Card yet. Your total purchase is ৳' . number_format($member->total_purchase, 2) . ', but the eligibility requirement is ৳2,000.00.';
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->withErrors(['unique_card_number' => $msg]);
+        }
 
-        return back()->with('success', 'Golden card request received. Your membership has been upgraded to golden.');
+        if ($member->type === 'golden') {
+            $msg = 'You already have a Golden Card!';
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => $msg]);
+            }
+            return back()->with('success', $msg);
+        }
+
+        $member->update([
+            'type' => 'golden',
+            'expires_at' => now()->addYears(5),
+        ]);
+
+        $msg = 'Congratulations! Your membership has been upgraded to Golden Card. Your card is now valid for 5 years with a 10% flat discount.';
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+        return back()->with('success', $msg);
     }
 
     public function storeOrder(Request $request)
@@ -136,8 +176,16 @@ class HomeController extends Controller
         }
 
         $discountAmount = 0;
-        if ($member && $member->total_purchase <= 2000 && ! $member->first_order_discount_used) {
-            $discountAmount = round($request->order_total * 0.10, 2);
+        if ($member) {
+            $isExpired = $member->expires_at && $member->expires_at < now();
+            if (!$isExpired) {
+                if ($member->type === 'golden') {
+                    $discountAmount = round($request->order_total * 0.10, 2);
+                } elseif (!$member->first_order_discount_used) {
+                    $rate = $member->is_student ? 0.35 : 0.30;
+                    $discountAmount = round($request->order_total * $rate, 2);
+                }
+            }
         }
 
         $orderData = [
@@ -258,16 +306,45 @@ class HomeController extends Controller
             ], 404);
         }
 
-        $eligible = $member->total_purchase <= 2000 && ! $member->first_order_discount_used;
+        // Check card expiration
+        $isExpired = $member->expires_at && $member->expires_at < now();
+        if ($isExpired) {
+            return response()->json([
+                'eligible' => false,
+                'member_name' => $member->name,
+                'total_purchase' => (float) $member->total_purchase,
+                'discount_rate' => 0,
+                'message' => 'This membership card has expired. Validity is 1 year for standard and 5 years for golden.',
+            ]);
+        }
 
+        if ($member->type === 'golden') {
+            return response()->json([
+                'eligible' => true,
+                'member_name' => $member->name,
+                'total_purchase' => (float) $member->total_purchase,
+                'discount_rate' => 10,
+                'message' => 'Golden Card Holder: 10% discount applied to all food items.',
+            ]);
+        }
+
+        if ($member->first_order_discount_used) {
+            return response()->json([
+                'eligible' => false,
+                'member_name' => $member->name,
+                'total_purchase' => (float) $member->total_purchase,
+                'discount_rate' => 0,
+                'message' => 'No membership discount available. The first order discount has already been used.',
+            ]);
+        }
+
+        $rate = $member->is_student ? 35 : 30;
         return response()->json([
-            'eligible' => $eligible,
+            'eligible' => true,
             'member_name' => $member->name,
             'total_purchase' => (float) $member->total_purchase,
-            'discount_rate' => $eligible ? 10 : 0,
-            'message' => $eligible
-                ? 'You are eligible for 10% membership discount on this order.'
-                : 'No membership discount available. Your previous purchase amount is already above the eligible threshold or discount was already used.',
+            'discount_rate' => $rate,
+            'message' => sprintf('Welcome back! %d%% first-order discount applied to all food items.', $rate),
         ]);
     }
 

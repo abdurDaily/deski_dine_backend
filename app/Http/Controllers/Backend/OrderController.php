@@ -23,10 +23,41 @@ class OrderController extends Controller
                 ->addColumn('final', fn($order) => '৳ ' . number_format($order->final_amount, 2))
                 ->addColumn('status_name', fn($order) => ucfirst($order->status))
                 ->addColumn('date', fn($order) => $order->created_at->format('Y-m-d'))
-                ->rawColumns(['member', 'card_number', 'total', 'discount', 'final', 'status_name', 'date'])
+                ->addColumn('action', function($order) {
+                    return '<button class="btn btn-sm btn-info view-order-btn" data-id="' . $order->id . '" data-url="' . route('orders.show', $order->id) . '"><i class="fas fa-eye"></i> View</button>';
+                })
+                ->rawColumns(['member', 'card_number', 'total', 'discount', 'final', 'status_name', 'date', 'action'])
                 ->make(true);
         }
 
         return view('backend.orders.index');
+    }
+
+    public function show(Order $order)
+    {
+        $order->load('member');
+        return view('backend.orders.show', compact('order'));
+    }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,canceled',
+            'payment_status' => 'required|in:unpaid,paid,failed,cancelled',
+        ]);
+
+        $order->update([
+            'status' => $request->status,
+            'payment_status' => $request->payment_status,
+        ]);
+
+        if ($order->status === 'completed' || $order->payment_status === 'paid') {
+            $order->creditMemberPurchase();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully.',
+        ]);
     }
 }

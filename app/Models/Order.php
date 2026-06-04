@@ -24,6 +24,7 @@ class Order extends Model
         'final_amount',
         'student_card_used',
         'items',
+        'member_credited',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class Order extends Model
         'discount_amount' => 'decimal:2',
         'final_amount'    => 'decimal:2',
         'student_card_used' => 'boolean',
+        'member_credited'   => 'boolean',
         'items'           => 'array',
         'payment_date'    => 'datetime',
     ];
@@ -43,6 +45,28 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
+    }
+
+    /**
+     * Credit order amount to member's total purchase and handle card upgrades.
+     */
+    public function creditMemberPurchase(): void
+    {
+        if ($this->member_id && !$this->member_credited) {
+            $member = $this->member;
+            if ($member) {
+                $member->total_purchase += (float) $this->final_amount;
+                $member->first_order_discount_used = $member->first_order_discount_used || ((float) $this->discount_amount > 0);
+
+                if ($member->type !== 'golden' && $member->total_purchase >= 2000) {
+                    $member->type = 'golden';
+                    $member->expires_at = now()->addYears(5);
+                }
+                $member->save();
+
+                $this->update(['member_credited' => true]);
+            }
+        }
     }
 
     /**

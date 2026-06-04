@@ -1,6 +1,20 @@
 @extends('frontend.layout')
 @push('front_css')
-
+<style>
+    .dd-input-field[type="file"] {
+        padding-top: 24px;
+        padding-bottom: 8px;
+        line-height: 1.2;
+    }
+    .dd-input-field[type="file"] ~ .dd-floating-label {
+        transform: translateY(-10px) !important;
+        font-size: 0.75rem !important;
+        color: var(--dd-gold) !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+</style>
 @endpush
 @section('frontend_content')
 
@@ -29,14 +43,16 @@
             <!-- LEFT SIDE: Card Showcase & Perks -->
             <div class="dd-apply-left-showcase">
 
-                <div class="dd-apply-card-stage">
-                    <div class="dd-apply-glow"></div>
-                    <!-- Reference your actual card image here -->
-                    <img src="./images/membership.svg" alt="Degchi Premium Card" class="dd-apply-card-img" />
+                <div class="dd-apply-stage-wrap" style="position: relative;">
+                    <div class="dd-apply-card-stage">
+                        <div class="dd-apply-glow"></div>
+                        <!-- Reference your actual card image here -->
+                        <img src="./images/membership.svg" alt="Degchi Premium Card" class="dd-apply-card-img" />
+                    </div>
                 </div>
 
                 <div class="dd-apply-perks-list">
-                    <h3 class="dd-apply-perks-title">Membership Benefits</h3>
+                    <h3 class="dd-apply-perks-title">Membership Perks</h3>
 
                     <div class="dd-perk-row">
                         <div class="dd-perk-icon">
@@ -78,7 +94,7 @@
                     <p>Please provide your details below. Approvals are typically processed within one business day.</p>
                 </div>
 
-                <form id="privilegeCardForm" class="dd-apply-form-element" method="POST" action="{{ route('frontend.members.register') }}">
+                <form id="privilegeCardForm" class="dd-apply-form-element" method="POST" action="{{ route('frontend.members.register') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="dd-input-group">
                         <input type="text" name="name" id="dd_name" class="dd-input-field" placeholder=" " required>
@@ -112,13 +128,18 @@
                         <label for="dd_address" class="dd-floating-label">Address (optional)</label>
                     </div>
 
-                    <div class="dd-input-grid">
+                    <div class="dd-input-grid align-items-center">
                         <div class="dd-input-group">
-                            <label class="form-check form-check-inline">
-                                <input type="checkbox" name="is_student" value="1" class="form-check-input">
-                                <span class="form-check-label">I am a student</span>
+                            <label class="form-check form-check-inline" style="cursor: pointer;">
+                                <input type="checkbox" name="is_student" id="dd_is_student" value="1" class="form-check-input">
+                                <span class="form-check-label text-dark fw-semibold ms-1">I am a student</span>
                             </label>
                         </div>
+                    </div>
+
+                    <div class="dd-input-group d-none" id="student_card_group">
+                        <input type="file" name="student_card" id="dd_student_card" class="dd-input-field" accept="image/*,application/pdf">
+                        <label for="dd_student_card" class="dd-floating-label">Upload Student Card (Image or PDF)*</label>
                     </div>
 
                     <label class="dd-terms-wrapper">
@@ -139,21 +160,44 @@
 
                 <script>
                     $(function(){
+                        // Toggle student card upload input
+                        $('#dd_is_student').on('change', function() {
+                            if($(this).is(':checked')) {
+                                $('#student_card_group').removeClass('d-none');
+                                $('#dd_student_card').prop('required', true);
+                            } else {
+                                $('#student_card_group').addClass('d-none');
+                                $('#dd_student_card').prop('required', false).val('');
+                            }
+                        });
+
                         $('#privilegeCardForm').on('submit', function(e){
                             e.preventDefault();
                             var form = $(this);
+                            var submitBtn = $('#privilegeSubmitBtn');
+                            
+                            submitBtn.prop('disabled', true).addClass('is-loading');
+                            
+                            var formData = new FormData(this);
+                            
                             $.ajax({
                                 url: form.attr('action'),
                                 method: 'POST',
-                                data: form.serialize(),
+                                data: formData,
+                                processData: false,
+                                contentType: false,
                                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                                 success: function(res){
+                                    submitBtn.prop('disabled', false).removeClass('is-loading');
                                     if(res.success){
                                         $('#privilegeThanks').removeClass('d-none').text(res.message);
                                         form[0].reset();
+                                        $('#student_card_group').addClass('d-none');
+                                        $('#dd_student_card').prop('required', false);
                                     }
                                 },
                                 error: function(xhr){
+                                    submitBtn.prop('disabled', false).removeClass('is-loading');
                                     var msg = xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors)[0][0] : xhr.responseJSON?.message || 'Unable to register';
                                     alert(msg);
                                 }
