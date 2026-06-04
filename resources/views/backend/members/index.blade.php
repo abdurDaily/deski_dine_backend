@@ -65,17 +65,9 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-primary view-member-btn" data-id="{{ $member->id }}" data-url="{{ route('members.show', $member->id) }}" title="View Details" data-bs-toggle="tooltip">
-                                                    <i class="ri-eye-line"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-{{ $member->status === 'active' ? 'warning' : 'success' }} toggle-status-btn" data-id="{{ $member->id }}" data-url="{{ route('members.toggleStatus', $member->id) }}" title="{{ $member->status === 'active' ? 'Suspend' : 'Activate' }}" data-bs-toggle="tooltip">
-                                                    <i class="ri-{{ $member->status === 'active' ? 'forbid-line' : 'checkbox-circle-line' }}"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-info sync-purchase-btn" data-id="{{ $member->id }}" data-url="{{ route('members.syncPurchase', $member->id) }}" title="Sync Purchase Total" data-bs-toggle="tooltip">
-                                                    <i class="ri-refresh-line"></i>
-                                                </button>
-                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-primary view-member-btn" data-id="{{ $member->id }}" data-url="{{ route('members.show', $member->id) }}" title="View Details" data-bs-toggle="tooltip">
+                                                <i class="ri-eye-line"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty

@@ -101,20 +101,14 @@
                         <label for="dd_name" class="dd-floating-label">Full Name</label>
                     </div>
 
-                    <div class="dd-input-grid">
-                        <div class="dd-input-group">
-                            <input type="email" name="email" id="dd_email" class="dd-input-field" placeholder=" ">
-                            <label for="dd_email" class="dd-floating-label">Email Address</label>
-                        </div>
-                        <div class="dd-input-group">
-                            <input type="tel" name="phone" id="dd_phone" class="dd-input-field" placeholder=" " required>
-                            <label for="dd_phone" class="dd-floating-label">Phone Number</label>
-                        </div>
+                    <div class="dd-input-group">
+                        <input type="tel" name="phone" id="dd_phone" class="dd-input-field" placeholder=" " required>
+                        <label for="dd_phone" class="dd-floating-label">Phone Number</label>
                     </div>
 
                     <div class="dd-input-grid">
                         <div class="dd-input-group">
-                            <input type="date" name="dob" id="dd_dob" class="dd-input-field" placeholder=" ">
+                            <input type="date" name="dob" id="dd_dob" class="dd-input-field" placeholder=" " required>
                             <label for="dd_dob" class="dd-floating-label">Date of Birth</label>
                         </div>
                         <div class="dd-input-group">
@@ -124,14 +118,14 @@
                     </div>
 
                     <div class="dd-input-group">
-                        <textarea name="address" id="dd_address" class="dd-input-field" rows="2" placeholder=" "></textarea>
-                        <label for="dd_address" class="dd-floating-label">Address (optional)</label>
+                        <textarea name="address" id="dd_address" class="dd-input-field" rows="2" placeholder=" " required></textarea>
+                        <label for="dd_address" class="dd-floating-label">Address</label>
                     </div>
 
                     <!-- Profile Image Upload -->
                     <div class="dd-input-group">
-                        <input type="file" name="profile_image" id="dd_profile_image" class="dd-input-field" accept="image/webp,image/png,image/jpeg" required>
-                        <label for="dd_profile_image" class="dd-floating-label">Upload Profile Image (WebP, PNG, JPG)*</label>
+                        <input type="file" name="profile_image" id="dd_profile_image" class="dd-input-field" accept="image/webp,image/png,image/jpeg">
+                        <label for="dd_profile_image" class="dd-floating-label">Upload Profile Image (WebP, PNG, JPG) (optional)</label>
                     </div>
 
                     <!-- Profile Image Preview -->
@@ -149,7 +143,7 @@
                     </div>
 
                     {{-- Student discount info callout --}}
-                    <div class="d-none" id="student_discount_info" style="background: linear-gradient(135deg, rgba(40,167,69,0.08), rgba(40,167,69,0.02)); border: 1px solid rgba(40,167,69,0.2); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div id="student_discount_info" style="background: linear-gradient(135deg, rgba(40,167,69,0.08), rgba(40,167,69,0.02)); border: 1px solid rgba(40,167,69,0.2); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;">
                         <div style="display:flex;align-items:flex-start;gap:10px;">
                             <iconify-icon icon="solar:graduation-cap-bold" style="font-size:22px;color:#28a745;margin-top:2px;"></iconify-icon>
                             <div>
@@ -161,7 +155,7 @@
 
                     <div class="dd-input-group d-none" id="student_card_group">
                         <input type="file" name="student_card" id="dd_student_card" class="dd-input-field" accept="image/*">
-                        <label for="dd_student_card" class="dd-floating-label">Upload Student Card (Image)*</label>
+                        <label for="dd_student_card" class="dd-floating-label">Upload your valid student ID*</label>
                     </div>
 
                     {{-- Image preview --}}
@@ -186,88 +180,95 @@
 
                 <div id="privilegeThanks" class="d-none mt-3 alert alert-success"></div>
 
-                <script>
-                    $(function(){
-                        // Toggle student card upload input
-                        $('#dd_is_student').on('change', function() {
-                            if($(this).is(':checked')) {
-                                $('#student_card_group').removeClass('d-none');
-                                $('#dd_student_card').prop('required', true);
-                            } else {
-                                $('#student_card_group').addClass('d-none');
-                                $('#dd_student_card').prop('required', false).val('');
-                            }
-                        });
-
-                        // Profile image preview
-                        $('#dd_profile_image').on('change', function(){
-                            var file = this.files[0];
-                            if(file){
-                                var reader = new FileReader();
-                                reader.onload = function(e){
-                                    $('#profile_image_preview').attr('src', e.target.result);
-                                    $('#profile_image_preview_wrap').removeClass('d-none');
-                                };
-                                reader.readAsDataURL(file);
-                            } else {
-                                $('#profile_image_preview_wrap').addClass('d-none');
-                                $('#profile_image_preview').attr('src', '');
-                            }
-                        });
-                        
-                        // Student card preview
-                        $('#dd_student_card').on('change', function(){
-                            var file = this.files[0];
-                            if(file){
-                                var reader = new FileReader();
-                                reader.onload = function(e){
-                                    $('#student_card_preview').attr('src', e.target.result);
-                                    $('#student_card_preview_wrap').removeClass('d-none');
-                                };
-                                reader.readAsDataURL(file);
-                            } else {
-                                $('#student_card_preview_wrap').addClass('d-none');
-                                $('#student_card_preview').attr('src', '');
-                            }
-                        });
-
-                        $('#privilegeCardForm').on('submit', function(e){
-                            e.preventDefault();
-                            var form = $(this);
-                            var submitBtn = $('#privilegeSubmitBtn');
-                            
-                            submitBtn.prop('disabled', true).addClass('is-loading');
-                            
-                            var formData = new FormData(this);
-                            
-                            $.ajax({
-                                url: form.attr('action'),
-                                method: 'POST',
-                                data: formData,
-                                processData: false,
-                                contentType: false,
-                                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                                success: function(res){
-                                    submitBtn.prop('disabled', false).removeClass('is-loading');
-                                    if(res.success){
-                                        $('#privilegeThanks').removeClass('d-none').text(res.message);
-                                        form[0].reset();
-                                        $('#student_card_group').addClass('d-none');
-                                        $('#dd_student_card').prop('required', false);
-                                    }
-                                },
-                                error: function(xhr){
-                                    submitBtn.prop('disabled', false).removeClass('is-loading');
-                                    var msg = xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors)[0][0] : xhr.responseJSON?.message || 'Unable to register';
-                                    alert(msg);
-                                }
-                            });
-                        });
-                    });
-                </script>
             </div>
 
         </div>
     </div>
 </section>
 @endsection
+
+@push('front_js')
+<script>
+    $(function(){
+        // Toggle student card upload input
+        $('#dd_is_student').on('change', function() {
+            if($(this).is(':checked')) {
+                $('#student_card_group').removeClass('d-none');
+                $('#dd_student_card').prop('required', true);
+            } else {
+                $('#student_card_group').addClass('d-none');
+                $('#dd_student_card').prop('required', false).val('');
+            }
+        });
+
+        // Profile image preview
+        $('#dd_profile_image').on('change', function(){
+            var file = this.files[0];
+            if(file){
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    $('#profile_image_preview').attr('src', e.target.result);
+                    $('#profile_image_preview_wrap').removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                $('#profile_image_preview_wrap').addClass('d-none');
+                $('#profile_image_preview').attr('src', '');
+            }
+        });
+        
+        // Student card preview
+        $('#dd_student_card').on('change', function(){
+            var file = this.files[0];
+            if(file){
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    $('#student_card_preview').attr('src', e.target.result);
+                    $('#student_card_preview_wrap').removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                $('#student_card_preview_wrap').addClass('d-none');
+                $('#student_card_preview').attr('src', '');
+            }
+        });
+
+        $('#privilegeCardForm').on('submit', function(e){
+            e.preventDefault();
+            var form = $(this);
+            var submitBtn = $('#privilegeSubmitBtn');
+            
+            submitBtn.prop('disabled', true).addClass('is-loading');
+            
+            var formData = new FormData(this);
+            
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function(res){
+                    submitBtn.prop('disabled', false).removeClass('is-loading');
+                    if(res.success){
+                        $('#privilegeThanks').removeClass('d-none').text(res.message);
+                        form[0].reset();
+                        $('#student_card_group').addClass('d-none');
+                        $('#dd_student_card').prop('required', false);
+                        $('#profile_image_preview_wrap').addClass('d-none');
+                        $('#profile_image_preview').attr('src', '');
+                        $('#student_card_preview_wrap').addClass('d-none');
+                        $('#student_card_preview').attr('src', '');
+                    }
+                },
+                error: function(xhr){
+                    submitBtn.prop('disabled', false).removeClass('is-loading');
+                    var msg = xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors)[0][0] : xhr.responseJSON?.message || 'Unable to register';
+                    alert(msg);
+                }
+            });
+        });
+    });
+</script>
+@endpush

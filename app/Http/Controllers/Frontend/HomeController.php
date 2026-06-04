@@ -53,11 +53,11 @@ class HomeController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
-            'dob' => 'nullable|date',
+            'dob' => 'required|date',
             'marriage_date' => 'nullable|date',
-            'address' => 'nullable|string|max:1000',
+            'address' => 'required|string|max:1000',
             'is_student' => 'sometimes|boolean',
-            'profile_image' => 'required|file|image|mimes:webp,png,jpg|max:2048',
+            'profile_image' => 'nullable|file|image|mimes:webp,png,jpg|max:2048',
         ];
 
         if ($request->boolean('is_student')) {
@@ -71,7 +71,10 @@ class HomeController extends Controller
             $studentCardPath = $request->file('student_card')->store('student_cards', 'public');
         }
 
-        $profileImagePath = $request->file('profile_image')->store('profile_images', 'public');
+        $profileImagePath = null;
+        if ($request->hasFile('profile_image')) {
+            $profileImagePath = $request->file('profile_image')->store('profile_images', 'public');
+        }
 
         $member = Member::create([
             'name' => $request->name,
