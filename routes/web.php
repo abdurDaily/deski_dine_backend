@@ -109,6 +109,7 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
     Route::get('account/orders/{order}', [App\Http\Controllers\Frontend\OrderController::class, 'invoice'])->name('account.invoice.show');
     Route::get('account/orders/{order}/download', [App\Http\Controllers\Frontend\OrderController::class, 'downloadInvoice'])->name('account.invoice.download');
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/latest-id', [OrderController::class, 'latestOrderId'])->name('orders.latestId');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });

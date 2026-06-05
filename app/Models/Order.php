@@ -19,6 +19,7 @@ class Order extends Model
         'payment_status',
         'payment_date',
         'payment_details',
+        'viewed_at',
         'total_amount',
         'discount_amount',
         'final_amount',
@@ -35,6 +36,7 @@ class Order extends Model
         'member_credited'   => 'boolean',
         'items'           => 'array',
         'payment_date'    => 'datetime',
+        'viewed_at'       => 'datetime',
     ];
 
     public function member()
