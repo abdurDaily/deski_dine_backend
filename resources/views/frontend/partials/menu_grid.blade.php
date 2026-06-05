@@ -6,11 +6,38 @@
             $imageUrl = \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://'])
                 ? $imagePath
                 : asset($imagePath);
+            
+            // Get ALL active offers on this variation
+            $activeOffers = $firstVariation?->offers->sortByDesc('discount_percent') ?? collect();
+            $bestOffer = $activeOffers->first();
         @endphp
         <div class="col-12 col-sm-6 col-lg-4 d-flex reveal-scale visible">
             <a href="#" class="menu-offer-card">
-                <div class="menu-offer-image-wrap">
+                <div class="menu-offer-image-wrap" style="position: relative;">
                     <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" />
+                    
+                    @if($activeOffers->count() > 0)
+                        {{-- Offer icon badge (left side) --}}
+                        <div class="offer-icon-badge" title="Special Offer Available!">
+                          <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        
+                        {{-- Discount badge (right side) --}}
+                        @if($activeOffers->count() === 1)
+                          {{-- Single offer badge --}}
+                          <div class="offer-badge-card">
+                            <i class="bi bi-tag-fill"></i> {{ $bestOffer->discount_percent }}% OFF
+                          </div>
+                        @else
+                          {{-- Multiple offers - stack badges --}}
+                          <div class="offer-badge-card offer-badge-multiple" style="padding: 0.3rem 0.6rem;">
+                            <i class="bi bi-tags-fill"></i> {{ $activeOffers->count() }} OFFERS
+                          </div>
+                          <div class="offer-badge-card" style="top: 52px; font-size: 0.7rem; padding: 0.3rem 0.6rem;">
+                            Up to {{ $bestOffer->discount_percent }}% OFF
+                          </div>
+                        @endif
+                    @endif
                 </div>
                 <div class="menu-offer-body">
                     <h5 class="menu-offer-title">{{ $menu->name }}</h5>
@@ -21,14 +48,25 @@
                     <div class="menu-offer-footer">
                         <div class="menu-offer-price-wrap">
                             <span class="menu-offer-price-label">Starts from</span>
-                            <span class="menu-offer-price">৳ {{ number_format((float) ($firstVariation?->price ?? 0), 2) }}</span>
+                            @if($bestOffer)
+                                <span class="menu-offer-price" style="text-decoration: line-through; opacity: 0.6; font-size: 0.9em;">
+                                  ৳ {{ number_format((float) ($firstVariation?->price ?? 0), 2) }}
+                                </span>
+                                <span class="menu-offer-price text-danger fw-bold">
+                                  ৳ {{ number_format((float) ($firstVariation?->price ?? 0) * (1 - $bestOffer->discount_percent / 100), 2) }}
+                                </span>
+                            @else
+                                <span class="menu-offer-price">৳ {{ number_format((float) ($firstVariation?->price ?? 0), 2) }}</span>
+                            @endif
                         </div>
                         <span class="menu-offer-serve">
                             <i class="bi bi-collection"></i> {{ $menu->variations->count() }} option{{ $menu->variations->count() > 1 ? 's' : '' }}
                         </span>
                     </div>
                     <div class="menu-offer-actions" onclick="event.preventDefault()">
-                        <button class="menu-offer-cart-btn" type="button">
+                        <button class="menu-offer-cart-btn" type="button" 
+                                data-variation-id="{{ $firstVariation?->id }}"
+                                data-original-price="{{ $firstVariation?->price ?? 0 }}">
                             <i class="bi bi-bag-plus" aria-hidden="true"></i>
                             Order Now
                         </button>

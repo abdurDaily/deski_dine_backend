@@ -998,6 +998,106 @@ h6,
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Offer Badge on Card */
+.offer-badge-card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.offer-badge-card i {
+  font-size: 0.85rem;
+}
+
+/* Add special badge for multiple offers */
+.offer-badge-multiple {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+}
+
+/* Offer corner ribbon - alternative style */
+.offer-corner-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.offer-corner-ribbon::before {
+  content: 'OFFER';
+  position: absolute;
+  top: 18px;
+  right: -20px;
+  width: 100px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #fff;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 5px 0;
+  transform: rotate(45deg);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon badge for offer - more prominent */
+.offer-icon-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #fff;
+  color: #e74c3c;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 11;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+  }
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.6);
+  }
+}
+
 .menu-offer-badge--gold {
   background-color: #ef8b1f; /* Brand Orange for premium picks */
   color: #ffffff;

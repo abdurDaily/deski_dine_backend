@@ -607,15 +607,13 @@
                                 <span>Membership Discount</span>
                                 <span id="checkoutDiscount" class="text-success fw-bold">- ৳ 0.00</span>
                             </div>
-                            @if(isset($activeOffer) && $activeOffer)
-                            <div class="cart-summary-row" id="offerDiscountRow">
-                                <span>
-                                    🎉 {{ $activeOffer->name }}
-                                    <span class="badge ms-1" style="background:#e74c3c;color:#fff;font-size:.68rem;padding:2px 7px;border-radius:20px;">{{ $activeOffer->discount_percent }}% OFF</span>
+                            <div class="cart-summary-row" id="offerDiscountRow" style="display: none;">
+                                <span id="offerDiscountLabel">
+                                    🎉 <span id="offerName">Offer Discount</span>
+                                    <span class="badge ms-1" id="offerBadge" style="background:#e74c3c;color:#fff;font-size:.68rem;padding:2px 7px;border-radius:20px;"></span>
                                 </span>
                                 <span id="checkoutOfferDiscount" class="text-danger fw-bold">- ৳ 0.00</span>
                             </div>
-                            @endif
                             <div class="cart-summary-row">
                                 <span>Shipping</span>
                                 <span class="cart-free-tag">Free</span>
@@ -675,46 +673,129 @@
                     }
                 }
 
-                // Active promotional offer injected from PHP
-                const activeOfferRate    = {{ isset($activeOffer) && $activeOffer ? $activeOffer->discount_percent : 0 }};
-                const activeOfferMinTotal = {{ isset($activeOffer) && $activeOffer && $activeOffer->min_total ? $activeOffer->min_total : 0 }};
-                const offerDiscountEl    = document.getElementById('checkoutOfferDiscount');
+                // Active offers data from PHP
+                const activeOffers = @json($activeOffers ?? []);
+                const offerDiscountEl = document.getElementById('checkoutOfferDiscount');
+                const offerDiscountRow = document.getElementById('offerDiscountRow');
+                const offerNameEl = document.getElementById('offerName');
+                const offerBadgeEl = document.getElementById('offerBadge');
 
                 // Track current membership discount amount (set when card is verified)
                 let currentMemberDiscount = 0;
 
-                function getOfferDiscount(subtotal) {
-                    if (!activeOfferRate) return 0;
-                    if (activeOfferMinTotal > 0 && subtotal < activeOfferMinTotal) return 0;
-                    return parseFloat((subtotal * activeOfferRate / 100).toFixed(2));
+                // Calculate offer discount for cart items
+                function calculateOfferDiscount(cartItems) {
+                    let totalOfferDiscount = 0;
+                    let bestOfferName = '';
+                    let bestOfferPercent = 0;
+
+                    console.log('Calculating offer discount for items:', cartItems);
+                    console.log('Active offers:', activeOffers);
+
+                    if (!Array.isArray(cartItems) || cartItems.length === 0 || activeOffers.length === 0) {
+                        return { discount: 0, offerName: '', offerPercent: 0 };
+                    }
+
+                    // For each cart item, find applicable offers
+                    cartItems.forEach(item => {
+                        const variationId = item.variation_id || item.id;
+                        console.log('Checking item:', item.title, 'variation_id:', variationId);
+                        
+                        if (!variationId) {
+                            console.warn('No variation_id for item:', item);
+                            return;
+                        }
+
+                        // Find offers that apply to this variation
+                        let bestItemOffer = null;
+                        
+                        activeOffers.forEach(offer => {
+                            // Check if offer applies to this item
+                            const appliesTo = offer.offer_type === 'all_items' || 
+                                (Array.isArray(offer.menu_variations) && 
+                                 offer.menu_variations.some(v => v.id == variationId));
+                            
+                            console.log(`  Offer "${offer.name}" (${offer.offer_type}) applies:`, appliesTo);
+                            
+                            if (appliesTo && (!bestItemOffer || offer.discount_percent > bestItemOffer.discount_percent)) {
+                                bestItemOffer = offer;
+                            }
+                        });
+
+                        // Calculate discount for this item
+                        if (bestItemOffer) {
+                            const itemTotal = (item.price || 0) * (item.quantity || 1);
+                            const itemDiscount = itemTotal * (bestItemOffer.discount_percent / 100);
+                            totalOfferDiscount += itemDiscount;
+                            
+                            console.log(`  ✓ Applied ${bestItemOffer.name} (${bestItemOffer.discount_percent}%): ৳${itemDiscount.toFixed(2)}`);
+
+                            if (bestItemOffer.discount_percent > bestOfferPercent) {
+                                bestOfferPercent = bestItemOffer.discount_percent;
+                                bestOfferName = bestItemOffer.name;
+                            }
+                        } else {
+                            console.log('  ✗ No offer applies to this item');
+                        }
+                    });
+
+                    console.log('Total offer discount:', totalOfferDiscount);
+
+                    return {
+                        discount: parseFloat(totalOfferDiscount.toFixed(2)),
+                        offerName: bestOfferName,
+                        offerPercent: bestOfferPercent
+                    };
                 }
 
-                function updateTotals(subtotal, bestDiscount) {
-                    const offerDiscount  = getOfferDiscount(subtotal);
+                function updateTotals(subtotal, bestDiscount, offerInfo) {
                     const memberDiscount = currentMemberDiscount || 0;
+                    const offerDiscount = offerInfo.discount;
 
-                    if (offerDiscountEl) {
+                    console.log('updateTotals called:', { subtotal, bestDiscount, memberDiscount, offerDiscount });
+
+                    // Update offer display
+                    if (offerDiscount > 0) {
+                        offerDiscountRow.style.display = '';
                         offerDiscountEl.textContent = `- ৳ ${offerDiscount.toFixed(2)}`;
+                        if (offerNameEl) offerNameEl.textContent = offerInfo.offerName || 'Offer Discount';
+                        if (offerBadgeEl) offerBadgeEl.textContent = `${offerInfo.offerPercent}% OFF`;
+                    } else {
+                        offerDiscountRow.style.display = 'none';
                     }
 
                     if (offerDiscount >= memberDiscount) {
                         // Offer wins — membership row shows 0
                         discountDisplay.textContent = `- ৳ 0.00`;
                     } else {
-                        // Membership wins — offer row shows 0
+                        // Membership wins — offer row shows 0 (or hide it)
                         discountDisplay.textContent = `- ৳ ${memberDiscount.toFixed(2)}`;
-                        if (offerDiscountEl) offerDiscountEl.textContent = `- ৳ 0.00`;
+                        if (offerDiscount > 0) {
+                            offerDiscountRow.style.display = 'none';
+                        }
                     }
 
-                    totalDisplay.textContent = `৳ ${Math.max(0, subtotal - bestDiscount).toFixed(2)}`;
+                    const finalTotal = Math.max(0, subtotal - bestDiscount);
+                    totalDisplay.textContent = `৳ ${finalTotal.toFixed(2)}`;
+                    
+                    // Update hidden input for form submission
+                    if (orderTotalInput) {
+                        orderTotalInput.value = subtotal.toFixed(2); // Send original subtotal, backend will recalculate discount
+                    }
+                    
+                    console.log('Final total displayed:', finalTotal);
                 }
 
                 function updateDiscountDisplay(memberDiscountAmount) {
                     currentMemberDiscount = memberDiscountAmount;
-                    const subtotal      = parseFloat(orderTotalInput.value) || 0;
-                    const offerDiscount = getOfferDiscount(subtotal);
-                    const bestDiscount  = Math.max(memberDiscountAmount, offerDiscount);
-                    updateTotals(subtotal, bestDiscount);
+                    const subtotal = parseFloat(orderTotalInput.value) || 0;
+                    
+                    // Get cart items from localStorage
+                    const cart = JSON.parse(localStorage.getItem('degchi_cart') || '[]');
+                    const offerInfo = calculateOfferDiscount(cart);
+                    
+                    const bestDiscount = Math.max(memberDiscountAmount, offerInfo.discount);
+                    updateTotals(subtotal, bestDiscount, offerInfo);
                 }
 
                 function handleQueryMessage() {
@@ -789,9 +870,10 @@
                 // Re-apply discounts whenever app.js finishes rendering the cart summary
                 document.addEventListener('cartSummaryRendered', function(e) {
                     const subtotal = e.detail.total || 0;
-                    const offerDiscount  = getOfferDiscount(subtotal);
-                    const bestDiscount   = Math.max(currentMemberDiscount, offerDiscount);
-                    updateTotals(subtotal, bestDiscount);
+                    const cart = JSON.parse(localStorage.getItem('degchi_cart') || '[]');
+                    const offerInfo = calculateOfferDiscount(cart);
+                    const bestDiscount = Math.max(currentMemberDiscount, offerInfo.discount);
+                    updateTotals(subtotal, bestDiscount, offerInfo);
                 });
 
                 if (checkoutForm) {
@@ -859,6 +941,29 @@
                 }
 
                 handleQueryMessage();
+
+                // Initial offer discount calculation on page load
+                console.log('=== Checkout Page Loaded ===');
+                console.log('Active offers available:', activeOffers);
+                
+                // Trigger initial calculation
+                const initialCart = JSON.parse(localStorage.getItem('degchi_cart') || '[]');
+                console.log('Cart on page load:', initialCart);
+                
+                if (initialCart.length > 0) {
+                    // Wait a bit for cart to render, then calculate
+                    setTimeout(function() {
+                        const subtotal = parseFloat(document.getElementById('order_total')?.value || 0);
+                        console.log('Initial subtotal:', subtotal);
+                        
+                        if (subtotal > 0) {
+                            const offerInfo = calculateOfferDiscount(initialCart);
+                            const bestDiscount = Math.max(currentMemberDiscount, offerInfo.discount);
+                            updateTotals(subtotal, bestDiscount, offerInfo);
+                            console.log('Initial discount calculated and applied');
+                        }
+                    }, 500);
+                }
 
                 const flashMessage = @json(session('success') ?? session('error'));
                 const flashType = @json(session('success') ? 'success' : 'error');

@@ -320,7 +320,7 @@
                     <div style="font-size:.75rem;color:#888;margin-top:4px;">Save this number — use it at checkout for your discount</div>
                 </div>` : ''}
                 <button id="successPopupClose" style="background:#28a745;color:#fff;border:none;padding:13px 32px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;width:100%;">
-                    Great, Thanks! 🎊
+                    Great, Thanks! 
                 </button>
             `);
             overlay.append(box);

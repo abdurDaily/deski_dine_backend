@@ -53,6 +53,41 @@
                         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
+                    {{-- Offer Type --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Offer Type <span class="text-danger">*</span></label>
+                        <select name="offer_type" id="offerType" class="form-select @error('offer_type') is-invalid @enderror">
+                            <option value="all_items" {{ old('offer_type', $offer->offer_type ?? 'all_items') === 'all_items' ? 'selected' : '' }}>
+                                All Food Items
+                            </option>
+                            <option value="specific_items" {{ old('offer_type', $offer->offer_type) === 'specific_items' ? 'selected' : '' }}>
+                                Specific Food Items
+                            </option>
+                        </select>
+                        @error('offer_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    {{-- Menu Items Selection (shown only for specific_items) --}}
+                    <div id="menuItemsSection" class="mb-3" style="display: {{ old('offer_type', $offer->offer_type ?? 'all_items') === 'specific_items' ? 'block' : 'none' }}">
+                        <label class="form-label fw-semibold">Select Food Items <span class="text-danger">*</span></label>
+                        <select name="menu_variations[]" id="menuVariations" class="form-select select2-menu-items @error('menu_variations') is-invalid @enderror" multiple>
+                            @foreach(\App\Models\Menu::with('variations')->where('is_available', 1)->orderBy('name')->get() as $menu)
+                                @foreach($menu->variations as $variation)
+                                    <option value="{{ $variation->id }}" 
+                                        data-category="{{ $menu->category->name ?? 'Uncategorized' }}"
+                                        {{ (is_array(old('menu_variations')) && in_array($variation->id, old('menu_variations'))) || 
+                                           (isset($offer) && $offer->menuVariations->contains($variation->id)) ? 'selected' : '' }}>
+                                        {{ $menu->name }} - {{ $variation->name }} (৳{{ number_format($variation->price, 2) }})
+                                    </option>
+                                @endforeach
+                            @endforeach
+                        </select>
+                        <div class="form-text">
+                            <i class="ri-search-line me-1"></i> Type to search for food items by name or category
+                        </div>
+                        @error('menu_variations')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
                     {{-- Applicable To + Min Total --}}
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
@@ -175,6 +210,7 @@
 @push('scripts')
 <script>
 $(function(){
+    // Image preview
     $('#popupImageInput').on('change', function(){
         const file = this.files[0];
         if(!file){ $('#newImgPreviewWrap').addClass('d-none'); return; }
@@ -185,6 +221,41 @@ $(function(){
         };
         reader.readAsDataURL(file);
     });
+
+    // Toggle menu items section based on offer type
+    $('#offerType').on('change', function() {
+        if ($(this).val() === 'specific_items') {
+            $('#menuItemsSection').show();
+        } else {
+            $('#menuItemsSection').hide();
+        }
+    });
+
+    // Initialize Select2 for searchable menu items
+    $('.select2-menu-items').select2({
+        placeholder: 'Search and select food items...',
+        allowClear: true,
+        width: '100%',
+        templateResult: formatMenuItem,
+        templateSelection: formatMenuSelection
+    });
+
+    function formatMenuItem(item) {
+        if (!item.id) return item.text;
+        
+        const category = $(item.element).data('category');
+        const $item = $(
+            '<div class="d-flex flex-column">' +
+                '<div class="fw-semibold">' + item.text.split(' (')[0] + '</div>' +
+                '<small class="text-muted"><i class="ri-bookmark-line"></i> ' + category + '</small>' +
+            '</div>'
+        );
+        return $item;
+    }
+
+    function formatMenuSelection(item) {
+        return item.text.split(' (')[0]; // Show only name without price in selection
+    }
 });
 </script>
 @endpush

@@ -4,11 +4,42 @@
 <!-- COMPLETE MENU HEADER -->
 <section class="menu-hero-section py-5 text-center position-relative">
     <div class="container px-4 px-lg-5">
+        @if(isset($activeOfferDetails) && $activeOfferDetails)
+            <!-- Offer Banner -->
+            <div class="alert alert-dismissible fade show" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border: none; border-radius: 15px; box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3); margin-bottom: 2rem;">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="d-flex align-items-center justify-content-center flex-wrap gap-3 py-2">
+                    <div class="text-white">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-megaphone-fill fs-4"></i>
+                            <span class="fs-5 fw-bold">{{ $activeOfferDetails->name }}</span>
+                        </div>
+                        @if($activeOfferDetails->description)
+                            <p class="mb-0 small opacity-90">{{ $activeOfferDetails->description }}</p>
+                        @endif
+                    </div>
+                    <div class="offer-badge-big" style="background: rgba(255,255,255,0.2); padding: 0.75rem 1.5rem; border-radius: 50px; backdrop-filter: blur(10px);">
+                        <span class="text-white fs-3 fw-bold">{{ $activeOfferDetails->discount_percent }}% OFF</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+        
         <span class="luxury-meta-label mb-2">Degchi Dine</span>
-        <h1 class="luxury-title text-uppercase mb-2">Our Complete Menu</h1>
+        <h1 class="luxury-title text-uppercase mb-2">
+            @if(isset($activeOfferDetails) && $activeOfferDetails)
+                Special Offer Items
+            @else
+                Our Complete Menu
+            @endif
+        </h1>
         <div class="luxury-accent-line mx-auto mb-3"></div>
         <p class="section-subtitle text-muted max-w-600 mx-auto">
-            Explore our curated culinary creations, prepared with heritage slow-cooking techniques and fresh local spices.
+            @if(isset($activeOfferDetails) && $activeOfferDetails)
+                All items shown below are eligible for <strong>{{ $activeOfferDetails->discount_percent }}% discount</strong>. Add them to your cart now!
+            @else
+                Explore our curated culinary creations, prepared with heritage slow-cooking techniques and fresh local spices.
+            @endif
         </p>
     </div>
 </section>

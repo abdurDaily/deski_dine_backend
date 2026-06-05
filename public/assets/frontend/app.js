@@ -347,26 +347,44 @@ const createMenuItemFromCard = (button) => {
     if (!card) return null;
 
     const title = card.querySelector(".menu-offer-title")?.textContent.trim();
-    const priceText =
-        card.querySelector(".menu-offer-price")?.textContent || "0";
     const image =
         card.querySelector(".menu-offer-image")?.getAttribute("src") || "";
     const quantityText =
         card.querySelector(".menu-offer-serve")?.textContent || "1 person";
+    
+    // Get variation_id from the button's data attribute
+    const variationId = button.getAttribute("data-variation-id") || button.dataset.variationId;
+    
+    // Get ORIGINAL price from data attribute (most reliable)
+    const originalPriceAttr = button.getAttribute("data-original-price") || button.dataset.originalPrice;
+    let price = parseFloat(originalPriceAttr) || 0;
+    
+    // Fallback: try to parse from displayed price if data attribute not available
+    if (price === 0) {
+        const allPrices = card.querySelectorAll(".menu-offer-price");
+        if (allPrices.length > 1) {
+            // Multiple prices: first is original (strikethrough)
+            const priceText = allPrices[0].textContent.replace(/,/g, "").replace(/[^\d.]/g, "").trim();
+            price = parseFloat(priceText) || 0;
+        } else if (allPrices.length === 1) {
+            // Single price
+            const priceText = allPrices[0].textContent.replace(/,/g, "").replace(/[^\d.]/g, "").trim();
+            price = parseFloat(priceText) || 0;
+        }
+    }
 
-    const normalizedPriceText = priceText
-        .replace(/,/g, "")
-        .replace(/[^\d.]/g, "")
-        .trim();
-    const price = parseFloat(normalizedPriceText) || 0;
-    return {
+    const item = {
         id: buildCartItemId({ title }),
+        variation_id: variationId ? parseInt(variationId) : null,
         title: title || "Menu item",
-        price,
+        price: price,
         quantity: 1,
         image,
         note: quantityText.trim() || "1 person",
     };
+    
+    console.log('Creating cart item:', item);
+    return item;
 };
 
 const updateCartBadges = (cart) => {

@@ -36,8 +36,8 @@ class OfferController extends Controller
         $offer = Offer::create($data);
 
         // Attach selected menu variations if offer_type is 'specific_items'
-        if ($request->offer_type === 'specific_items' && $request->filled('menu_variation_ids')) {
-            $offer->menuVariations()->sync($request->menu_variation_ids);
+        if ($request->offer_type === 'specific_items' && $request->filled('menu_variations')) {
+            $offer->menuVariations()->sync($request->menu_variations);
         }
 
         return redirect()->route('offers.index')->with('success', 'Offer created successfully.');
@@ -71,7 +71,7 @@ class OfferController extends Controller
 
         // Update menu variations relationship
         if ($request->offer_type === 'specific_items') {
-            $offer->menuVariations()->sync($request->filled('menu_variation_ids') ? $request->menu_variation_ids : []);
+            $offer->menuVariations()->sync($request->filled('menu_variations') ? $request->menu_variations : []);
         } else {
             // If changed to 'all_items', clear any specific items
             $offer->menuVariations()->detach();
@@ -105,8 +105,8 @@ class OfferController extends Controller
             'discount_percent'  => 'required|integer|min:0|max:100',
             'applicable_to'     => 'required|string|max:100',
             'offer_type'        => 'required|in:all_items,specific_items',
-            'menu_variation_ids' => 'nullable|array',
-            'menu_variation_ids.*' => 'integer|exists:menu_variations,id',
+            'menu_variations'   => 'nullable|array',
+            'menu_variations.*' => 'integer|exists:menu_variations,id',
             'min_total'         => 'nullable|numeric|min:0',
             'is_first_order'    => 'sometimes|boolean',
             'is_active'         => 'sometimes|boolean',
@@ -114,8 +114,8 @@ class OfferController extends Controller
             'popup_image'       => 'nullable|file|image|mimes:webp,png,jpg,jpeg|max:2048',
             'popup_badge'       => 'nullable|string|max:50',
             'popup_expires_at'  => 'nullable|date',
-            'valid_from'        => 'nullable|datetime',
-            'valid_until'       => 'nullable|datetime',
+            'valid_from'        => 'nullable|date',
+            'valid_until'       => 'nullable|date',
         ]);
     }
 }

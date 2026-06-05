@@ -16,34 +16,65 @@ class HomeController extends Controller
 {
     public function home()
     {
-        // Paginate categories with eager-loaded relationships
-        $categories = \App\Models\Category::where('status', 1)
-            ->with(['menus' => function ($query) {
-                $query->where('is_available', 1)
-                    ->select(['id', 'category_id', 'name', 'slug', 'description', 'is_available'])
-                    ->with(['variations' => function ($query) {
-                        $query->select(['id', 'menu_id', 'name', 'price', 'image']);
-                    }]);
-            }])
-            ->select(['id', 'name', 'status', 'branch_id', 'image'])
-            ->orderBy('name')
-            ->paginate(10); // Paginate 10 categories per page
+        // Cache categories for 5 minutes to improve performance
+        $categories = cache()->remember('home_categories', 300, function () {
+            return \App\Models\Category::where('status', 1)
+                ->with(['menus' => function ($query) {
+                    $query->where('is_available', 1)
+                        ->select(['id', 'category_id', 'name', 'slug', 'description', 'is_available'])
+                        ->with(['variations' => function ($query) {
+                            $query->select(['id', 'menu_id', 'name', 'price', 'image'])
+                                ->with(['offers' => function ($q) {
+                                    $q->where('is_active', true)
+                                        ->where(function ($subQ) {
+                                            $subQ->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+                                        })
+                                        ->where(function ($subQ) {
+                                            $subQ->whereNull('valid_until')->orWhere('valid_until', '>=', now());
+                                        })
+                                        ->select(['offers.id', 'offers.name', 'offers.discount_percent', 'offers.popup_badge']);
+                                }]);
+                        }]);
+                }])
+                ->select(['id', 'name', 'status', 'branch_id', 'image'])
+                ->orderBy('name')
+                ->get();
+        });
 
-        $branches = \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
+        // Simple pagination wrapper
+        $perPage = 10;
+        $page = request()->get('page', 1);
+        $paginatedCategories = new \Illuminate\Pagination\LengthAwarePaginator(
+            $categories->forPage($page, $perPage),
+            $categories->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
 
-        // Active popup offer (shown as ad on home page)
-        // Use caching for popup offer to reduce queries
-        $popupOffer = \App\Models\Offer::where('is_active', true)
-            ->where('show_as_popup', true)
-            ->where(function ($q) {
-                $q->whereNull('popup_expires_at')
-                    ->orWhere('popup_expires_at', '>=', now()->toDateString());
-            })
-            ->select(['id', 'name', 'description', 'discount_percent', 'popup_image', 'popup_badge', 'popup_expires_at'])
-            ->latest()
-            ->first();
+        $branches = cache()->remember('home_branches', 600, function () {
+            return \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
+        });
 
-        return view('index', compact('categories', 'branches', 'popupOffer'));
+        // Cache popup offer for 5 minutes
+        $popupOffer = cache()->remember('home_popup_offer', 300, function () {
+            return \App\Models\Offer::where('is_active', true)
+                ->where('show_as_popup', true)
+                ->where(function ($q) {
+                    $q->whereNull('popup_expires_at')
+                        ->orWhere('popup_expires_at', '>=', now()->toDateString());
+                })
+                ->with('menuVariations.menu.category') // Load relationships for redirect
+                ->select(['id', 'name', 'description', 'discount_percent', 'popup_image', 'popup_badge', 'popup_expires_at', 'offer_type'])
+                ->latest()
+                ->first();
+        });
+
+        return view('index', [
+            'categories' => $paginatedCategories,
+            'branches' => $branches,
+            'popupOffer' => $popupOffer
+        ]);
     }
 
     public function addToCart()
@@ -59,18 +90,22 @@ class HomeController extends Controller
 
     public function checkout()
     {
-        // Pass any active non-popup discount offer to the checkout page
-        $activeOffer = \App\Models\Offer::where('is_active', true)
+        // Pass all active valid offers to the checkout page (not just non-popup ones)
+        $activeOffers = \App\Models\Offer::where('is_active', true)
             ->where('discount_percent', '>', 0)
-            ->where('applicable_to', 'all')
             ->where(function ($q) {
-                $q->whereNull('popup_expires_at')
-                    ->orWhere('popup_expires_at', '>=', now()->toDateString());
+                $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
             })
-            ->latest()
-            ->first();
+            ->where(function ($q) {
+                $q->whereNull('valid_until')->orWhere('valid_until', '>=', now());
+            })
+            ->with(['menuVariations' => function ($q) {
+                $q->select(['menu_variations.id', 'menu_id', 'name', 'price']);
+            }])
+            ->orderBy('discount_percent', 'desc')
+            ->get();
 
-        return view('frontend.checkout', compact('activeOffer'));
+        return view('frontend.checkout', compact('activeOffers'));
     }
 
     public function cards()
@@ -497,17 +532,39 @@ class HomeController extends Controller
 
         // 3. Get search/filter params
         $selectedCategorySlug = $request->query('category');
+        $offerFilter = $request->query('offer'); // NEW: Filter by offer ID
         $minPrice = $request->query('min_price', $minPriceLimit);
         $maxPrice = $request->query('max_price', $maxPriceLimit);
 
-        // 4. Build query
+        // 4. Build query with eager loading for offers
         $query = \App\Models\Menu::where('is_available', 1)
-            ->with(['variations', 'category']);
+            ->with([
+                'variations' => function ($q) {
+                    $q->with(['offers' => function ($offerQuery) {
+                        $offerQuery->where('is_active', true)
+                            ->where(function ($q) {
+                                $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+                            })
+                            ->where(function ($q) {
+                                $q->whereNull('valid_until')->orWhere('valid_until', '>=', now());
+                            })
+                            ->select(['offers.id', 'offers.name', 'offers.discount_percent']);
+                    }]);
+                },
+                'category'
+            ]);
 
         // Filter by category slug
         if ($selectedCategorySlug) {
             $query->whereHas('category', function ($q) use ($selectedCategorySlug) {
                 $q->where('slug', $selectedCategorySlug);
+            });
+        }
+
+        // NEW: Filter by offer - show only items that have this specific offer
+        if ($offerFilter) {
+            $query->whereHas('variations.offers', function ($q) use ($offerFilter) {
+                $q->where('offers.id', $offerFilter);
             });
         }
 
@@ -519,7 +576,16 @@ class HomeController extends Controller
         // 5. Paginate items (9 per page for perfect grid)
         $menus = $query->orderBy('name')->paginate(9)->withQueryString();
 
-        // 6. Handle AJAX request
+        // 6. Get active offer details if filtering by offer
+        $activeOfferDetails = null;
+        if ($offerFilter) {
+            $activeOfferDetails = \App\Models\Offer::where('id', $offerFilter)
+                ->where('is_active', true)
+                ->select(['id', 'name', 'discount_percent', 'description'])
+                ->first();
+        }
+
+        // 7. Handle AJAX request
         if ($request->ajax()) {
             return view('frontend.partials.menu_grid', compact('menus'))->render();
         }
@@ -531,7 +597,9 @@ class HomeController extends Controller
             'maxPriceLimit',
             'selectedCategorySlug',
             'minPrice',
-            'maxPrice'
+            'maxPrice',
+            'offerFilter',
+            'activeOfferDetails'
         ));
     }
 }
