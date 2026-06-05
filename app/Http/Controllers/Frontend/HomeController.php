@@ -59,7 +59,7 @@ class HomeController extends Controller
             return \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
         });
 
-        $signaturePlatters = SignaturePlatter::where('status', true)
+        $signaturePlatters = SignaturePlatter::where('status', 1)
             ->orderBy('sort_order')
             ->get();
 

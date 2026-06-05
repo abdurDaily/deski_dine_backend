@@ -13,7 +13,8 @@ class SignaturePlatter extends Model
         'title',
         'subtitle',
         'description',
-        'image',
+        'thumbnail_image',
+        'menu_card_image',
         'features',
         'status',
         'sort_order',
@@ -21,6 +22,5 @@ class SignaturePlatter extends Model
 
     protected $casts = [
         'features' => 'array',
-        'status'   => 'boolean',
     ];
 }

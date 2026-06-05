@@ -18,11 +18,11 @@ class SignaturePlatterController extends Controller
 
                 return DataTables::of($data)
                     ->addIndexColumn()
-                    ->addColumn('image_preview', function ($row) {
-                        $url = $row->image
-                            ? asset('uploads/platters/' . $row->image)
-                            : 'https://via.placeholder.com/60x60?text=No+Img';
-                        return '<img src="' . $url . '" width="60" height="60" class="rounded shadow-sm object-fit-cover" />';
+                    ->addColumn('thumbnail_preview', function ($row) {
+                        $url = $row->thumbnail_image
+                            ? asset('uploads/platters/' . $row->thumbnail_image)
+                            : 'https://via.placeholder.com/60x60?text=No+Thumb';
+                        return '<img src="' . $url . '" width="60" height="60" class="rounded shadow-sm object-fit-cover" title="Thumbnail" />';
                     })
                     ->addColumn('status', function ($row) {
                         return $row->status
@@ -40,7 +40,7 @@ class SignaturePlatterController extends Controller
                                 </button>
                             </div>';
                     })
-                    ->rawColumns(['image_preview', 'status', 'action'])
+                    ->rawColumns(['thumbnail_preview', 'status', 'action'])
                     ->make(true);
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
@@ -53,36 +53,40 @@ class SignaturePlatterController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'subtitle'    => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
-            'status'      => 'required|in:0,1',
-            'sort_order'  => 'nullable|integer|min:0',
-            'features'    => 'nullable|array',
-            'features.*.icon'  => 'nullable|string|max:100',
-            'features.*.label' => 'nullable|string|max:100',
-            'features.*.text'  => 'nullable|string|max:500',
+            'title'              => 'required|string|max:255',
+            'subtitle'           => 'nullable|string|max:255',
+            'description'        => 'nullable|string',
+            'thumbnail_image'    => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
+            'menu_card_image'    => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
+            'status'             => 'required|in:0,1',
+            'sort_order'         => 'nullable|integer|min:0',
+            'features'           => 'nullable|array',
         ]);
 
         try {
             $data = $request->only(['title', 'subtitle', 'description', 'status', 'sort_order']);
             $data['sort_order'] = $data['sort_order'] ?? 0;
 
-            // Handle features array – filter out empty rows
+            // Handle features array
             if ($request->has('features')) {
-                $features = array_values(array_filter($request->features, function ($f) {
-                    return !empty($f['label']) || !empty($f['text']);
-                }));
+                $features = array_values(array_filter($request->features));
                 $data['features'] = $features ?: null;
             }
 
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                $file      = $request->file('image');
-                $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // Handle thumbnail image upload
+            if ($request->hasFile('thumbnail_image')) {
+                $file      = $request->file('thumbnail_image');
+                $imageName = time() . '_thumb_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/platters'), $imageName);
-                $data['image'] = $imageName;
+                $data['thumbnail_image'] = $imageName;
+            }
+
+            // Handle menu card image upload
+            if ($request->hasFile('menu_card_image')) {
+                $file      = $request->file('menu_card_image');
+                $imageName = time() . '_menu_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/platters'), $imageName);
+                $data['menu_card_image'] = $imageName;
             }
 
             SignaturePlatter::create($data);
@@ -101,42 +105,48 @@ class SignaturePlatterController extends Controller
     public function update(Request $request, SignaturePlatter $signaturePlatter)
     {
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'subtitle'    => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
-            'status'      => 'required|in:0,1',
-            'sort_order'  => 'nullable|integer|min:0',
-            'features'    => 'nullable|array',
-            'features.*.icon'  => 'nullable|string|max:100',
-            'features.*.label' => 'nullable|string|max:100',
-            'features.*.text'  => 'nullable|string|max:500',
+            'title'              => 'required|string|max:255',
+            'subtitle'           => 'nullable|string|max:255',
+            'description'        => 'nullable|string',
+            'thumbnail_image'    => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
+            'menu_card_image'    => 'nullable|image|mimes:webp,png,jpg,jpeg|max:2048',
+            'status'             => 'required|in:0,1',
+            'sort_order'         => 'nullable|integer|min:0',
+            'features'           => 'nullable|array',
         ]);
 
         try {
             $data = $request->only(['title', 'subtitle', 'description', 'status', 'sort_order']);
-            $data['sort_order'] = $data['sort_order'] ?? 0;
+            $data['sort_order'] = $data['sort_order'] ?? $signaturePlatter->sort_order;
 
             // Handle features
             if ($request->has('features')) {
-                $features = array_values(array_filter($request->features, function ($f) {
-                    return !empty($f['label']) || !empty($f['text']);
-                }));
+                $features = array_values(array_filter($request->features));
                 $data['features'] = $features ?: null;
-            } else {
-                $data['features'] = null;
             }
 
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                // Delete old image
-                if ($signaturePlatter->image && file_exists(public_path('uploads/platters/' . $signaturePlatter->image))) {
-                    unlink(public_path('uploads/platters/' . $signaturePlatter->image));
+            // Handle thumbnail image upload
+            if ($request->hasFile('thumbnail_image')) {
+                // Delete old thumbnail
+                if ($signaturePlatter->thumbnail_image && file_exists(public_path('uploads/platters/' . $signaturePlatter->thumbnail_image))) {
+                    unlink(public_path('uploads/platters/' . $signaturePlatter->thumbnail_image));
                 }
-                $file      = $request->file('image');
-                $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file      = $request->file('thumbnail_image');
+                $imageName = time() . '_thumb_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/platters'), $imageName);
-                $data['image'] = $imageName;
+                $data['thumbnail_image'] = $imageName;
+            }
+
+            // Handle menu card image upload
+            if ($request->hasFile('menu_card_image')) {
+                // Delete old menu card image
+                if ($signaturePlatter->menu_card_image && file_exists(public_path('uploads/platters/' . $signaturePlatter->menu_card_image))) {
+                    unlink(public_path('uploads/platters/' . $signaturePlatter->menu_card_image));
+                }
+                $file      = $request->file('menu_card_image');
+                $imageName = time() . '_menu_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/platters'), $imageName);
+                $data['menu_card_image'] = $imageName;
             }
 
             $signaturePlatter->update($data);
@@ -149,9 +159,16 @@ class SignaturePlatterController extends Controller
 
     public function destroy(SignaturePlatter $signaturePlatter)
     {
-        if ($signaturePlatter->image && file_exists(public_path('uploads/platters/' . $signaturePlatter->image))) {
-            unlink(public_path('uploads/platters/' . $signaturePlatter->image));
+        // Delete thumbnail image
+        if ($signaturePlatter->thumbnail_image && file_exists(public_path('uploads/platters/' . $signaturePlatter->thumbnail_image))) {
+            unlink(public_path('uploads/platters/' . $signaturePlatter->thumbnail_image));
         }
+        
+        // Delete menu card image
+        if ($signaturePlatter->menu_card_image && file_exists(public_path('uploads/platters/' . $signaturePlatter->menu_card_image))) {
+            unlink(public_path('uploads/platters/' . $signaturePlatter->menu_card_image));
+        }
+        
         $signaturePlatter->delete();
 
         return response()->json(['status' => 'success', 'message' => 'Signature Platter deleted!']);

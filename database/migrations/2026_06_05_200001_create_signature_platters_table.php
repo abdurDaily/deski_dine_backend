@@ -13,8 +13,9 @@ return new class extends Migration
             $table->string('title');
             $table->string('subtitle')->nullable();
             $table->text('description')->nullable();
-            $table->string('image')->nullable();
-            $table->json('features')->nullable(); // Array of feature items [{icon, label, text}]
+            $table->string('thumbnail_image')->nullable(); // Image for slider navigation
+            $table->string('menu_card_image')->nullable(); // Detailed menu card image for popup
+            $table->json('features')->nullable(); // Array of feature items
             $table->boolean('status')->default(1);
             $table->integer('sort_order')->default(0);
             $table->timestamps();

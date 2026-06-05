@@ -237,169 +237,95 @@
 
           <div class="platter-nav-column">
             <div class="slider-nav">
-              <div class="nav-item">
-                <div class="nav-img-wrapper">
-                  <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&q=80"
-                    alt="Lunch Feast" />
-                  <div class="sticker-badge">
-                    <div class="sticker-inner">Lunch<br />Feast</div>
+              @forelse($signaturePlatters as $platter)
+                @php
+                  $thumbnailImage = $platter->thumbnail_image
+                      ? (
+                          \Illuminate\Support\Str::startsWith($platter->thumbnail_image, ['http://', 'https://'])
+                              ? $platter->thumbnail_image
+                              : asset('uploads/platters/' . $platter->thumbnail_image)
+                        )
+                      : 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&q=80';
+                @endphp
+                <div class="nav-item">
+                  <div class="nav-img-wrapper">
+                    <img src="{{ $thumbnailImage }}" alt="{{ $platter->title }}" onerror="this.src='https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&q=80'" />
+                    <div class="sticker-badge">
+                      <div class="sticker-inner">{{ \Illuminate\Support\Str::limit($platter->title, 15) }}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="nav-item">
-                <div class="nav-img-wrapper">
-                  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" alt="Healthy Bowl" />
-                  <div class="sticker-badge">
-                    <div class="sticker-inner">Healthy<br />Bowl</div>
+              @empty
+                <!-- No signature platters found - show empty state -->
+                <div class="nav-item">
+                  <div class="nav-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&q=80" alt="Signature Platter" />
+                    <div class="sticker-badge">
+                      <div class="sticker-inner">No Data</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="nav-item">
-                <div class="nav-img-wrapper">
-                  <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&q=80"
-                    alt="Dinner Special" />
-                  <div class="sticker-badge">
-                    <div class="sticker-inner">Dinner<br />Special</div>
-                  </div>
-                </div>
-              </div>
-              <div class="nav-item">
-                <div class="nav-img-wrapper">
-                  <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500&q=80"
-                    alt="Chef's Choice" />
-                  <div class="sticker-badge">
-                    <div class="sticker-inner">Chef's<br />Choice</div>
-                  </div>
-                </div>
-              </div>
+              @endforelse
             </div>
           </div>
 
           <div class="platter-content-column">
             <div class="slider-for">
-              <div class="content-item">
-                <div class="subtitle-wrapper">
-                  <h4 class="platter-subtitle">A MID-DAY FEAST OF INDIA</h4>
-                  <span class="subtitle-line"></span>
+              @forelse($signaturePlatters as $platter)
+                @php
+                  $features = collect($platter->features ?? [])->filter()->values();
+                  $menuCardImage = $platter->menu_card_image
+                      ? (
+                          \Illuminate\Support\Str::startsWith($platter->menu_card_image, ['http://', 'https://'])
+                              ? $platter->menu_card_image
+                              : asset('uploads/platters/' . $platter->menu_card_image)
+                        )
+                      : 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&q=80';
+                @endphp
+                <div class="content-item">
+                  <div class="subtitle-wrapper">
+                    <h4 class="platter-subtitle">{{ $platter->subtitle ?: 'Signature Collection' }}</h4>
+                    <span class="subtitle-line"></span>
+                  </div>
+                  <h2 class="platter-title">
+                    {!! nl2br(e($platter->title)) !!}
+                  </h2>
+                  <p class="platter-desc">
+                    {{ $platter->description ?: 'Discover our curated signature platters, designed to delight and share.' }}
+                  </p>
+                  @if($features->isNotEmpty())
+                    <ul class="platter-features">
+                      @foreach($features->take(2) as $feature)
+                        <li>
+                          @if(is_array($feature))
+                            <i class="fa-solid {{ $feature['icon'] ?? 'fa-check' }}"></i>
+                            <strong>{{ $feature['label'] ?? '' }}:</strong> {{ $feature['text'] ?? '' }}
+                          @else
+                            <i class="fa-solid fa-leaf text-success"></i>
+                            {!! nl2br(e($feature)) !!}
+                          @endif
+                        </li>
+                      @endforeach
+                    </ul>
+                  @endif
+                  <div class="text-center text-lg-start">
+                    <button class="btn-order trigger-menu-popup" data-menu-image="{{ $menuCardImage }}" data-platter-title="{{ $platter->title }}">
+                      view menu card
+                    </button>
+                  </div>
                 </div>
-                <h2 class="platter-title">
-                  Flavors To Brighten<br />Your Afternoon!
-                </h2>
-                <p class="platter-desc">
-                  Choose from a delightful balance of vegetarian and
-                  non-vegetarian dishes — Perfect for a satisfying, flavorful
-                  lunch break.
-                </p>
-                <ul class="platter-features">
-                  <li>
-                    <i class="fa-solid fa-leaf text-success"></i>
-                    <strong>Veg Lunch Special:</strong> Paneer Butter Masala,
-                    Dal Tadka, Mixed Vegetable Curry Served with Basmati Rice
-                    & Naan
-                  </li>
-                  <li>
-                    <i class="fa-solid fa-drumstick-bite text-warning"></i>
-                    <strong>Non-Veg Lunch Special:</strong> Butter Chicken or
-                    Chicken Curry, Lamb Rogan Josh, Fish Masala
-                  </li>
-                </ul>
-                <div class="text-center text-lg-start">
-                  <button class="btn-order trigger-menu-popup">
-                    Order Today
-                  </button>
+              @empty
+                <div class="content-item">
+                  <div class="subtitle-wrapper">
+                    <h4 class="platter-subtitle">No Data</h4>
+                    <span class="subtitle-line"></span>
+                  </div>
+                  <h2 class="platter-title">No Signature Platters</h2>
+                  <p class="platter-desc">
+                    Signature platters are coming soon!
+                  </p>
                 </div>
-              </div>
-
-              <div class="content-item">
-                <div class="subtitle-wrapper">
-                  <h4 class="platter-subtitle">FRESH & REVITALIZING</h4>
-                  <span class="subtitle-line"></span>
-                </div>
-                <h2 class="platter-title">
-                  The Ultimate<br />Healthy Power Bowl
-                </h2>
-                <p class="platter-desc">
-                  A perfect mix of greens, grains, and proteins to keep your
-                  energy up throughout the day without feeling heavy.
-                </p>
-                <ul class="platter-features">
-                  <li>
-                    <i class="fa-solid fa-bowl-food text-success"></i>
-                    <strong>Base:</strong> Organic Quinoa, Fresh Kale, and
-                    Roasted Sweet Potatoes
-                  </li>
-                  <li>
-                    <i class="fa-solid fa-seedling text-warning"></i>
-                    <strong>Toppings:</strong> Sliced Avocado, Cherry
-                    Tomatoes, Toasted Seeds, and our House Vinaigrette
-                  </li>
-                </ul>
-                <div class="text-center text-lg-start">
-                  <button class="btn-order trigger-menu-popup">
-                    Order Today
-                  </button>
-                </div>
-              </div>
-
-              <div class="content-item">
-                <div class="subtitle-wrapper">
-                  <h4 class="platter-subtitle">EVENING INDULGENCE</h4>
-                  <span class="subtitle-line"></span>
-                </div>
-                <h2 class="platter-title">The Grand<br />Dinner Special</h2>
-                <p class="platter-desc">
-                  A rich and fulfilling spread designed for the perfect
-                  evening dining experience with friends and family.
-                </p>
-                <ul class="platter-features">
-                  <li>
-                    <i class="fa-solid fa-star text-warning"></i>
-                    <strong>Premium Curries:</strong> Mutton Korma, Shahi
-                    Paneer, and Dal Makhani
-                  </li>
-                  <li>
-                    <i class="fa-solid fa-bread-slice text-warning"></i>
-                    <strong>Accompaniments:</strong> Garlic Naan, Jeera Rice,
-                    and Mint Raita
-                  </li>
-                </ul>
-                <div class="text-center text-lg-start">
-                  <button class="btn-order trigger-menu-popup">
-                    Order Today
-                  </button>
-                </div>
-              </div>
-
-              <div class="content-item">
-                <div class="subtitle-wrapper">
-                  <h4 class="platter-subtitle">CURATED PERFECTION</h4>
-                  <span class="subtitle-line"></span>
-                </div>
-                <h2 class="platter-title">
-                  The Chef's<br />Exclusive Choice
-                </h2>
-                <p class="platter-desc">
-                  Let our head chef take you on a culinary journey with our
-                  most premium, hand-selected seasonal dishes.
-                </p>
-                <ul class="platter-features">
-                  <li>
-                    <i class="fa-solid fa-crown text-warning"></i>
-                    <strong>Signature Mains:</strong> Tandoori Lobster,
-                    Truffle Butter Chicken
-                  </li>
-                  <li>
-                    <i class="fa-solid fa-wine-glass text-danger"></i>
-                    <strong>Pairings:</strong> Saffron Pilaf, Assorted Artisan
-                    Breads
-                  </li>
-                </ul>
-                <div class="text-center text-lg-start">
-                  <button class="btn-order trigger-menu-popup">
-                    Order Today
-                  </button>
-                </div>
-              </div>
+              @endforelse
             </div>
 
             <div class="custom-slider-arrows">
@@ -951,21 +877,22 @@
     @endif
 
 <script>
-  // Handle view menu card button clicks in signature platters section
+  // Handle menu popup trigger for signature platters
   document.addEventListener('DOMContentLoaded', function() {
-    const viewPlatterCardBtns = document.querySelectorAll('.view-platter-card-btn');
+    const triggerButtons = document.querySelectorAll('.trigger-menu-popup');
     const modalOverlay = document.querySelector('.js-modal-overlay');
     const closeModalBtn = document.querySelector('.js-close-modal');
     const modalImg = document.getElementById('modal-active-display-img');
 
-    viewPlatterCardBtns.forEach(btn => {
+    triggerButtons.forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        const menuImage = this.getAttribute('data-menu-image');
-        const menuTitle = this.getAttribute('data-menu-title');
-        if (menuImage && modalImg && modalOverlay) {
-          modalImg.src = menuImage;
-          modalImg.alt = menuTitle;
+        const platterImage = this.getAttribute('data-platter-image');
+        const platterTitle = this.getAttribute('data-platter-title');
+        
+        if (platterImage && modalImg && modalOverlay) {
+          modalImg.src = platterImage;
+          modalImg.alt = platterTitle || 'Signature Platter Menu';
           modalOverlay.style.display = 'flex';
         }
       });

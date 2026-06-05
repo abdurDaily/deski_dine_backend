@@ -1321,6 +1321,13 @@ $(document).ready(function () {
     // 3. Popup Modal Logic
     $(document).on("click", ".trigger-menu-popup", function (e) {
         e.preventDefault();
+        const menuImage = $(this).data("menu-image");
+        const platterTitle = $(this).data("platter-title");
+        
+        if (menuImage) {
+            $("#menuPopup img").attr("src", menuImage).attr("alt", platterTitle);
+        }
+        
         $("#menuPopup").css("display", "flex").hide().fadeIn(300);
     });
 

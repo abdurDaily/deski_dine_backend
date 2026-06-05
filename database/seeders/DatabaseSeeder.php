@@ -11,7 +11,8 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\CurrencySettingSeeder;
 use Database\Seeders\UsersPermissionSeeder;
 use Database\Seeders\SettingPermissionSeeder;
-use Database\Seeders\CurrencyPermissionSeeder;
+use Database\Seeders\MenuSeeder;
+use Database\Seeders\SignaturePlatterSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 CurrencyPermissionSeeder::class,
                 CurrencySettingSeeder::class,
                 MenuSeeder::class,
+                SignaturePlatterSeeder::class,
             ]
         );
     }
