@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\Offer;
 use App\Models\Order;
+use App\Models\Setting;
+use App\Models\SignaturePlatter;
+use App\Models\FacebookReel;
 use App\Services\SSLCommerzService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -56,6 +59,22 @@ class HomeController extends Controller
             return \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
         });
 
+        $signaturePlatters = SignaturePlatter::where('status', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $facebookReels = FacebookReel::where('status', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $aboutSettings = Setting::where('setting_group', 'about_section')
+            ->get()
+            ->keyBy('key');
+
+        $contactSettings = Setting::where('setting_group', 'contact_section')
+            ->get()
+            ->keyBy('key');
+
         // Cache popup offer for 5 minutes
         $popupOffer = cache()->remember('home_popup_offer', 300, function () {
             return \App\Models\Offer::where('is_active', true)
@@ -73,7 +92,11 @@ class HomeController extends Controller
         return view('index', [
             'categories' => $paginatedCategories,
             'branches' => $branches,
-            'popupOffer' => $popupOffer
+            'signaturePlatters' => $signaturePlatters,
+            'facebookReels' => $facebookReels,
+            'aboutSettings' => $aboutSettings,
+            'contactSettings' => $contactSettings,
+            'popupOffer' => $popupOffer,
         ]);
     }
 

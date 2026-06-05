@@ -334,9 +334,11 @@
                     Tomatoes, Toasted Seeds, and our House Vinaigrette
                   </li>
                 </ul>
-                <button class="btn-order trigger-menu-popup">
-                  Order Today
-                </button>
+                <div class="text-center text-lg-start">
+                  <button class="btn-order trigger-menu-popup">
+                    Order Today
+                  </button>
+                </div>
               </div>
 
               <div class="content-item">
@@ -361,9 +363,11 @@
                     and Mint Raita
                   </li>
                 </ul>
-                <button class="btn-order trigger-menu-popup">
-                  Order Today
-                </button>
+                <div class="text-center text-lg-start">
+                  <button class="btn-order trigger-menu-popup">
+                    Order Today
+                  </button>
+                </div>
               </div>
 
               <div class="content-item">
@@ -390,9 +394,11 @@
                     Breads
                   </li>
                 </ul>
-                <button class="btn-order trigger-menu-popup">
-                  Order Today
-                </button>
+                <div class="text-center text-lg-start">
+                  <button class="btn-order trigger-menu-popup">
+                    Order Today
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -499,7 +505,7 @@
                 Dine. Fresh reels every week.
               </p>
               <div class="reels-header-cta-mobile d-md-none mt-3">
-                <a href="https://www.facebook.com/DegchiDine" class="btn reels-follow-btn w-100 justify-content-center"
+                <a href="{{ $contactSettings['contact_facebook_url']->value ?? 'https://www.facebook.com/DegchiDine' }}" class="btn reels-follow-btn w-100 justify-content-center"
                   target="_blank" rel="noopener noreferrer">
                   <i class="bi bi-facebook" aria-hidden="true"></i><span>Follow on Facebook</span>
                 </a>
@@ -507,7 +513,7 @@
             </div>
 
             <div class="reels-header-right d-none d-md-flex align-items-center">
-              <a href="https://www.facebook.com/DegchiDine" class="btn reels-follow-btn" target="_blank"
+              <a href="{{ $contactSettings['contact_facebook_url']->value ?? 'https://www.facebook.com/DegchiDine' }}" class="btn reels-follow-btn" target="_blank"
                 rel="noopener noreferrer">
                 <i class="bi bi-facebook" aria-hidden="true"></i><span>Follow on Facebook</span>
               </a>
@@ -517,79 +523,41 @@
 
         <div class="reels-slider-container-wrap position-relative">
           <div id="reelsSlider" class="reels-slick reveal">
-            <div class="reel-slide-wrap">
-              <a class="reel-card" href="https://www.facebook.com/share/r/1cNLa7uWHT/" target="_blank"
-                rel="noopener noreferrer">
-                <div class="reel-card-thumb">
-                  <div class="reel-progress-indicator"></div>
-                  <img src="./images/reels/4.jpg" alt="Kitchen Rush reel" loading="lazy" />
-                  <div class="reel-card-overlay">
-                    <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
-                    <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on
-                      Facebook</span>
+            @forelse($facebookReels as $reel)
+              @php
+                $reelThumbnail = $reel->thumbnail
+                    ? (\Illuminate\Support\Str::startsWith($reel->thumbnail, ['http://', 'https://'])
+                        ? $reel->thumbnail
+                        : asset('uploads/reels/' . $reel->thumbnail))
+                    : asset('assets/frontend/images/placeholder.webp');
+                $reelUrl = $reel->facebook_url ?: 'https://www.facebook.com/DegchiDine';
+              @endphp
+              <div class="reel-slide-wrap">
+                <a class="reel-card" href="{{ $reelUrl }}" target="_blank" rel="noopener noreferrer">
+                  <div class="reel-card-thumb">
+                    <div class="reel-progress-indicator"></div>
+                    <img src="{{ $reelThumbnail }}" alt="{{ $reel->title ?? 'Facebook Reel' }}" loading="lazy" />
+                    <div class="reel-card-overlay">
+                      <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
+                      <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on Facebook</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            @empty
+              <div class="reel-slide-wrap">
+                <div class="reel-card">
+                  <div class="reel-card-thumb">
+                    <div class="reel-progress-indicator"></div>
+                    <img src="{{ asset('assets/frontend/images/placeholder.webp') }}" alt="No reels available" loading="lazy" />
+                    <div class="reel-card-overlay">
+                      <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
+                      <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on Facebook</span>
+                    </div>
                   </div>
                 </div>
-              </a>
-            </div>
-
-            <div class="reel-slide-wrap">
-              <a class="reel-card" href="https://www.facebook.com/share/r/1cNLa7uWHT/" target="_blank"
-                rel="noopener noreferrer">
-                <div class="reel-card-thumb">
-                  <div class="reel-progress-indicator"></div>
-                  <img src="./images/reels/1.jpg" alt="Chef Moments reel" loading="lazy" />
-                  <div class="reel-card-overlay">
-                    <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
-                    <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on
-                      Facebook</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            <div class="reel-slide-wrap">
-              <a class="reel-card" href="https://www.facebook.com/share/r/1cNLa7uWHT/" target="_blank"
-                rel="noopener noreferrer">
-                <div class="reel-card-thumb">
-                  <div class="reel-progress-indicator"></div>
-                  <img src="./images/reels/2.jpg" alt="Guest Vibes reel" loading="lazy" />
-                  <div class="reel-card-overlay">
-                    <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
-                    <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on
-                      Facebook</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="reel-slide-wrap">
-              <a class="reel-card" href="https://www.facebook.com/share/r/1cNLa7uWHT/" target="_blank"
-                rel="noopener noreferrer">
-                <div class="reel-card-thumb">
-                  <div class="reel-progress-indicator"></div>
-                  <img src="./images/reels/2.jpg" alt="Guest Vibes reel" loading="lazy" />
-                  <div class="reel-card-overlay">
-                    <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
-                    <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on
-                      Facebook</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            <div class="reel-slide-wrap">
-              <a class="reel-card" href="https://www.facebook.com/share/r/1cNLa7uWHT/" target="_blank"
-                rel="noopener noreferrer">
-                <div class="reel-card-thumb">
-                  <div class="reel-progress-indicator"></div>
-                  <img src="./images/reels/3.jpg" alt="Signature Dish preparation reel" loading="lazy" />
-                  <div class="reel-card-overlay">
-                    <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
-                    <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on
-                      Facebook</span>
-                  </div>
-                </div>
-              </a>
-            </div>
+              </div>
+            @endforelse
           </div>
         </div>
       </div>
@@ -601,44 +569,51 @@
         <div class="row align-items-center g-5">
           <div class="col-12 col-lg-6 reveal">
             <div class="about-content-block">
+              @php
+                $aboutKicker = optional($aboutSettings->get('about_kicker'))->value ?? 'Our Heritage';
+                $aboutTitle = optional($aboutSettings->get('about_title'))->value ?? 'The Story of Degchi Dine';
+                $aboutLead = optional($aboutSettings->get('about_lead'))->value ?? 'Bringing the authentic, slow-cooked royal culinary traditions of heritage clay-pot dining straight to your contemporary table.';
+                $aboutParagraph = optional($aboutSettings->get('about_paragraph'))->value ?? 'At Degchi Dine, every recipe tells a story of patience, craft, and passion. We specialize in traditional Dum cooking methods—where premium cuts of meat, fragrant basmati rice, and freshly crushed spice masalas are sealed tightly inside heavy vessels, allowing the ingredients to mature perfectly in their own steam.';
+                $aboutFeature1Icon = optional($aboutSettings->get('about_feature_1_icon'))->value ?? 'bi bi-fire';
+                $aboutFeature1Text = optional($aboutSettings->get('about_feature_1_text'))->value ?? 'Authentic Dum Style';
+                $aboutFeature2Icon = optional($aboutSettings->get('about_feature_2_icon'))->value ?? 'bi bi-patch-check-fill';
+                $aboutFeature2Text = optional($aboutSettings->get('about_feature_2_text'))->value ?? 'Premium Ingredients';
+                $aboutExpNumber = optional($aboutSettings->get('about_exp_number'))->value ?? '10+';
+                $aboutExpText = optional($aboutSettings->get('about_exp_text'))->value ?? 'Years Of Culinary Craft';
+                $aboutCtaUrl = optional($aboutSettings->get('about_cta_url'))->value ?? route('frontend.completeMenu');
+                $aboutImage = optional($aboutSettings->get('about_image'))->value ? asset('uploads/about/' . optional($aboutSettings->get('about_image'))->value) : asset('assets/frontend/images/about.png');
+              @endphp
+
               <span class="about-kicker text-uppercase">
-                <i class="bi bi-heart-fill me-1" aria-hidden="true"></i> Our
-                Heritage
+                <i class="bi bi-heart-fill me-1" aria-hidden="true"></i> {{ $aboutKicker }}
               </span>
               <h2 class="section-title mt-2 mb-3">
-                The Story of Degchi Dine
+                {{ $aboutTitle }}
               </h2>
               <p class="about-lead mb-4">
-                Bringing the authentic, slow-cooked royal culinary traditions
-                of heritage clay-pot dining straight to your contemporary
-                table.
+                {{ $aboutLead }}
               </p>
-              <p class="about-paragraph mb-4">
-                At Degchi Dine, every recipe tells a story of patience, craft,
-                and passion. We specialize in traditional Dum cooking
-                methods—where premium cuts of meat, fragrant basmati rice, and
-                freshly crushed spice masalas are sealed tightly inside heavy
-                vessels, allowing the ingredients to mature perfectly in their
-                own steam.
-              </p>
+              <div class="about-paragraph mb-4">
+                {!! $aboutParagraph !!}
+              </div>
 
               <div class="about-features-grid d-flex flex-wrap gap-4 mb-4">
                 <div class="about-feature-item d-flex align-items-center gap-3">
                   <div class="feature-icon-box">
-                    <i class="bi bi-fire"></i>
+                    <i class="{{ $aboutFeature1Icon }}"></i>
                   </div>
-                  <span class="feature-text text-uppercase">Authentic Dum Style</span>
+                  <span class="feature-text text-uppercase">{{ $aboutFeature1Text }}</span>
                 </div>
                 <div class="about-feature-item d-flex align-items-center gap-3">
                   <div class="feature-icon-box">
-                    <i class="bi bi-patch-check-fill"></i>
+                    <i class="{{ $aboutFeature2Icon }}"></i>
                   </div>
-                  <span class="feature-text text-uppercase">Premium Ingredients</span>
+                  <span class="feature-text text-uppercase">{{ $aboutFeature2Text }}</span>
                 </div>
               </div>
 
               <div class="about-cta-wrap">
-                <a href="about-detail.html" class="btn about-explore-btn">
+                <a href="{{ $aboutCtaUrl }}" class="btn about-explore-btn">
                   <span>Read Full Journey <i class="bi bi-arrow-right ms-2"></i></span>
                 </a>
               </div>
@@ -650,13 +625,13 @@
               <div class="about-shape-backdrop"></div>
 
               <div class="about-img-container">
-                <img src="./images/about.png" alt="Our authentic kitchen craft" class="about-main-img" />
+                <img src="{{ $aboutImage }}" alt="About image" class="about-main-img" onerror="this.src='{{ asset('assets/frontend/images/about.png') }}'" />
                 <div class="about-img-overlay"></div>
               </div>
 
               <div class="about-experience-badge text-center">
-                <span class="exp-number">10+</span>
-                <span class="exp-text text-uppercase">Years Of Culinary Craft</span>
+                <span class="exp-number">{{ $aboutExpNumber }}</span>
+                <span class="exp-text text-uppercase">{{ $aboutExpText }}</span>
               </div>
             </div>
           </div>
@@ -794,14 +769,27 @@
       <div class="container px-4 px-lg-5">
 
         <!-- Elegant Header -->
+        @php
+          $contactTitle = optional($contactSettings->get('contact_section_title'))->value ?? 'Visit Us';
+          $contactSubtitle = optional($contactSettings->get('contact_section_subtitle'))->value ?? 'We look forward to welcoming you';
+          $contactName = optional($contactSettings->get('contact_restaurant_name'))->value ?? 'Degchi Dine';
+          $contactAddress = optional($contactSettings->get('contact_address'))->value ?? 'Boropool Circle, Kaptan Villa, Halishahar, Chittagong.';
+          $contactHours = optional($contactSettings->get('contact_hours'))->value ?? 'Mon - Sun: 11:00 AM - 11:00 PM';
+          $contactPhone = optional($contactSettings->get('contact_phone'))->value ?? '+880 1234 567 890';
+          $contactMapLink = optional($contactSettings->get('contact_map_link'))->value ?: 'https://maps.google.com';
+          $contactMapEmbed = optional($contactSettings->get('contact_map_embed'))->value ?: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3690.669527376662!2d91.7766299!3d22.3283281!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDE5JzQyLjAiTiA5McKwNDYnMzUuOSJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd';
+          $contactFacebookUrl = optional($contactSettings->get('contact_facebook_url'))->value ?? 'https://www.facebook.com/DegchiDine';
+          $contactInstagramUrl = optional($contactSettings->get('contact_instagram_url'))->value ?? '#';
+        @endphp
+
         <div class="mb-5 text-center reveal py-lg-2">
-          <h2 class="section-title mt-2">Visit Us</h2>
+          <h2 class="section-title mt-2">{{ $contactTitle }}</h2>
           <div class="elegant-divider mx-auto">
             <span></span>
             <i class="fa-solid fa-map-location-dot"></i>
             <span></span>
           </div>
-          <p class="section-subtitle">We look forward to welcoming you</p>
+          <p class="section-subtitle">{{ $contactSubtitle }}</p>
         </div>
 
         <!-- The Masterpiece Location Layout -->
@@ -809,7 +797,7 @@
 
           <!-- LEFT COLUMN: The Premium Info Card -->
           <div class="location-info-card">
-            <h3 class="info-title">Degchi Dine</h3>
+            <h3 class="info-title">{{ $contactName }}</h3>
 
             <div class="info-list">
               <!-- Item 1 -->
@@ -817,7 +805,7 @@
                 <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
                 <div class="info-text">
                   <strong>Address</strong>
-                  <p>Boropool Circle, Kaptan Villa,<br>Halishahar, Chittagong.</p>
+                  <p>{!! nl2br(e($contactAddress)) !!}</p>
                 </div>
               </div>
 
@@ -826,7 +814,7 @@
                 <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
                 <div class="info-text">
                   <strong>Opening Hours</strong>
-                  <p>Mon - Sun: 11:00 AM - 11:00 PM</p>
+                  <p>{{ $contactHours }}</p>
                 </div>
               </div>
 
@@ -835,13 +823,13 @@
                 <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
                 <div class="info-text">
                   <strong>Reservations</strong>
-                  <p>+880 1234 567 890</p>
+                  <p><a href="tel:{{ preg_replace('/\D+/', '', $contactPhone) }}">{{ $contactPhone }}</a></p>
                 </div>
               </div>
             </div>
 
             <!-- Interactive CTA Button -->
-            <a href="https://maps.google.com" target="_blank" class="btn-directions">
+            <a href="{{ $contactMapLink }}" target="_blank" class="btn-directions">
               Get Directions
               <i class="fa-solid fa-arrow-right-long btn-arrow"></i>
             </a>
@@ -850,9 +838,11 @@
           <!-- RIGHT COLUMN: The Map -->
           <div class="location-map-card">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3690.669527376662!2d91.7766299!3d22.3283281!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDE5JzQyLjAiTiA5McKwNDYnMzUuOSJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd"
-              allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-              title="Degchi Dine location map"></iframe>
+              src="{{ $contactMapEmbed }}"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="{{ $contactName }} location map"></iframe>
           </div>
 
         </div>
@@ -959,5 +949,47 @@
         });
     </script>
     @endif
+
+<script>
+  // Handle view menu card button clicks in signature platters section
+  document.addEventListener('DOMContentLoaded', function() {
+    const viewPlatterCardBtns = document.querySelectorAll('.view-platter-card-btn');
+    const modalOverlay = document.querySelector('.js-modal-overlay');
+    const closeModalBtn = document.querySelector('.js-close-modal');
+    const modalImg = document.getElementById('modal-active-display-img');
+
+    viewPlatterCardBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const menuImage = this.getAttribute('data-menu-image');
+        const menuTitle = this.getAttribute('data-menu-title');
+        if (menuImage && modalImg && modalOverlay) {
+          modalImg.src = menuImage;
+          modalImg.alt = menuTitle;
+          modalOverlay.style.display = 'flex';
+        }
+      });
+    });
+
+    // Close modal when close button is clicked
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (modalOverlay) {
+          modalOverlay.style.display = 'none';
+        }
+      });
+    }
+
+    // Close modal when clicking on overlay background
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
 
 @endsection

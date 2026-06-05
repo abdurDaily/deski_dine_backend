@@ -53,6 +53,7 @@
             <x-setting-nav></x-setting-nav>
             <x-branch></x-branch>
             <x-category></x-category>
+            <x-frontend-content-nav></x-frontend-content-nav>
         </ul>
     </div>
     <!-- Sidebar -->

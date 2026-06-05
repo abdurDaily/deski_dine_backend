@@ -29,7 +29,7 @@ const syncSharedNavigationAndFooter = () => {
         index: "home",
         "index.html": "home",
         "about.html": "about",
-        "menu.html": "menu",
+        
         "complete-menu.html": "complete-menu",
         "menu-detail.html": "complete-menu",
         "complete-menu-detail.html": "complete-menu",
@@ -60,12 +60,12 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#about",
             otherHref: "/#about",
         },
-        {
-            key: "menu",
-            label: "Menu",
-            homeHref: "/#menu",
-            otherHref: "/#menu",
-        },
+        // {
+        //     key: "menu",
+        //     label: "Menu",
+        //     homeHref: "/#menu",
+        //     otherHref: "/#menu",
+        // },
         {
             key: "complete-menu",
             label: "Full Menu",
@@ -103,11 +103,11 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#about",
             otherHref: "/#about",
         },
-        {
-            label: "Menu",
-            homeHref: "/#menu",
-            otherHref: "/#menu",
-        },
+        // {
+        //     label: "Menu",
+        //     homeHref: "/#menu",
+        //     otherHref: "/#menu",
+        // },
         {
             label: "Full Menu",
             homeHref: "/menu",
