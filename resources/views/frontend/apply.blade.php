@@ -154,14 +154,21 @@
                     </div>
 
                     <div class="dd-input-group d-none" id="student_card_group">
-                        <input type="file" name="student_card" id="dd_student_card" class="dd-input-field" accept="image/*">
-                        <label for="dd_student_card" class="dd-floating-label">Upload your valid student ID*</label>
+                        <input type="file" name="student_card" id="dd_student_card" class="dd-input-field" accept="image/png,image/jpeg,image/jpg,application/pdf">
+                        <label for="dd_student_card" class="dd-floating-label">Upload your valid student ID (JPG, PNG, PDF)*</label>
                     </div>
 
-                    {{-- Image preview --}}
-                    <div class="d-none mb-3" id="student_card_preview_wrap" style="text-align:center;">
-                        <img id="student_card_preview" src="" alt="Student Card Preview" style="max-height:180px;border-radius:10px;border:2px solid rgba(40,167,69,0.3);box-shadow:0 2px 12px rgba(0,0,0,0.08);" />
-                        <div style="margin-top:6px;font-size:0.78rem;color:#888;">Preview of your student card</div>
+                    {{-- Student card preview (image or PDF indicator) --}}
+                    <div class="d-none mb-3" id="student_card_preview_wrap">
+                        <div id="student_card_img_preview" class="d-none" style="text-align:center;">
+                            <img id="student_card_preview" src="" alt="Student Card Preview"
+                                 style="max-height:180px; border-radius:10px; border:2px solid rgba(40,167,69,.3); box-shadow:0 2px 12px rgba(0,0,0,.08);" />
+                        </div>
+                        <div id="student_card_pdf_indicator" class="d-none" style="text-align:center; padding:18px; border:2px dashed rgba(40,167,69,.4); border-radius:10px; background:rgba(40,167,69,.04);">
+                            <iconify-icon icon="solar:document-bold" style="font-size:2.5rem; color:#28a745;"></iconify-icon>
+                            <div style="margin-top:6px; font-size:.85rem; font-weight:600; color:#28a745;" id="student_card_pdf_name"></div>
+                            <div style="font-size:.75rem; color:#888; margin-top:2px;">PDF document ready to upload</div>
+                        </div>
                     </div>
 
                     <label class="dd-terms-wrapper">
@@ -198,6 +205,7 @@
             } else {
                 $('#student_card_group').addClass('d-none');
                 $('#dd_student_card').prop('required', false).val('');
+                resetStudentCardPreview();
             }
         });
 
@@ -216,32 +224,48 @@
                 $('#profile_image_preview').attr('src', '');
             }
         });
-        
-        // Student card preview
+
+        // Student card preview — supports image + PDF
         $('#dd_student_card').on('change', function(){
             var file = this.files[0];
-            if(file){
+            if(!file){ resetStudentCardPreview(); return; }
+
+            $('#student_card_preview_wrap').removeClass('d-none');
+
+            if(file.type === 'application/pdf'){
+                // PDF: show file name indicator
+                $('#student_card_img_preview').addClass('d-none');
+                $('#student_card_pdf_name').text(file.name);
+                $('#student_card_pdf_indicator').removeClass('d-none');
+            } else {
+                // Image: show preview
+                $('#student_card_pdf_indicator').addClass('d-none');
                 var reader = new FileReader();
                 reader.onload = function(e){
                     $('#student_card_preview').attr('src', e.target.result);
-                    $('#student_card_preview_wrap').removeClass('d-none');
+                    $('#student_card_img_preview').removeClass('d-none');
                 };
                 reader.readAsDataURL(file);
-            } else {
-                $('#student_card_preview_wrap').addClass('d-none');
-                $('#student_card_preview').attr('src', '');
             }
         });
+
+        function resetStudentCardPreview(){
+            $('#student_card_preview_wrap').addClass('d-none');
+            $('#student_card_img_preview').addClass('d-none');
+            $('#student_card_pdf_indicator').addClass('d-none');
+            $('#student_card_preview').attr('src', '');
+            $('#student_card_pdf_name').text('');
+        }
 
         $('#privilegeCardForm').on('submit', function(e){
             e.preventDefault();
             var form = $(this);
             var submitBtn = $('#privilegeSubmitBtn');
-            
+
             submitBtn.prop('disabled', true).addClass('is-loading');
-            
+
             var formData = new FormData(this);
-            
+
             $.ajax({
                 url: form.attr('action'),
                 method: 'POST',
@@ -252,23 +276,88 @@
                 success: function(res){
                     submitBtn.prop('disabled', false).removeClass('is-loading');
                     if(res.success){
-                        $('#privilegeThanks').removeClass('d-none').text(res.message);
+                        // Reset form
                         form[0].reset();
                         $('#student_card_group').addClass('d-none');
                         $('#dd_student_card').prop('required', false);
                         $('#profile_image_preview_wrap').addClass('d-none');
                         $('#profile_image_preview').attr('src', '');
-                        $('#student_card_preview_wrap').addClass('d-none');
-                        $('#student_card_preview').attr('src', '');
+                        resetStudentCardPreview();
+
+                        // Show eye-catching success popup
+                        showSuccessPopup(res.message, res.card);
                     }
                 },
                 error: function(xhr){
                     submitBtn.prop('disabled', false).removeClass('is-loading');
-                    var msg = xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors)[0][0] : xhr.responseJSON?.message || 'Unable to register';
-                    alert(msg);
+                    var msg = xhr.responseJSON?.errors
+                        ? Object.values(xhr.responseJSON.errors)[0][0]
+                        : (xhr.responseJSON?.message || 'Unable to register. Please try again.');
+                    showErrorPopup(msg);
                 }
             });
         });
+
+        function showSuccessPopup(message, cardNumber){
+            var overlay = $('<div>').css({
+                position:'fixed', inset:0, background:'rgba(0,0,0,.6)',
+                zIndex:99999, display:'flex', alignItems:'center', justifyContent:'center'
+            });
+            var box = $('<div>').css({
+                background:'#fff', borderRadius:'20px', padding:'40px 36px',
+                maxWidth:'440px', width:'90%', textAlign:'center',
+                boxShadow:'0 24px 60px rgba(0,0,0,.35)',
+                animation:'successPopIn .4s cubic-bezier(.34,1.56,.64,1)'
+            });
+            box.html(`
+                <div style="font-size:3.5rem;margin-bottom:12px;">🎉</div>
+                <h3 style="color:#1a1a1a;font-weight:800;margin-bottom:8px;">Application Submitted!</h3>
+                <p style="color:#555;font-size:.93rem;line-height:1.6;margin-bottom:${cardNumber ? '16px' : '24px'};">${message}</p>
+                ${cardNumber ? `
+                <div style="background:#f0faf4;border:1.5px solid #28a745;border-radius:12px;padding:14px 20px;margin-bottom:22px;">
+                    <div style="font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Your Card Number</div>
+                    <div style="font-size:1.3rem;font-weight:800;color:#28a745;letter-spacing:.08em;">${cardNumber}</div>
+                    <div style="font-size:.75rem;color:#888;margin-top:4px;">Save this number — use it at checkout for your discount</div>
+                </div>` : ''}
+                <button id="successPopupClose" style="background:#28a745;color:#fff;border:none;padding:13px 32px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;width:100%;">
+                    Great, Thanks! 🎊
+                </button>
+            `);
+            overlay.append(box);
+            $('body').append(overlay);
+            overlay.find('#successPopupClose').on('click', function(){ overlay.remove(); });
+            overlay.on('click', function(e){ if(e.target===this) overlay.remove(); });
+        }
+
+        function showErrorPopup(message){
+            var overlay = $('<div>').css({
+                position:'fixed', inset:0, background:'rgba(0,0,0,.5)',
+                zIndex:99999, display:'flex', alignItems:'center', justifyContent:'center'
+            });
+            var box = $('<div>').css({
+                background:'#fff', borderRadius:'20px', padding:'36px',
+                maxWidth:'400px', width:'90%', textAlign:'center',
+                boxShadow:'0 20px 50px rgba(0,0,0,.3)'
+            });
+            box.html(`
+                <div style="font-size:3rem;margin-bottom:10px;">⚠️</div>
+                <h4 style="color:#c0392b;font-weight:700;margin-bottom:8px;">Oops!</h4>
+                <p style="color:#555;font-size:.9rem;line-height:1.55;margin-bottom:20px;">${message}</p>
+                <button id="errPopupClose" style="background:#e74c3c;color:#fff;border:none;padding:11px 28px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;">
+                    Try Again
+                </button>
+            `);
+            overlay.append(box);
+            $('body').append(overlay);
+            overlay.find('#errPopupClose').on('click', function(){ overlay.remove(); });
+            overlay.on('click', function(e){ if(e.target===this) overlay.remove(); });
+        }
     });
 </script>
+<style>
+@keyframes successPopIn {
+    from { transform: scale(.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+</style>
 @endpush

@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Backend\MemberController;
+use App\Http\Controllers\Backend\OfferController;
 use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\NotificationController;
@@ -112,12 +113,20 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
     Route::get('orders/latest-id', [OrderController::class, 'latestOrderId'])->name('orders.latestId');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // Offers CRUD
+    Route::resource('offers', OfferController::class)->except(['show']);
+    Route::post('offers/{offer}/toggle', [OfferController::class, 'toggleStatus'])->name('offers.toggle');
 });
 
 Route::name('frontend.')->group(function () {
 
     //* HOME PAGE
     Route::get('/', [HomeController::class, 'home'])->name('home');
+
+    //* OFFER CHECKING (for displaying offer badges on cards)
+    Route::get('/api/variation/{id}/offers', [App\Http\Controllers\Frontend\OfferCheckController::class, 'getOffersForVariation'])->name('api.offers.for-variation');
+    Route::get('/api/variations/with-offers', [App\Http\Controllers\Frontend\OfferCheckController::class, 'getAllVariationsWithOffers'])->name('api.offers.all-variations');
     Route::get('/add-to-cart', [HomeController::class, 'addToCart'])->name('addtocart');
     Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
     Route::get('/cards', [HomeController::class, 'cards'])->name('cards');

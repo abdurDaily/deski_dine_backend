@@ -283,8 +283,8 @@
     </div>
 
     {{-- ══ Sound toggle ══ --}}
-    <button id="soundToggleBtn" class="btn btn-secondary" title="Toggle notification sound">
-        <i class="fas fa-volume-up" id="soundIcon"></i>
+    <button id="soundToggleBtn" class="btn btn-secondary" title="Toggle new order notification sound">
+        <i class="fas fa-bell" id="soundIcon"></i>
     </button>
 @endsection
 
@@ -527,9 +527,11 @@ $(function () {
     ══════════════════════════════════════════════════ */
     $('#soundToggleBtn').on('click', function () {
         soundEnabled = !soundEnabled;
-        $('#soundIcon').toggleClass('fa-volume-up', soundEnabled).toggleClass('fa-volume-mute', !soundEnabled);
+        $('#soundIcon')
+            .toggleClass('fa-bell',      soundEnabled)
+            .toggleClass('fa-bell-slash', !soundEnabled);
         $(this).toggleClass('btn-secondary', soundEnabled).toggleClass('btn-danger', !soundEnabled);
-        toastr.info('Sound ' + (soundEnabled ? 'on' : 'off'));
+        toastr.info('Order sound ' + (soundEnabled ? 'on' : 'off'));
     });
 
 });

@@ -13,3 +13,8 @@
         <i class="ri-user-line"></i><span data-key="t-members">{{ __('Members') }}</span>
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link menu-link" href="{{ route('offers.index') }}">
+        <i class="ri-price-tag-3-line"></i><span data-key="t-offers">{{ __('Offers') }}</span>
+    </a>
+</li>

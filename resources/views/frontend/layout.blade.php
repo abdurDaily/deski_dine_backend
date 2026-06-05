@@ -48,9 +48,6 @@
           <a class="nav-link" href="{{ route('frontend.home') }}#about">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{{ route('frontend.completeMenu') }}">Full Menu</a>
         </li>
         <li class="nav-item">
@@ -109,9 +106,6 @@
         </li>
         <li class="nav-item">
           <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#about">About</a>
-        </li>
-        <li class="nav-item">
-          <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.home') }}#menu">Menu</a>
         </li>
         <li class="nav-item">
           <a data-bs-dismiss="offcanvas" class="nav-link" href="{{ route('frontend.completeMenu') }}">Full Menu</a>

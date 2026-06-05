@@ -121,7 +121,8 @@
                 <div class="menu-slide-item">
                   <a href="#" class="menu-offer-card">
                     <div class="menu-offer-image-wrap">
-                      <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" />
+                      <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image"
+                           onerror="this.src='{{ asset('assets/frontend/images/placeholder.webp') }}'" />
                     </div>
                     <div class="menu-offer-body">
                       <h5 class="menu-offer-title">{{ $menu->name }}</h5>
@@ -819,5 +820,88 @@
         </div>
       </div>
     </section>
+
+    {{-- ══ Offer Popup Ad ══ --}}
+    @if(isset($popupOffer) && $popupOffer)
+    <div id="offerPopupOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9990; align-items:center; justify-content:center;">
+        <div style="position:relative; background:#fff; border-radius:18px; max-width:480px; width:90%; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,.4); animation:offerPopIn .4s cubic-bezier(.34,1.56,.64,1);">
+            {{-- Close button --}}
+            <button onclick="closeOfferPopup()" style="position:absolute; top:12px; right:12px; z-index:2; background:rgba(0,0,0,.5); border:none; color:#fff; border-radius:50%; width:32px; height:32px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+
+            {{-- Badge --}}
+            @if($popupOffer->popup_badge)
+            <div style="position:absolute; top:16px; left:16px; z-index:2; background:#e74c3c; color:#fff; font-size:.72rem; font-weight:700; letter-spacing:.08em; padding:4px 12px; border-radius:20px; text-transform:uppercase;">
+                {{ $popupOffer->popup_badge }}
+            </div>
+            @endif
+
+            {{-- Image --}}
+            @if($popupOffer->popup_image)
+            <img src="{{ asset('storage/' . $popupOffer->popup_image) }}"
+                 alt="{{ $popupOffer->name }}"
+                 onerror="this.src='{{ asset('assets/frontend/images/placeholder.webp') }}'"
+                 style="width:100%; max-height:240px; object-fit:cover; display:block;">
+            @else
+            <div style="background:linear-gradient(135deg,#c0392b,#e74c3c); height:140px; display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:3.5rem;">🎉</span>
+            </div>
+            @endif
+
+            {{-- Body --}}
+            <div style="padding:24px 26px 28px;">
+                @if($popupOffer->discount_percent > 0)
+                <div style="font-size:2.8rem; font-weight:800; color:#e74c3c; line-height:1; margin-bottom:4px;">
+                    {{ $popupOffer->discount_percent }}% <span style="font-size:1.1rem; font-weight:600; color:#444;">OFF</span>
+                </div>
+                @endif
+                <h3 style="font-size:1.2rem; font-weight:700; color:#1a1a1a; margin:6px 0 8px;">{{ $popupOffer->name }}</h3>
+                @if($popupOffer->description)
+                <p style="font-size:.88rem; color:#666; margin:0 0 20px; line-height:1.55;">{{ $popupOffer->description }}</p>
+                @endif
+                <div style="display:flex; gap:10px;">
+                    <a href="{{ route('frontend.completeMenu') }}" style="flex:1; background:#e74c3c; color:#fff; text-align:center; padding:11px; border-radius:10px; text-decoration:none; font-weight:700; font-size:.88rem;">
+                        Order Now &rarr;
+                    </a>
+                    <button onclick="closeOfferPopup()" style="flex:1; background:#f5f5f5; color:#555; border:none; padding:11px; border-radius:10px; font-weight:600; font-size:.88rem; cursor:pointer;">
+                        Maybe Later
+                    </button>
+                </div>
+                {{-- Don't show again --}}
+                <label style="display:flex; align-items:center; gap:6px; margin-top:14px; font-size:.78rem; color:#999; cursor:pointer;">
+                    <input type="checkbox" id="offerDontShow" style="cursor:pointer;">
+                    Don't show again today
+                </label>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes offerPopIn {
+            from { transform: scale(.7); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+    </style>
+    <script>
+        (function(){
+            var key = 'offer_hidden_{{ $popupOffer->id }}';
+            var hidden = sessionStorage.getItem(key);
+            if(!hidden){
+                setTimeout(function(){
+                    var el = document.getElementById('offerPopupOverlay');
+                    if(el){ el.style.display = 'flex'; }
+                }, 1200);
+            }
+        })();
+        function closeOfferPopup(){
+            var el = document.getElementById('offerPopupOverlay');
+            if(el) el.style.display = 'none';
+            if(document.getElementById('offerDontShow')?.checked){
+                sessionStorage.setItem('offer_hidden_{{ $popupOffer->id }}', '1');
+            }
+        }
+        document.getElementById('offerPopupOverlay')?.addEventListener('click', function(e){
+            if(e.target === this) closeOfferPopup();
+        });
+    </script>
+    @endif
 
 @endsection

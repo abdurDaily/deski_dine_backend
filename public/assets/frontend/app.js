@@ -546,6 +546,8 @@ const renderCheckoutSummary = () => {
     if (itemCountHint) {
         itemCountHint.textContent = `(${itemCount} item${itemCount === 1 ? "" : "s"})`;
     }
+    // Notify checkout page that the subtotal has been set so discounts can be re-applied
+    document.dispatchEvent(new CustomEvent('cartSummaryRendered', { detail: { total } }));
 };
 
 const addToCart = (item) => {

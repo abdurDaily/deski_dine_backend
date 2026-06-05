@@ -605,8 +605,17 @@
                             </div>
                             <div class="cart-summary-row">
                                 <span>Membership Discount</span>
-                                <span id="checkoutDiscount" class="text-success fw-bold">৳ 0.00</span>
+                                <span id="checkoutDiscount" class="text-success fw-bold">- ৳ 0.00</span>
                             </div>
+                            @if(isset($activeOffer) && $activeOffer)
+                            <div class="cart-summary-row" id="offerDiscountRow">
+                                <span>
+                                    🎉 {{ $activeOffer->name }}
+                                    <span class="badge ms-1" style="background:#e74c3c;color:#fff;font-size:.68rem;padding:2px 7px;border-radius:20px;">{{ $activeOffer->discount_percent }}% OFF</span>
+                                </span>
+                                <span id="checkoutOfferDiscount" class="text-danger fw-bold">- ৳ 0.00</span>
+                            </div>
+                            @endif
                             <div class="cart-summary-row">
                                 <span>Shipping</span>
                                 <span class="cart-free-tag">Free</span>
@@ -666,10 +675,46 @@
                     }
                 }
 
-                function updateDiscountDisplay(discountAmount) {
-                    discountDisplay.textContent = `- ৳ ${discountAmount.toFixed(2)}`;
-                    const subtotal = parseFloat(orderTotalInput.value) || 0;
-                    totalDisplay.textContent = `৳ ${(subtotal - discountAmount).toFixed(2)}`;
+                // Active promotional offer injected from PHP
+                const activeOfferRate    = {{ isset($activeOffer) && $activeOffer ? $activeOffer->discount_percent : 0 }};
+                const activeOfferMinTotal = {{ isset($activeOffer) && $activeOffer && $activeOffer->min_total ? $activeOffer->min_total : 0 }};
+                const offerDiscountEl    = document.getElementById('checkoutOfferDiscount');
+
+                // Track current membership discount amount (set when card is verified)
+                let currentMemberDiscount = 0;
+
+                function getOfferDiscount(subtotal) {
+                    if (!activeOfferRate) return 0;
+                    if (activeOfferMinTotal > 0 && subtotal < activeOfferMinTotal) return 0;
+                    return parseFloat((subtotal * activeOfferRate / 100).toFixed(2));
+                }
+
+                function updateTotals(subtotal, bestDiscount) {
+                    const offerDiscount  = getOfferDiscount(subtotal);
+                    const memberDiscount = currentMemberDiscount || 0;
+
+                    if (offerDiscountEl) {
+                        offerDiscountEl.textContent = `- ৳ ${offerDiscount.toFixed(2)}`;
+                    }
+
+                    if (offerDiscount >= memberDiscount) {
+                        // Offer wins — membership row shows 0
+                        discountDisplay.textContent = `- ৳ 0.00`;
+                    } else {
+                        // Membership wins — offer row shows 0
+                        discountDisplay.textContent = `- ৳ ${memberDiscount.toFixed(2)}`;
+                        if (offerDiscountEl) offerDiscountEl.textContent = `- ৳ 0.00`;
+                    }
+
+                    totalDisplay.textContent = `৳ ${Math.max(0, subtotal - bestDiscount).toFixed(2)}`;
+                }
+
+                function updateDiscountDisplay(memberDiscountAmount) {
+                    currentMemberDiscount = memberDiscountAmount;
+                    const subtotal      = parseFloat(orderTotalInput.value) || 0;
+                    const offerDiscount = getOfferDiscount(subtotal);
+                    const bestDiscount  = Math.max(memberDiscountAmount, offerDiscount);
+                    updateTotals(subtotal, bestDiscount);
                 }
 
                 function handleQueryMessage() {
@@ -715,9 +760,12 @@
                         membershipFeedback.classList.add('text-success');
 
                         const subtotal = parseFloat(orderTotalInput.value) || 0;
-                        const discountAmount = result.eligible ? parseFloat((subtotal * (result.discount_rate /
-                            100)).toFixed(2)) : 0;
-                        updateDiscountDisplay(discountAmount);
+                        currentMemberDiscount = result.eligible
+                            ? parseFloat((subtotal * (result.discount_rate / 100)).toFixed(2))
+                            : 0;
+                        const offerDiscount = getOfferDiscount(subtotal);
+                        const bestDiscount  = Math.max(currentMemberDiscount, offerDiscount);
+                        updateTotals(subtotal, bestDiscount);
                     } catch (error) {
                         membershipFeedback.textContent = 'Unable to verify membership card at the moment.';
                         membershipFeedback.classList.remove('text-success');
@@ -737,6 +785,14 @@
                         checkMemberCardEligibility(this.value.trim());
                     });
                 }
+
+                // Re-apply discounts whenever app.js finishes rendering the cart summary
+                document.addEventListener('cartSummaryRendered', function(e) {
+                    const subtotal = e.detail.total || 0;
+                    const offerDiscount  = getOfferDiscount(subtotal);
+                    const bestDiscount   = Math.max(currentMemberDiscount, offerDiscount);
+                    updateTotals(subtotal, bestDiscount);
+                });
 
                 if (checkoutForm) {
                     checkoutForm.addEventListener('submit', async function(event) {

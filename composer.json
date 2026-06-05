@@ -36,7 +36,8 @@
         },
         "files": [
             "app/Helpers/constants.php",
-            "app/Helpers/helper.php"
+            "app/Helpers/helper.php",
+            "app/Helpers/OfferHelper.php"
         ]
     },
     "autoload-dev": {

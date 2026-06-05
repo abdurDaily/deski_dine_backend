@@ -16,13 +16,34 @@ class HomeController extends Controller
 {
     public function home()
     {
-        $categories = \App\Models\Category::with(['menus' => function ($query) {
-            $query->where('is_available', 1)->with('variations');
-        }])->where('status', 1)->get();
+        // Paginate categories with eager-loaded relationships
+        $categories = \App\Models\Category::where('status', 1)
+            ->with(['menus' => function ($query) {
+                $query->where('is_available', 1)
+                    ->select(['id', 'category_id', 'name', 'slug', 'description', 'is_available'])
+                    ->with(['variations' => function ($query) {
+                        $query->select(['id', 'menu_id', 'name', 'price', 'image']);
+                    }]);
+            }])
+            ->select(['id', 'name', 'status', 'branch_id', 'image'])
+            ->orderBy('name')
+            ->paginate(10); // Paginate 10 categories per page
 
-        $branches = \App\Models\Branch::orderBy('name')->get();
+        $branches = \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
 
-        return view('index', compact('categories', 'branches'));
+        // Active popup offer (shown as ad on home page)
+        // Use caching for popup offer to reduce queries
+        $popupOffer = \App\Models\Offer::where('is_active', true)
+            ->where('show_as_popup', true)
+            ->where(function ($q) {
+                $q->whereNull('popup_expires_at')
+                    ->orWhere('popup_expires_at', '>=', now()->toDateString());
+            })
+            ->select(['id', 'name', 'description', 'discount_percent', 'popup_image', 'popup_badge', 'popup_expires_at'])
+            ->latest()
+            ->first();
+
+        return view('index', compact('categories', 'branches', 'popupOffer'));
     }
 
     public function addToCart()
@@ -38,7 +59,18 @@ class HomeController extends Controller
 
     public function checkout()
     {
-        return view('frontend.checkout');
+        // Pass any active non-popup discount offer to the checkout page
+        $activeOffer = \App\Models\Offer::where('is_active', true)
+            ->where('discount_percent', '>', 0)
+            ->where('applicable_to', 'all')
+            ->where(function ($q) {
+                $q->whereNull('popup_expires_at')
+                    ->orWhere('popup_expires_at', '>=', now()->toDateString());
+            })
+            ->latest()
+            ->first();
+
+        return view('frontend.checkout', compact('activeOffer'));
     }
 
     public function cards()
@@ -61,7 +93,7 @@ class HomeController extends Controller
         ];
 
         if ($request->boolean('is_student')) {
-            $rules['student_card'] = 'required|file|image|max:2048';
+            $rules['student_card'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:4096';
         }
 
         $request->validate($rules);
@@ -219,6 +251,52 @@ class HomeController extends Controller
             }
         }
 
+        // Apply promotional offers discount
+        // Check for offers on specific items and calculate discount accordingly
+        $items = json_decode($request->items, true);
+        $offerDiscount = 0;
+        $itemDiscountDetails = [];
+
+        if (is_array($items) && !empty($items)) {
+            foreach ($items as &$item) {
+                $menuVariationId = $item['variation_id'] ?? $item['id'] ?? null;
+                if (!$menuVariationId) continue;
+
+                $variation = \App\Models\MenuVariation::find($menuVariationId);
+                if (!$variation) continue;
+
+                // Get active, valid offers for this variation
+                $applicableOffers = $variation->activeOffers()
+                    ->where('is_active', true)
+                    ->orderBy('discount_percent', 'desc')
+                    ->get();
+
+                if ($applicableOffers->isNotEmpty()) {
+                    $bestOffer = $applicableOffers->first();
+                    $itemTotal = ($item['price'] ?? 0) * ($item['quantity'] ?? 1);
+                    $itemDiscount = round($itemTotal * ($bestOffer->discount_percent / 100), 2);
+
+                    $offerDiscount += $itemDiscount;
+                    $itemDiscountDetails[] = [
+                        'variation_id' => $menuVariationId,
+                        'offer_id' => $bestOffer->id,
+                        'offer_name' => $bestOffer->name,
+                        'discount_percent' => $bestOffer->discount_percent,
+                        'discount_amount' => $itemDiscount,
+                    ];
+
+                    // Add offer details to item
+                    $item['offer_id'] = $bestOffer->id;
+                    $item['offer_discount'] = $itemDiscount;
+                }
+            }
+        }
+
+        // Use the higher discount: member discount or accumulated item offers
+        if ($offerDiscount > $discountAmount) {
+            $discountAmount = $offerDiscount;
+        }
+
         $orderData = [
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
@@ -226,7 +304,7 @@ class HomeController extends Controller
             'total_amount' => $request->order_total,
             'discount_amount' => $discountAmount,
             'final_amount' => max(0, $request->order_total - $discountAmount),
-            'items' => json_decode($request->items, true),
+            'items' => json_encode($items ?? json_decode($request->items, true)),
             'payment_method' => $paymentMethod,
             'status' => 'pending',
             'student_card_used' => $request->boolean('student_card'),
@@ -266,7 +344,7 @@ class HomeController extends Controller
                 ]);
             }
 
-            return redirect()->route('frontend.checkout')->with([ 'success' => 'Order placed successfully via Cash on Delivery!', 'clear_cart' => true ]);
+            return redirect()->route('frontend.checkout')->with(['success' => 'Order placed successfully via Cash on Delivery!', 'clear_cart' => true]);
         }
 
         // --- SSLCOMMERZ (EASYCHECKOUT POPUP) ---
