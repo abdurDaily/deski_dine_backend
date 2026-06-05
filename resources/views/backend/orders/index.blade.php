@@ -5,16 +5,17 @@
 <style>
     /* ─── Filter pill buttons ─── */
     .filter-btn-group .btn {
-        border-radius: 20px;
+        border-radius: 50px;
         font-weight: 600;
         font-size: 0.8rem;
-        padding: 5px 14px;
+        padding: 6px 16px;
+        line-height: 1.4;
         transition: all 0.2s ease;
     }
     .filter-btn-group .btn .badge {
         font-size: 0.7rem;
         padding: 2px 7px;
-        border-radius: 10px;
+        border-radius: 50px;
         margin-left: 4px;
         font-weight: 700;
     }
@@ -23,7 +24,7 @@
         transform: translateY(-1px);
     }
 
-    /* ─── Date range picker wrapper ─── */
+    /* ─── Date range picker ─── */
     .drp-wrapper {
         position: relative;
         display: inline-flex;
@@ -31,32 +32,37 @@
     }
     #dateRangePickerBtn {
         cursor: pointer;
-        min-width: 240px;
+        /* width: 50%;
+        min-width: 190px; */
         background: #fff;
         border: 1.5px solid #d0d7df;
-        border-radius: 8px;
-        padding: 7px 36px 7px 38px;   /* left room for icon, right for clear */
-        font-size: 0.85rem;
-        font-weight: 500;
+        border-radius: 5px;
+        padding: 6px 32px 6px 34px;
+        font-size: 0.8rem;
+        font-weight: 600;
         color: #344054;
         transition: border-color .2s, box-shadow .2s;
         white-space: nowrap;
         line-height: 1.4;
     }
     #dateRangePickerBtn:hover,
-    #dateRangePickerBtn:focus { border-color: #4a90d9; box-shadow: 0 0 0 3px rgba(74,144,217,.12); outline: none; }
+    #dateRangePickerBtn:focus {
+        border-color: #4a90d9;
+        box-shadow: 0 0 0 3px rgba(74,144,217,.12);
+        outline: none;
+    }
     .drp-wrapper .drp-icon {
         position: absolute;
-        left: 11px;
+        left: 12px;
         color: #4a90d9;
-        font-size: 0.9rem;
+        font-size: 0.78rem;
         pointer-events: none;
     }
     #drpClear {
         position: absolute;
         right: 10px;
         color: #adb5bd;
-        font-size: 1.1rem;
+        font-size: 1rem;
         line-height: 1;
         cursor: pointer;
         background: none;
@@ -66,15 +72,35 @@
     }
     #drpClear:hover { color: #dc3545; }
 
-    /* ─── Toolbar section separator ─── */
-    .toolbar-divider {
-        width: 1px;
-        height: 32px;
-        background: #dee2e6;
-        flex-shrink: 0;
+    /* ─── Search input matching pill style ─── */
+    .orders-search-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+    .orders-search-wrap .search-icon {
+        position: absolute;
+        left: 12px;
+        color: #adb5bd;
+        font-size: 0.78rem;
+        pointer-events: none;
+    }
+    #ordersSearch {
+        border-radius: 5px;
+        border: 1.5px solid #d0d7df;
+        padding: 6px 16px 6px 32px;
+        font-size: 0.8rem;
+        min-width: 190px;
+        line-height: 1.4;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    #ordersSearch:focus {
+        border-color: #4a90d9;
+        box-shadow: 0 0 0 3px rgba(74,144,217,.12);
+        outline: none;
     }
 
-    /* ─── Unread / new-order row — soft blue glow ─── */
+    /* ─── Unread / new-order rows ─── */
     tr.row-new-order { position: relative; }
     tr.row-new-order td {
         background: linear-gradient(90deg, #e8f4fd 0%, #f0f8ff 100%) !important;
@@ -132,7 +158,7 @@
         box-shadow: 0 3px 12px rgba(0,0,0,.2);
     }
 
-    /* ─── DataTable: hide built-in search box ─── */
+    /* ─── Hide DataTable's own search box ─── */
     .dataTables_wrapper .dataTables_filter { display: none; }
 </style>
 @endpush
@@ -144,69 +170,52 @@
         <div class="col-12">
             <div class="card shadow-sm">
 
-                {{-- ══ Card Header ══ --}}
+                {{-- ══ Single toolbar row: pills + date picker + search ══ --}}
                 <div class="card-header py-3" style="background:#f8f9fb; border-bottom:1px solid #e9ecef;">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
 
-                        {{-- Left: Title --}}
-                        <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
-                            <span class="avatar-xs rounded-circle bg-primary-soft d-inline-flex align-items-center justify-content-center" style="width:32px;height:32px;">
-                                <i class="fas fa-receipt text-primary" style="font-size:.85rem;"></i>
-                            </span>
-                            Orders
-                        </h5>
+                        {{-- Left: Status filter pills --}}
+                        <div class="filter-btn-group d-flex flex-wrap align-items-center gap-2">
+                            <button class="btn btn-dark active" data-filter="">
+                                <i class="fas fa-list-ul me-1"></i>All
+                                <span class="badge bg-white text-dark" id="count-all">{{ $counts['all'] ?? 0 }}</span>
+                            </button>
+                            <button class="btn btn-warning" data-filter="pending">
+                                <i class="fas fa-clock me-1"></i>Pending
+                                <span class="badge bg-white text-warning" id="count-pending">{{ $counts['pending'] ?? 0 }}</span>
+                            </button>
+                            <button class="btn btn-info text-white" data-filter="confirmed">
+                                <i class="fas fa-check-circle me-1"></i>Confirmed
+                                <span class="badge bg-white text-info" id="count-confirmed">{{ $counts['confirmed'] ?? 0 }}</span>
+                            </button>
+                            <button class="btn btn-success" data-filter="completed">
+                                <i class="fas fa-check-double me-1"></i>Completed
+                                <span class="badge bg-white text-success" id="count-completed">{{ $counts['completed'] ?? 0 }}</span>
+                            </button>
+                            <button class="btn btn-danger" data-filter="canceled">
+                                <i class="fas fa-times-circle me-1"></i>Canceled
+                                <span class="badge bg-white text-danger" id="count-canceled">{{ $counts['canceled'] ?? 0 }}</span>
+                            </button>
+                        </div>
 
-                        {{-- Right: Toolbar --}}
+                        {{-- Right: Date picker + Search (same pill height) --}}
                         <div class="d-flex flex-wrap align-items-center gap-2">
 
-                            {{-- Date Range Picker --}}
                             <div class="drp-wrapper">
                                 <i class="fas fa-calendar-alt drp-icon"></i>
                                 <input id="dateRangePickerBtn" type="text" readonly
                                        placeholder="Select date range" />
-                                <button id="drpClear" class="d-none" title="Clear date filter">&times;</button>
+                                <button id="drpClear" class="d-none" title="Clear">&times;</button>
                             </div>
 
-                            <div class="toolbar-divider"></div>
-
-                            {{-- Search --}}
-                            <div class="input-group" style="max-width:220px;">
-                                <span class="input-group-text bg-white border-end-0" style="border-radius:8px 0 0 8px; border:1.5px solid #d0d7df; border-right:none;">
-                                    <i class="fas fa-search text-muted" style="font-size:.8rem;"></i>
-                                </span>
+                            <div class="orders-search-wrap">
+                                <i class="fas fa-search search-icon"></i>
                                 <input id="ordersSearch" type="search"
-                                       class="form-control border-start-0 ps-0"
-                                       style="border-radius:0 8px 8px 0; border:1.5px solid #d0d7df; border-left:none; font-size:.85rem;"
                                        placeholder="Name, phone, card…" />
                             </div>
 
-                        </div>{{-- /toolbar --}}
-                    </div>
-                </div>
+                        </div>
 
-                {{-- ══ Filter Buttons ══ --}}
-                <div class="px-3 pt-3 pb-0">
-                    <div class="filter-btn-group d-flex flex-wrap gap-2">
-                        <button class="btn btn-dark active" data-filter="">
-                            <i class="fas fa-list-ul me-1"></i>All
-                            <span class="badge bg-white text-dark" id="count-all">{{ $counts['all'] ?? 0 }}</span>
-                        </button>
-                        <button class="btn btn-warning" data-filter="pending">
-                            <i class="fas fa-clock me-1"></i>Pending
-                            <span class="badge bg-white text-warning" id="count-pending">{{ $counts['pending'] ?? 0 }}</span>
-                        </button>
-                        <button class="btn btn-info text-white" data-filter="confirmed">
-                            <i class="fas fa-check-circle me-1"></i>Confirmed
-                            <span class="badge bg-white text-info" id="count-confirmed">{{ $counts['confirmed'] ?? 0 }}</span>
-                        </button>
-                        <button class="btn btn-success" data-filter="completed">
-                            <i class="fas fa-check-double me-1"></i>Completed
-                            <span class="badge bg-white text-success" id="count-completed">{{ $counts['completed'] ?? 0 }}</span>
-                        </button>
-                        <button class="btn btn-danger" data-filter="canceled">
-                            <i class="fas fa-times-circle me-1"></i>Canceled
-                            <span class="badge bg-white text-danger" id="count-canceled">{{ $counts['canceled'] ?? 0 }}</span>
-                        </button>
                     </div>
                 </div>
 
@@ -234,7 +243,7 @@
                     </div>
                 </div>
 
-            </div>{{-- /card --}}
+            </div>
         </div>
     </div>
 
@@ -310,35 +319,28 @@ $(function () {
         }
     });
 
-    // Apply — update state + redraw
     $('#dateRangePickerBtn').on('apply.daterangepicker', function(ev, picker) {
         dateFrom = picker.startDate.format('YYYY-MM-DD');
         dateTo   = picker.endDate.format('YYYY-MM-DD');
 
-        const isToday   = dateFrom === todayStr && dateTo === todayStr;
-        const isSameDay = dateFrom === dateTo;
-
-        // Show a tidy label
+        const isToday = dateFrom === todayStr && dateTo === todayStr;
         if (isToday) {
-            $(this).val('Today  —  ' + picker.startDate.format('MMM D, YYYY'));
-        } else if (isSameDay) {
+            $(this).val('Today');
+            $('#drpClear').addClass('d-none');
+        } else if (dateFrom === dateTo) {
             $(this).val(picker.startDate.format('MMM D, YYYY'));
+            $('#drpClear').removeClass('d-none');
         } else {
             $(this).val(picker.startDate.format('MMM D') + '  →  ' + picker.endDate.format('MMM D, YYYY'));
+            $('#drpClear').removeClass('d-none');
         }
-
-        // Show the clear button only when NOT on today
-        isToday ? $('#drpClear').addClass('d-none') : $('#drpClear').removeClass('d-none');
-
         table.draw();
     });
 
-    // Cancel = revert to All Time
     $('#dateRangePickerBtn').on('cancel.daterangepicker', function() {
         clearDateFilter();
     });
 
-    // × button
     $('#drpClear').on('click', function(e) {
         e.stopPropagation();
         clearDateFilter();
@@ -347,14 +349,13 @@ $(function () {
     function clearDateFilter() {
         dateFrom = '';
         dateTo   = '';
-        $('#dateRangePickerBtn').val('');
-        $('#dateRangePickerBtn').attr('placeholder', 'All Dates');
+        $('#dateRangePickerBtn').val('All Time');
         $('#drpClear').addClass('d-none');
         table.draw();
     }
 
-    // Seed the label for the default "Today" selection
-    $('#dateRangePickerBtn').val('Today  —  ' + moment().format('MMM D, YYYY'));
+    // Seed label for the default "Today"
+    $('#dateRangePickerBtn').val('Today');
 
     /* ══════════════════════════════════════════════════
        2. DATATABLE
