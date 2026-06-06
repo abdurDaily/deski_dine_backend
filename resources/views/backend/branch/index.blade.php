@@ -386,21 +386,20 @@
                 $('.error-text').text('');
 
                 // Get ID from both sources to be sure
-                currentEditId = $(this).attr('data-edit-id') || $(this)[0].dataset.editId || null;
+                let editId = $(this).attr('data-edit-id') || $(this)[0].dataset.editId || '';
                 
-                if (currentEditId === 'undefined' || currentEditId === '') {
-                    currentEditId = null;
-                }
+                // Ensure it's not undefined, 'undefined', 'store', or empty string
+                currentEditId = (editId && editId !== 'undefined' && editId !== 'store' && editId !== '') ? editId : null;
                 
                 let url = currentEditId ? "{{ route('admin.branch.update', ':id') }}".replace(':id', currentEditId) : "{{ route('admin.branch.store') }}";
 
                 let formData = new FormData(this);
                 
                 console.log('=== FORM SUBMIT ===');
-                console.log('Edit ID:', currentEditId);
+                console.log('Raw ID:', editId);
+                console.log('Processed ID:', currentEditId);
                 console.log('URL:', url);
                 console.log('Is Edit Mode:', !!currentEditId);
-                console.log('Form Data Keys:', Array.from(formData.keys()));
 
                 $.ajax({
                     url: url,

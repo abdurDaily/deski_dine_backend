@@ -30,7 +30,7 @@ class BranchController extends Controller
                             <i class="ri-pencil-line"></i>
                         </button>
                         <button type="button" class="btn btn-sm btn-soft-success copy-link-btn" data-id="' . $row->id . '" data-slug="' . $row->slug . '" title="Copy Link">
-                            <i class="ri-link-copy"></i>
+                            <span>🔗</span>
                         </button>
                         <button type="button" class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '" data-name="' . $row->name . '" title="Delete">
                             <i class="ri-delete-bin-line"></i>
@@ -218,17 +218,10 @@ class BranchController extends Controller
         }
 
         foreach ($logoFields as $field) {
-            // If updating and no new file is uploaded, keep the existing one
-            if ($branch && !$request->hasFile($field)) {
-                if ($branch->$field) {
-                    $branchData[$field] = $branch->$field;
-                }
-                continue;
-            }
-
-            if ($request->hasFile($field)) {
+            // Check if file was uploaded
+            if ($request->hasFile($field) && $request->file($field)->isValid()) {
                 // Delete old file if updating
-                if ($branch && $branch->$field) {
+                if ($branch && isset($branch->$field) && $branch->$field) {
                     $oldPath = $uploadDir . '/' . $branch->$field;
                     if (file_exists($oldPath)) {
                         @unlink($oldPath);
@@ -241,12 +234,18 @@ class BranchController extends Controller
                     $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
                     $file->move($uploadDir, $filename);
                     $branchData[$field] = $filename;
+                    \Log::info('Uploaded file for ' . $field . ': ' . $filename);
                 } catch (\Exception $e) {
                     \Log::error('File upload error for ' . $field . ': ' . $e->getMessage());
                     // Continue without this file - don't break the update
                     if (!$branch) {
                         $branchData[$field] = null;
                     }
+                }
+            } else if ($branch) {
+                // If updating and no new file uploaded, keep existing
+                if (isset($branch->$field) && $branch->$field) {
+                    $branchData[$field] = $branch->$field;
                 }
             }
         }
