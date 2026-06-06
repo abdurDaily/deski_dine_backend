@@ -54,12 +54,12 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#home",
             otherHref: "/#home",
         },
-        {
-            key: "branches",
-            label: "Branches",
-            homeHref: "/#new_branch",
-            otherHref: "/#new_branch",
-        },
+        // {
+        //     key: "branches",
+        //     label: "Branches",
+        //     homeHref: "/#new_branch",
+        //     otherHref: "/#new_branch",
+        // },
         // {
         //     key: "about",
         //     label: "About",
@@ -84,12 +84,12 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/cards",
             otherHref: "/cards",
         },
-        // {
-        //     key: "reviews",
-        //     label: "Reviews",
-        //     homeHref: "/#testimonials",
-        //     otherHref: "/#testimonials",
-        // },
+        {
+            key: "reviews",
+            label: "Reviews",
+            homeHref: "/#testimonials",
+            otherHref: "/#testimonials",
+        },
         {
             key: "contact",
             label: "Contact",
@@ -124,6 +124,12 @@ const syncSharedNavigationAndFooter = () => {
             label: "Full Menu",
             homeHref: "/menu",
             otherHref: "/menu",
+        },
+        {
+            key: "reviews",
+            label: "Reviews",
+            homeHref: "/#testimonials",
+            otherHref: "/#testimonials",
         },
         {
             label: "Privilege Card",

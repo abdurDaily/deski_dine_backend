@@ -18,3 +18,8 @@
         <i class="ri-price-tag-3-line"></i><span data-key="t-offers">{{ __('Offers') }}</span>
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link menu-link" href="{{ route('admin.reviews.index') }}">
+        <i class="ri-star-line"></i><span data-key="t-reviews">{{ __('Reviews') }}</span>
+    </a>
+</li>

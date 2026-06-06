@@ -13,6 +13,7 @@ use Database\Seeders\UsersPermissionSeeder;
 use Database\Seeders\SettingPermissionSeeder;
 use Database\Seeders\MenuSeeder;
 use Database\Seeders\SignaturePlatterSeeder;
+use Database\Seeders\ReviewSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 CurrencySettingSeeder::class,
                 MenuSeeder::class,
                 SignaturePlatterSeeder::class,
+                ReviewSeeder::class,
             ]
         );
     }

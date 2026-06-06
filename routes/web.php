@@ -111,6 +111,12 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
         Route::get('branch/{id}/edit', [App\Http\Controllers\Backend\BranchController::class, 'edit'])->name('branch.edit');
         Route::post('branch/{id}', [App\Http\Controllers\Backend\BranchController::class, 'update'])->name('branch.update');
         Route::delete('branch/{id}', [App\Http\Controllers\Backend\BranchController::class, 'destroy'])->name('branch.delete');
+
+        // Admin review management
+        Route::get('reviews', [App\Http\Controllers\Backend\ReviewController::class, 'index'])->name('reviews.index');
+        Route::post('reviews/{review}/approve', [App\Http\Controllers\Backend\ReviewController::class, 'approve'])->name('reviews.approve');
+        Route::post('reviews/{review}/reject', [App\Http\Controllers\Backend\ReviewController::class, 'reject'])->name('reviews.reject');
+        Route::delete('reviews/{review}', [App\Http\Controllers\Backend\ReviewController::class, 'delete'])->name('reviews.delete');
     });
     // User account orders & invoices
     Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');
@@ -148,6 +154,12 @@ Route::name('frontend.')->group(function () {
     Route::post('/order', [HomeController::class, 'storeOrder'])->name('order.store');
     Route::get('/member/check', [HomeController::class, 'checkMemberCard'])->name('member.check');
     Route::get('/menu', [HomeController::class, 'completeMenu'])->name('completeMenu');
+
+    //* REVIEWS
+    Route::get('/reviews', [App\Http\Controllers\Frontend\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/reviews', [App\Http\Controllers\Frontend\ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews/verify-member', [App\Http\Controllers\Frontend\ReviewController::class, 'verifyMember'])->name('reviews.verify-member');
+    Route::get('/contact', [App\Http\Controllers\Frontend\ReviewController::class, 'contact'])->name('contact');
 });
 
 Route::prefix('payment')->name('payment.')->group(function () {
