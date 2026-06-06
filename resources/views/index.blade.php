@@ -577,118 +577,69 @@
         </div>
 
         <div class="reviews-slider">
-          <div class="review-slide-item">
-            <div class="review-card">
-              <div class="review-quote-icon">
-                <i class="bi bi-quote"></i>
-              </div>
-              <div class="review-stars mb-3">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-              </div>
-              <p class="review-text">
-                "Authentic flavors that remind me of old traditional cookery.
-                The premium Kacchi items are absolutely worth every visit."
-              </p>
-              <hr class="review-divider" />
-              <div class="review-author">
-                <img src="https://i.pravatar.cc/150?u=asif" class="review-avatar" alt="Asif R." />
-                <div class="author-info">
-                  <strong class="d-block">Asif R.</strong>
-                  <span class="text-muted small">Food Enthusiast</span>
+          @forelse($reviews as $review)
+            <div class="review-slide-item">
+              <div class="review-card">
+                <div class="review-quote-icon">
+                  <i class="bi bi-quote"></i>
+                </div>
+                <div class="review-stars mb-3">
+                  @for($i = 1; $i <= 5; $i++)
+                    @if($i <= $review->rating)
+                      <i class="bi bi-star-fill"></i>
+                    @else
+                      <i class="bi bi-star"></i>
+                    @endif
+                  @endfor
+                </div>
+                <p class="review-text">
+                  "{{ $review->comment }}"
+                </p>
+                <hr class="review-divider" />
+                <div class="review-author">
+                  @php
+                    $avatarUrl = $review->image 
+                      ? asset('storage/' . $review->image)
+                      : 'https://i.pravatar.cc/150?u=' . urlencode($review->email ?? $review->name);
+                  @endphp
+                  <img src="{{ $avatarUrl }}" class="review-avatar" alt="{{ $review->name }}" onerror="this.src='https://i.pravatar.cc/150?u={{ urlencode($review->name) }}'" />
+                  <div class="author-info">
+                    <strong class="d-block">{{ $review->name }}</strong>
+                    <span class="text-muted small">{{ $review->title ?? 'Guest' }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="review-slide-item">
-            <div class="review-card">
-              <div class="review-quote-icon">
-                <i class="bi bi-quote"></i>
-              </div>
-              <div class="review-stars mb-3">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-              </div>
-              <p class="review-text">
-                "The atmosphere is elegant without feeling stiff. Every course
-                was balanced, flavorful, and beautifully presented."
-              </p>
-              <hr class="review-divider" />
-              <div class="review-author">
-                <img src="https://i.pravatar.cc/150?u=eleanor" class="review-avatar" alt="Eleanor W." />
-                <div class="author-info">
-                  <strong class="d-block">Eleanor W.</strong>
-                  <span class="text-muted small">Regular Guest</span>
+          @empty
+            <div class="review-slide-item">
+              <div class="review-card">
+                <div class="review-quote-icon">
+                  <i class="bi bi-quote"></i>
+                </div>
+                <div class="review-stars mb-3">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                </div>
+                <p class="review-text">
+                  "No reviews yet. Be the first to share your experience with us!"
+                </p>
+                <hr class="review-divider" />
+                <div class="review-author">
+                  <img src="https://i.pravatar.cc/150?u=degchi" class="review-avatar" alt="Degchi Dine" />
+                  <div class="author-info">
+                    <strong class="d-block">Degchi Dine</strong>
+                    <span class="text-muted small">Coming Soon</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="review-slide-item">
-            <div class="review-card">
-              <div class="review-quote-icon">
-                <i class="bi bi-quote"></i>
-              </div>
-              <div class="review-stars mb-3">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-              </div>
-              <p class="review-text">
-                "From arrival to dessert, service was impeccable. A perfect
-                venue for formal client dinners and traditional feasts."
-              </p>
-              <hr class="review-divider" />
-              <div class="review-author">
-                <img src="https://i.pravatar.cc/150?u=daniel" class="review-avatar" alt="Daniel C." />
-                <div class="author-info">
-                  <strong class="d-block">Daniel C.</strong>
-                  <span class="text-muted small">Business Dining</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="review-slide-item">
-            <div class="review-card">
-              <div class="review-quote-icon">
-                <i class="bi bi-quote"></i>
-              </div>
-              <div class="review-stars mb-3">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-              </div>
-              <p class="review-text">
-                "The best dining experience in Chittagong. The staff knows
-                exactly how to treat you like royalty while serving hot, fresh
-                food."
-              </p>
-              <hr class="review-divider" />
-              <div class="review-author">
-                <img src="https://i.pravatar.cc/150?u=mira" class="review-avatar" alt="Mira L." />
-                <div class="author-info">
-                  <strong class="d-block">Mira L.</strong>
-                  <span class="text-muted small">Seasonal Guest</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          @endforelse
         </div>
       </div>
     </section>
-    <!--  -->
 
 
     <section class="section-block pt-0" id="location">

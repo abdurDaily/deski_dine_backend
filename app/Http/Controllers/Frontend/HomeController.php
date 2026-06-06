@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\Offer;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\Setting;
 use App\Models\SignaturePlatter;
 use App\Models\FacebookReel;
@@ -75,6 +76,12 @@ class HomeController extends Controller
             ->get()
             ->keyBy('key');
 
+        // Fetch last 10 approved reviews
+        $reviews = Review::where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
         // Cache popup offer for 5 minutes
         $popupOffer = cache()->remember('home_popup_offer', 300, function () {
             return \App\Models\Offer::where('is_active', true)
@@ -97,6 +104,7 @@ class HomeController extends Controller
             'aboutSettings' => $aboutSettings,
             'contactSettings' => $contactSettings,
             'popupOffer' => $popupOffer,
+            'reviews' => $reviews,
         ]);
     }
 

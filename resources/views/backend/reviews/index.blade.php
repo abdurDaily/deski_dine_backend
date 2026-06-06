@@ -100,7 +100,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table id="reviewsTable" class="table table-hover mb-0">
+                        <table id="reviewsTable" class="table reviews-datatable table-hover mb-0">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
@@ -295,38 +295,31 @@
 
 @push('back_js')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
 <script>
     $(function() {
-        let table = $('#reviewsTable').DataTable({
+        let table = $('.reviews-datatable').DataTable({
             processing: true,
             serverSide: true,
-            ajax: {
-                url: '{{ route("admin.reviews.index") }}',
-                type: 'GET',
-                error: function(xhr, error, thrown) {
-                    console.log('AJAX Error:', error, thrown);
-                    console.log('Response:', xhr.responseText);
-                }
-            },
+            responsive: true,
+            autoWidth: false,
+            pageLength: 10,
+            ajax: "{{ route('admin.reviews.index') }}",
             columns: [
-                {data: 'id', name: 'id'},
-                {data: 'name', name: 'name'},
-                {data: 'email', name: 'email'},
-                {data: 'rating', name: 'rating'},
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', width: '60px'},
+                {data: 'name_with_image', name: 'name', orderable: false},
+                {data: 'email_display', name: 'email'},
+                {data: 'rating_display', name: 'rating', orderable: false},
                 {data: 'title', name: 'title'},
-                {data: 'comment', name: 'comment'},
-                {data: 'status', name: 'status'},
+                {data: 'comment_preview', name: 'comment'},
+                {data: 'status_badge', name: 'status', orderable: false},
                 {data: 'created_at', name: 'created_at'},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
-            ],
-            order: [[7, 'desc']],
-            pageLength: 10,
-            language: {
-                emptyTable: 'No reviews found'
-            }
+            ]
         });
 
         // View Review

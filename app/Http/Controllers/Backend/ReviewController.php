@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class ReviewController extends Controller
 {
@@ -16,99 +17,74 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $draw = intval($request->input('draw', 0));
-            $start = intval($request->input('start', 0));
-            $length = intval($request->input('length', 10));
-            $searchValue = $request->input('search.value', '');
+            $data = Review::latest()->get();
 
-            // Build query
-            $query = Review::query();
-
-            // Apply search
-            if (!empty($searchValue)) {
-                $query->where(function($q) use ($searchValue) {
-                    $q->where('name', 'like', "%{$searchValue}%")
-                      ->orWhere('email', 'like', "%{$searchValue}%")
-                      ->orWhere('comment', 'like', "%{$searchValue}%");
-                });
-            }
-
-            // Get counts
-            $totalRecords = Review::count();
-            $filteredRecords = $query->count();
-
-            // Get paginated data
-            $reviews = $query->orderBy('created_at', 'desc')
-                ->skip($start)
-                ->take($length)
-                ->get();
-
-            // Build response data
-            $data = [];
-            foreach ($reviews as $review) {
-                // Build action buttons
-                $viewBtn = '<button class="btn btn-sm btn-outline-primary btn-view" data-id="' . $review->id . '" data-image="' . ($review->image ? asset('storage/' . $review->image) : '') . '" data-name="' . htmlspecialchars($review->name) . '" data-email="' . ($review->email ?? '-') . '" data-rating="' . $review->rating . '" data-title="' . htmlspecialchars($review->title ?? '') . '" data-comment="' . htmlspecialchars($review->comment) . '" data-status="' . $review->status . '" data-created="' . $review->created_at->format('M d, Y H:i') . '" data-approved="' . ($review->approved_at ? $review->approved_at->format('M d, Y H:i') : '') . '" title="View"><i class="ri-eye-line"></i></button>';
-
-                $approveBtn = ($review->status !== 'approved') 
-                    ? '<button class="btn btn-sm btn-outline-success btn-approve" data-id="' . $review->id . '" title="Approve"><i class="ri-check-line"></i></button>' 
-                    : '';
-
-                $rejectBtn = ($review->status !== 'rejected') 
-                    ? '<button class="btn btn-sm btn-outline-danger btn-reject" data-id="' . $review->id . '" title="Reject"><i class="ri-close-line"></i></button>' 
-                    : '';
-
-                $deleteBtn = '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $review->id . '" title="Delete"><i class="ri-delete-bin-line"></i></button>';
-
-                $actions = '<div class="btn-group btn-group-sm">' . $viewBtn . $approveBtn . $rejectBtn . $deleteBtn . '</div>';
-
-                // Build image HTML
-                $imageHtml = '';
-                if ($review->image) {
-                    $imageHtml = '<img src="' . asset('storage/' . $review->image) . '" alt="' . htmlspecialchars($review->name) . '" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">';
-                } else {
-                    $gravatarId = $review->email ? urlencode($review->email) : urlencode($review->name);
-                    $imageHtml = '<img src="https://i.pravatar.cc/32?u=' . $gravatarId . '" alt="' . htmlspecialchars($review->name) . '" style="width: 32px; height: 32px; border-radius: 50%;">';
-                }
-
-                // Build name with image
-                $nameHtml = '<div style="display: flex; align-items: center; gap: 0.5rem;"><div>' . $imageHtml . '</div><div>' . htmlspecialchars($review->name) . '</div></div>';
-
-                // Build email HTML
-                $emailHtml = $review->email 
-                    ? '<a href="mailto:' . htmlspecialchars($review->email) . '">' . htmlspecialchars($review->email) . '</a>'
-                    : '<span class="text-muted">-</span>';
-
-                // Build rating HTML
-                $ratingHtml = '<div style="color: #f39c12; font-size: 1.1rem;">' . str_repeat('★', $review->rating) . str_repeat('☆', 5 - $review->rating) . '</div>';
-
-                // Build status badge
-                $statusClass = 'bg-warning';
-                if ($review->status === 'approved') $statusClass = 'bg-success';
-                if ($review->status === 'rejected') $statusClass = 'bg-danger';
-                $statusHtml = '<span class="badge ' . $statusClass . '">' . ucfirst($review->status) . '</span>';
-
-                $data[] = [
-                    'id' => $review->id,
-                    'name' => $nameHtml,
-                    'email' => $emailHtml,
-                    'rating' => $ratingHtml,
-                    'title' => htmlspecialchars($review->title ?? '-'),
-                    'comment' => htmlspecialchars(substr($review->comment, 0, 50)) . (strlen($review->comment) > 50 ? '...' : ''),
-                    'status' => $statusHtml,
-                    'created_at' => $review->created_at->format('M d, Y'),
-                    'action' => $actions,
-                ];
-            }
-
-            return response()->json([
-                'draw' => $draw,
-                'recordsTotal' => $totalRecords,
-                'recordsFiltered' => $filteredRecords,
-                'data' => $data,
-            ]);
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('member_image', function($row) {
+                    if ($row->image) {
+                        return '<img src="' . asset('storage/' . $row->image) . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">';
+                    } else {
+                        $gravatarId = $row->email ? urlencode($row->email) : urlencode($row->name);
+                        return '<img src="https://i.pravatar.cc/32?u=' . $gravatarId . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%;">';
+                    }
+                })
+                ->addColumn('name_with_image', function($row) {
+                    $image = $row->image 
+                        ? '<img src="' . asset('storage/' . $row->image) . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">'
+                        : '<img src="https://i.pravatar.cc/32?u=' . urlencode($row->email ?? $row->name) . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%;">';
+                    return '<div style="display: flex; align-items: center; gap: 0.5rem;"><div>' . $image . '</div><div>' . htmlspecialchars($row->name) . '</div></div>';
+                })
+                ->addColumn('email_display', function($row) {
+                    return $row->email ? '<a href="mailto:' . htmlspecialchars($row->email) . '">' . htmlspecialchars($row->email) . '</a>' : '<span class="text-muted">-</span>';
+                })
+                ->addColumn('rating_display', function($row) {
+                    return '<div style="color: #f39c12; font-size: 1.1rem;">' . str_repeat('★', $row->rating) . str_repeat('☆', 5 - $row->rating) . '</div>';
+                })
+                ->addColumn('status_badge', function($row) {
+                    $class = 'bg-warning';
+                    if ($row->status === 'approved') $class = 'bg-success';
+                    if ($row->status === 'rejected') $class = 'bg-danger';
+                    return '<span class="badge ' . $class . '">' . ucfirst($row->status) . '</span>';
+                })
+                ->addColumn('comment_preview', function($row) {
+                    return htmlspecialchars(substr($row->comment, 0, 50)) . (strlen($row->comment) > 50 ? '...' : '');
+                })
+                ->addColumn('action', function($row) {
+                    $buttons = '<div class="btn-group btn-group-sm" role="group">';
+                    
+                    $buttons .= '<button type="button" class="btn btn-outline-primary btn-view" 
+                        data-id="' . $row->id . '" 
+                        data-image="' . ($row->image ? asset('storage/' . $row->image) : '') . '" 
+                        data-name="' . htmlspecialchars($row->name) . '" 
+                        data-email="' . ($row->email ?? '-') . '" 
+                        data-rating="' . $row->rating . '" 
+                        data-title="' . htmlspecialchars($row->title ?? '') . '" 
+                        data-comment="' . htmlspecialchars($row->comment) . '" 
+                        data-status="' . $row->status . '" 
+                        data-created="' . $row->created_at->format('M d, Y H:i') . '" 
+                        data-approved="' . ($row->approved_at ? $row->approved_at->format('M d, Y H:i') : '') . '" 
+                        title="View"><i class="ri-eye-line"></i></button>';
+                    
+                    if ($row->status !== 'approved') {
+                        $buttons .= '<button type="button" class="btn btn-outline-success btn-approve" data-id="' . $row->id . '" title="Approve"><i class="ri-check-line"></i></button>';
+                    }
+                    
+                    if ($row->status !== 'rejected') {
+                        $buttons .= '<button type="button" class="btn btn-outline-danger btn-reject" data-id="' . $row->id . '" title="Reject"><i class="ri-close-line"></i></button>';
+                    }
+                    
+                    $buttons .= '<button type="button" class="btn btn-outline-danger btn-delete" data-id="' . $row->id . '" title="Delete"><i class="ri-delete-bin-line"></i></button>';
+                    
+                    $buttons .= '</div>';
+                    
+                    return $buttons;
+                })
+                ->rawColumns(['name_with_image', 'email_display', 'rating_display', 'status_badge', 'action', 'member_image'])
+                ->make(true);
         }
 
-        // Non-AJAX request - show page with stats
+        // Non-AJAX request - return view
         $pending = Review::where('status', 'pending')->count();
         $approved = Review::where('status', 'approved')->count();
         $rejected = Review::where('status', 'rejected')->count();

@@ -28,7 +28,7 @@ const syncSharedNavigationAndFooter = () => {
         "": "home",
         index: "home",
         "index.html": "home",
-        "about.html": "about",
+        // "about.html": "about",
         
         "complete-menu.html": "complete-menu",
         "menu-detail.html": "complete-menu",
@@ -40,8 +40,8 @@ const syncSharedNavigationAndFooter = () => {
         cards: "privilege",
         "card-apply": "privilege",
         "privilege-card.html": "privilege",
-        "contact.html": "contact",
-        "review.html": "reviews",
+        contact: "contact",
+        reviews: "reviews",
         menu: "complete-menu",
     };
 
@@ -87,14 +87,14 @@ const syncSharedNavigationAndFooter = () => {
         {
             key: "reviews",
             label: "Reviews",
-            homeHref: "/#testimonials",
-            otherHref: "/#testimonials",
+            homeHref: "/reviews",
+            otherHref: "/reviews",
         },
         {
             key: "contact",
             label: "Contact",
-            homeHref: "/#contact",
-            otherHref: "/#contact",
+            homeHref: "/contact",
+            otherHref: "/contact",
         },
     ];
 
@@ -104,12 +104,12 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#home",
             otherHref: "/#home",
         },
-        {
-            key: "branches",
-            label: "Branches",
-            homeHref: "/#new_branch",
-            otherHref: "/#new_branch",
-        },
+        // {
+        //     key: "branches",
+        //     label: "Branches",
+        //     homeHref: "/#new_branch",
+        //     otherHref: "/#new_branch",
+        // },
         // {
         //     label: "About Us",
         //     homeHref: "/#about",
@@ -128,8 +128,8 @@ const syncSharedNavigationAndFooter = () => {
         {
             key: "reviews",
             label: "Reviews",
-            homeHref: "/#testimonials",
-            otherHref: "/#testimonials",
+            homeHref: "/reviews",
+            otherHref: "/reviews",
         },
         {
             label: "Privilege Card",
