@@ -195,7 +195,7 @@
             <div class="modal-content border-0">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="ri-store-2-fill me-2"></i>Add Branch Details
+                        <i class="ri-store-2-fill me-2"></i><span id="modalTitle">Add Branch Details</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -349,6 +349,13 @@
                 }
             });
 
+            // Reset form when modal is being shown for ADD
+            $('#addBranchModal').on('show.bs.modal', function() {
+                if (!currentEditId || currentEditId <= 0) {
+                    $('#modalTitle').text('Add Branch Details');
+                }
+            });
+
             // Initialize DataTable
             table = $('.branch-datatable').DataTable({
                 processing: true,
@@ -385,21 +392,25 @@
                 e.preventDefault();
                 $('.error-text').text('');
 
-                // Get ID from both sources to be sure
-                let editId = $(this).attr('data-edit-id') || $(this)[0].dataset.editId || '';
-                
-                // Ensure it's not undefined, 'undefined', 'store', or empty string
-                currentEditId = (editId && editId !== 'undefined' && editId !== 'store' && editId !== '') ? editId : null;
-                
-                let url = currentEditId ? "{{ route('admin.branch.update', ':id') }}".replace(':id', currentEditId) : "{{ route('admin.branch.store') }}";
+                // Check if we're editing or creating based on currentEditId
+                let url;
+                if (currentEditId && currentEditId > 0) {
+                    url = "{{ url('/admin/branch') }}/" + currentEditId;
+                    console.log('UPDATE MODE - URL:', url, 'ID:', currentEditId);
+                } else {
+                    url = "{{ url('/admin/branch') }}";
+                    console.log('CREATE MODE - URL:', url);
+                }
 
                 let formData = new FormData(this);
                 
                 console.log('=== FORM SUBMIT ===');
-                console.log('Raw ID:', editId);
-                console.log('Processed ID:', currentEditId);
-                console.log('URL:', url);
-                console.log('Is Edit Mode:', !!currentEditId);
+                console.log('Mode:', currentEditId ? 'UPDATE' : 'CREATE');
+                console.log('Final URL:', url);
+                console.log('Current Edit ID:', currentEditId);
+
+                // Show loading indicator
+                toastr.info('Processing...', '', { hideDuration: 10000, timeOut: 10000 });
 
                 $.ajax({
                     url: url,
@@ -408,42 +419,44 @@
                     processData: false,
                     contentType: false,
                     success: function(res) {
-                        console.log('Success response:', res);
-                        if (res.status === 'success') {
-                            toastr.success(res.message, 'Success', { timeOut: 3000 });
+                        console.log('=== SUCCESS ===');
+                        console.log('Response:', res);
+                        
+                        if (res && res.status === 'success') {
+                            toastr.success(res.message);
                             $('#addBranchModal').modal('hide');
                             resetForm();
                             
-                            // Reload table with error handling
                             setTimeout(function() {
-                                console.log('Reloading DataTable...');
-                                table.ajax.reload(function() {
-                                    console.log('DataTable reloaded successfully');
-                                });
+                                if (typeof table !== 'undefined') {
+                                    table.ajax.reload();
+                                }
                             }, 300);
                         } else {
-                            toastr.error(res.message || 'Error', 'Error');
+                            toastr.error(res?.message || 'Unknown error');
                         }
                     },
                     error: function(xhr) {
-                        console.log('=== ERROR RESPONSE ===');
+                        console.log('=== ERROR ===');
                         console.log('Status:', xhr.status);
                         console.log('Response:', xhr.responseJSON);
                         
+                        let errorMsg = 'Error';
                         if (xhr.status === 422) {
+                            errorMsg = 'Validation error - please check your input';
                             let errors = xhr.responseJSON.errors;
-                            console.log('Validation Errors:', errors);
                             $.each(errors, function(key, val) {
-                                let errorClass = '.' + key + '_error';
-                                $(errorClass).text(val[0]);
-                                console.log('Set error for', errorClass, ':', val[0]);
+                                $('.' + key + '_error').text(val[0]);
                             });
-                            toastr.error('Please fix validation errors', 'Validation Error');
+                        } else if (xhr.status === 400) {
+                            errorMsg = xhr.responseJSON?.message || 'Bad request';
                         } else if (xhr.status === 404) {
-                            toastr.error(xhr.responseJSON?.message || 'Branch not found', 'Error');
-                        } else {
-                            toastr.error('Error: ' + (xhr.responseJSON?.message || 'Unknown error'), 'Error', { timeOut: 3000 });
+                            errorMsg = 'Branch not found';
+                        } else if (xhr.status === 500) {
+                            errorMsg = 'Server error: ' + (xhr.responseJSON?.message || '');
                         }
+                        
+                        toastr.error(errorMsg);
                     }
                 });
             });
@@ -456,7 +469,7 @@
                     console.log('Branch data loaded:', data);
                     currentEditId = id;
                     $('#branchForm').attr('data-edit-id', id);
-                    $('#branchForm')[0].dataset.editId = id;  // Double set to ensure it's there
+                    $('#modalTitle').text('Edit Branch Details');
                     
                     $('input[name="name"]').val(data.name || '');
                     $('input[name="phone"]').val(data.phone || '');
@@ -520,6 +533,7 @@
                 let id = currentEditId;
                 $.get("{{ route('admin.branch.edit', ':id') }}".replace(':id', id), function(data) {
                     $('#branchForm').attr('data-edit-id', id);
+                    $('#modalTitle').text('Edit Branch Details');
                     $('input[name="name"]').val(data.name);
                     $('input[name="phone"]').val(data.phone);
                     $('input[name="location"]').val(data.location);
@@ -596,9 +610,18 @@
 
         function resetForm() {
             $('#branchForm')[0].reset();
+            
+            // CRITICAL: Remove ALL traces of edit ID
             $('#branchForm').removeAttr('data-edit-id');
-            $('.error-text').text('');
+            $('#branchForm')[0].removeAttribute('data-edit-id');
+            delete $('#branchForm')[0].dataset.editId;
+            
+            // Make absolutely sure it's null
             currentEditId = null;
+            
+            $('.error-text').text('');
+            
+            console.log('Form reset. currentEditId is now:', currentEditId);
         }
     </script>
 @endpush
