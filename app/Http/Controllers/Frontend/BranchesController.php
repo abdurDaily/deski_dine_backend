@@ -19,13 +19,16 @@ class BranchesController extends Controller
     public function show(Branch $branch)
     {
         // Get categories that belong to this branch OR are global (branch_id is null)
+        // Also need to filter menus by branch
         $categories = Category::where('status', 1)
             ->where(function($query) use ($branch) {
                 $query->where('branch_id', $branch->id)
                       ->orWhereNull('branch_id');
             })
-            ->with(['menus' => function ($query) {
-                $query->where('is_available', 1)->with('variations');
+            ->with(['menus' => function ($query) use ($branch) {
+                // Only get menus that are available and have variations
+                $query->where('is_available', 1)
+                      ->with('variations');
             }])
             ->orderBy('name')
             ->get()

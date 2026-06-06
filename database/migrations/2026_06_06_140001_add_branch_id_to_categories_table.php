@@ -12,12 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('categories', 'branch_id')) {
-            Schema::table('categories', function (Blueprint $table) {
-                $table->unsignedBigInteger('branch_id')->nullable()->after('id');
-                $table->foreign('branch_id')->references('id')->on('branches')->onDelete('set null');
-            });
-        }
+        // This migration is now handled by 2026_06_06_150001_update_branch_id_in_categories
+        // The branch_id column already exists, so we skip it here
+        // New projects: create categories with branch_id nullable from the start
     }
 
     /**

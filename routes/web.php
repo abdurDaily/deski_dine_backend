@@ -105,12 +105,12 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
         Route::resource('menu', App\Http\Controllers\Backend\MenuController::class)->except(['show']);
         Route::post('menu/{menu}/delete', [App\Http\Controllers\Backend\MenuController::class, 'destroy'])->name('menu.delete');
         
-        // Admin branch management
+    // Admin branch management
         Route::get('branch', [App\Http\Controllers\Backend\BranchController::class, 'index'])->name('branch.index');
         Route::post('branch', [App\Http\Controllers\Backend\BranchController::class, 'store'])->name('branch.store');
-        Route::get('branch/{branch}/edit', [App\Http\Controllers\Backend\BranchController::class, 'edit'])->name('branch.edit');
-        Route::post('branch/{branch}', [App\Http\Controllers\Backend\BranchController::class, 'update'])->name('branch.update');
-        Route::delete('branch/{branch}', [App\Http\Controllers\Backend\BranchController::class, 'destroy'])->name('branch.delete');
+        Route::get('branch/{id}/edit', [App\Http\Controllers\Backend\BranchController::class, 'edit'])->name('branch.edit');
+        Route::post('branch/{id}', [App\Http\Controllers\Backend\BranchController::class, 'update'])->name('branch.update');
+        Route::delete('branch/{id}', [App\Http\Controllers\Backend\BranchController::class, 'destroy'])->name('branch.delete');
     });
     // User account orders & invoices
     Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');

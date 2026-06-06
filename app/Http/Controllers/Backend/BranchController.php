@@ -2,151 +2,253 @@
 
 namespace App\Http\Controllers\Backend;
 
-
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class BranchController extends Controller
 {
-
     /**
-     * Display the list and the form.
+     * Display branches list with DataTables
      */
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $data = Branch::latest()->get();
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    return '
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-soft-info view-details-btn" data-id="' . $row->id . '" title="View Details">
-                                <i class="ri-eye-fill"></i>
-                            </button>
-                            <button class="btn btn-sm btn-soft-info copy-link-btn" data-url="' . route('frontend.branches.show', $row->slug) . '" title="Copy Link">
-                                <i class="ri-links-fill"></i>
-                            </button>
-                            <button class="btn btn-sm btn-soft-warning edit-btn" data-id="' . $row->id . '" title="Edit">
-                                <i class="ri-pencil-fill"></i>
-                            </button>
-                            <button class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '" title="Delete">
-                                <i class="ri-delete-bin-fill"></i>
-                            </button>
-                        </div>';
+                    return '<div class="d-flex gap-1 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-soft-info view-details-btn" data-id="' . $row->id . '" title="View Details">
+                            <i class="ri-eye-line"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-soft-warning edit-btn" data-id="' . $row->id . '" title="Edit">
+                            <i class="ri-pencil-line"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-soft-success copy-link-btn" data-id="' . $row->id . '" data-slug="' . $row->slug . '" title="Copy Link">
+                            <i class="ri-link-copy"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '" data-name="' . $row->name . '" title="Delete">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>';
                 })
+                ->rawColumns(['action'])
                 ->make(true);
         }
+
         return view('backend.branch.index');
     }
 
     /**
-     * Store a newly created branch.
+     * Store a new branch
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name'             => 'required|string|max:255|unique:branches,name',
-            'phone'            => 'required|string|max:20',
-            'location'         => 'required|string|max:500',
-            'foodpanda_url'    => 'nullable|url',
-            'pathao_url'       => 'nullable|url',
-            'foodi_url'        => 'nullable|url',
-            'foodpanda_logo'   => $request->filled('foodpanda_url') ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'pathao_logo'      => $request->filled('pathao_url') ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foodi_logo'       => $request->filled('foodi_url') ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ], [
-            'foodpanda_logo.required' => 'Logo is required when providing FoodPanda URL',
-            'pathao_logo.required' => 'Logo is required when providing Pathao URL',
-            'foodi_logo.required' => 'Logo is required when providing Foodi URL',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name'           => 'required|string|max:255|unique:branches,name',
+                'phone'          => 'required|string|max:20',
+                'location'       => 'required|string|max:500',
+                'foodpanda_url'  => 'nullable|url',
+                'pathao_url'     => 'nullable|url',
+                'foodi_url'      => 'nullable|url',
+                'foodpanda_logo' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'pathao_logo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'foodi_logo'     => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
-        $data = $request->all();
-        $data['slug'] = \Illuminate\Support\Str::slug($request->name);
-        
-        // Handle logo uploads
-        foreach (['foodpanda_logo', 'pathao_logo', 'foodi_logo'] as $logoField) {
-            if ($request->hasFile($logoField)) {
-                $file = $request->file($logoField);
-                $filename = time() . '_' . $logoField . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/branches'), $filename);
-                $data[$logoField] = $filename;
-            }
+            DB::transaction(function () use ($validated, $request) {
+                $branchData = [
+                    'name'           => $validated['name'],
+                    'phone'          => $validated['phone'],
+                    'location'       => $validated['location'],
+                    'foodpanda_url'  => $validated['foodpanda_url'] ?? null,
+                    'pathao_url'     => $validated['pathao_url'] ?? null,
+                    'foodi_url'      => $validated['foodi_url'] ?? null,
+                ];
+
+                // Handle file uploads
+                $this->handleLogoUploads($request, $branchData);
+
+                Branch::create($branchData);
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Branch created successfully!'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error on store: ' . json_encode($e->errors()));
+            return response()->json([
+                'status' => 'error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error storing branch: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
-        
-        $branch = Branch::create($data);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Branch "' . $branch->name . '" created successfully!'
-        ]);
     }
 
     /**
-     * Show the form for editing (via JSON).
+     * Get branch data for editing
      */
-    public function edit(Branch $branch)
+    public function edit($id)
     {
-        return response()->json($branch);
+        try {
+            $branch = Branch::findOrFail($id);
+            return response()->json($branch);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Branch not found'], 404);
+        }
     }
 
     /**
-     * Update the specified branch.
+     * Update branch
      */
-    public function update(Request $request, Branch $branch)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'name'             => 'required|string|max:255|unique:branches,name,' . $branch->id,
-            'phone'            => 'required|string|max:20',
-            'location'         => 'required|string|max:500',
-            'foodpanda_url'    => 'nullable|url',
-            'pathao_url'       => 'nullable|url',
-            'foodi_url'        => 'nullable|url',
-            'foodpanda_logo'   => $request->filled('foodpanda_url') && !$branch->foodpanda_logo ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'pathao_logo'      => $request->filled('pathao_url') && !$branch->pathao_logo ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foodi_logo'       => $request->filled('foodi_url') && !$branch->foodi_logo ? 'required|mimes:jpeg,png,jpg,gif,svg|max:2048' : 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ], [
-            'foodpanda_logo.required' => 'Logo is required when providing FoodPanda URL',
-            'pathao_logo.required' => 'Logo is required when providing Pathao URL',
-            'foodi_logo.required' => 'Logo is required when providing Foodi URL',
-        ]);
+        try {
+            $branch = Branch::findOrFail($id);
 
-        $data = $request->all();
-        
-        // Handle logo uploads
-        foreach (['foodpanda_logo', 'pathao_logo', 'foodi_logo'] as $logoField) {
-            if ($request->hasFile($logoField)) {
-                // Delete old logo if exists
-                if ($branch->$logoField && file_exists(public_path('uploads/branches/' . $branch->$logoField))) {
-                    unlink(public_path('uploads/branches/' . $branch->$logoField));
+            $validated = $request->validate([
+                'name'           => 'required|string|max:255|unique:branches,name,' . $id,
+                'phone'          => 'required|string|max:20',
+                'location'       => 'required|string|max:500',
+                'foodpanda_url'  => 'nullable|url',
+                'pathao_url'     => 'nullable|url',
+                'foodi_url'      => 'nullable|url',
+                'foodpanda_logo' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'pathao_logo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'foodi_logo'     => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            DB::transaction(function () use ($validated, $request, $branch) {
+                $branchData = [
+                    'name'           => $validated['name'],
+                    'phone'          => $validated['phone'],
+                    'location'       => $validated['location'],
+                    'foodpanda_url'  => $validated['foodpanda_url'] ?? null,
+                    'pathao_url'     => $validated['pathao_url'] ?? null,
+                    'foodi_url'      => $validated['foodi_url'] ?? null,
+                ];
+
+                // Handle file uploads
+                $this->handleLogoUploads($request, $branchData, $branch);
+
+                $branch->update($branchData);
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Branch updated successfully!'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Branch not found: ' . $id);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Branch not found (ID: ' . $id . ')'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error: ' . json_encode($e->errors()));
+            return response()->json([
+                'status' => 'error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error updating branch: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete branch
+     */
+    public function destroy($id)
+    {
+        try {
+            $branch = Branch::findOrFail($id);
+
+            DB::transaction(function () use ($branch) {
+                // Delete logos
+                $logoFields = ['foodpanda_logo', 'pathao_logo', 'foodi_logo'];
+                foreach ($logoFields as $field) {
+                    if ($branch->$field && file_exists(public_path('uploads/branches/' . $branch->$field))) {
+                        unlink(public_path('uploads/branches/' . $branch->$field));
+                    }
                 }
-                
-                $file = $request->file($logoField);
-                $filename = time() . '_' . $logoField . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/branches'), $filename);
-                $data[$logoField] = $filename;
-            }
+
+                $branch->delete();
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Branch deleted successfully!'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting branch: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
-
-        $branch->update($data);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Branch updated successfully!'
-        ]);
     }
 
     /**
-     * Remove the specified branch.
+     * Handle logo file uploads
      */
-    public function destroy(Branch $branch)
+    private function handleLogoUploads(Request $request, &$branchData, $branch = null)
     {
-        $branch->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Branch deleted successfully!'
-        ]);
+        $logoFields = ['foodpanda_logo', 'pathao_logo', 'foodi_logo'];
+        $uploadDir = public_path('uploads/branches');
+
+        // Create directory if it doesn't exist
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        foreach ($logoFields as $field) {
+            // If updating and no new file is uploaded, keep the existing one
+            if ($branch && !$request->hasFile($field)) {
+                if ($branch->$field) {
+                    $branchData[$field] = $branch->$field;
+                }
+                continue;
+            }
+
+            if ($request->hasFile($field)) {
+                // Delete old file if updating
+                if ($branch && $branch->$field) {
+                    $oldPath = $uploadDir . '/' . $branch->$field;
+                    if (file_exists($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+
+                // Upload new file
+                try {
+                    $file = $request->file($field);
+                    $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    $file->move($uploadDir, $filename);
+                    $branchData[$field] = $filename;
+                } catch (\Exception $e) {
+                    \Log::error('File upload error for ' . $field . ': ' . $e->getMessage());
+                    // Continue without this file - don't break the update
+                    if (!$branch) {
+                        $branchData[$field] = null;
+                    }
+                }
+            }
+        }
     }
 }

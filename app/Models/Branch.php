@@ -19,23 +19,29 @@ class Branch extends Model
         'foodi_logo',
     ];
 
-    /**
-     * Automatically generate slug when name is set
-     */
-    public function setNameAttribute($value)
-    {
-        $this->attributes['name'] = $value;
-        if (empty($this->attributes['slug'])) {
-            $this->attributes['slug'] = Str::slug($value);
-        }
-    }
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     /**
-     * Route model binding using slug instead of ID
+     * Boot method to automatically generate slug
      */
-    public function getRouteKeyName()
+    protected static function boot()
     {
-        return 'slug';
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->slug)) {
+                $model->slug = Str::slug($model->name);
+            }
+        });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('name')) {
+                $model->slug = Str::slug($model->name);
+            }
+        });
     }
 }
 
