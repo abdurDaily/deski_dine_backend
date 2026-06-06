@@ -40,14 +40,14 @@ class ReviewController extends Controller
 
             $rows = $reviews->map(function ($row, $index) use ($page, $perPage) {
                 $image = $row->image 
-                    ? '<img src="' . asset('storage/' . $row->image) . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">'
-                    : '<img src="https://i.pravatar.cc/32?u=' . urlencode($row->email ?? $row->name) . '" alt="' . htmlspecialchars($row->name) . '" style="width: 32px; height: 32px; border-radius: 50%;">';
+                    ? '<img src="' . asset('storage/' . $row->image) . '" alt="' . htmlspecialchars($row->name) . '" class="name-avatar">'
+                    : '<img src="https://i.pravatar.cc/36?u=' . urlencode($row->email ?? $row->name) . '" alt="' . htmlspecialchars($row->name) . '" class="name-avatar">';
                 
-                $nameWithImage = '<div style="display: flex; align-items: center; gap: 0.5rem;"><div>' . $image . '</div><div>' . htmlspecialchars($row->name) . '</div></div>';
+                $nameWithImage = '<div class="name-with-image"><div>' . $image . '</div><div>' . htmlspecialchars($row->name) . '</div></div>';
                 
-                $emailDisplay = $row->email ? '<a href="mailto:' . htmlspecialchars($row->email) . '">' . htmlspecialchars($row->email) . '</a>' : '<span class="text-muted">-</span>';
+                $emailDisplay = $row->email ? '<a href="mailto:' . htmlspecialchars($row->email) . '" class="email-link">' . htmlspecialchars($row->email) . '</a>' : '<span style="color: #ccc;">-</span>';
                 
-                $ratingDisplay = '<div style="color: #f39c12; font-size: 1.1rem;">' . str_repeat('★', (int)$row->rating) . str_repeat('☆', 5 - (int)$row->rating) . '</div>';
+                $ratingDisplay = '<span class="rating-stars">' . str_repeat('<i class="ri-star-fill star-filled"></i>', (int)$row->rating) . str_repeat('<i class="ri-star-line star-empty"></i>', 5 - (int)$row->rating) . '</span>';
                 
                 $class = 'bg-warning';
                 if ($row->status === 'approved') $class = 'bg-success';
@@ -58,8 +58,8 @@ class ReviewController extends Controller
                 
                 $createdDate = $row->created_at ? $row->created_at->format('M d, Y H:i') : '-';
                 
-                $buttons = '<div class="btn-group btn-group-sm" role="group">';
-                $buttons .= '<button type="button" class="btn btn-outline-primary btn-view" 
+                $buttons = '<div class="btn-group-action" role="group">';
+                $buttons .= '<button type="button" class="btn btn-action btn-view" 
                     data-id="' . $row->id . '" 
                     data-image="' . ($row->image ? asset('storage/' . $row->image) : '') . '" 
                     data-name="' . htmlspecialchars($row->name) . '" 
@@ -70,17 +70,17 @@ class ReviewController extends Controller
                     data-status="' . htmlspecialchars($row->status) . '" 
                     data-created="' . htmlspecialchars($createdDate) . '" 
                     data-approved="' . htmlspecialchars($row->approved_at ? $row->approved_at->format('M d, Y H:i') : '') . '" 
-                    title="View"><i class="ri-eye-line"></i></button>';
+                    title="View Review"><i class="ri-eye-line"></i></button>';
                 
                 if ($row->status !== 'approved') {
-                    $buttons .= '<button type="button" class="btn btn-outline-success btn-approve" data-id="' . $row->id . '" title="Approve"><i class="ri-check-line"></i></button>';
+                    $buttons .= '<button type="button" class="btn btn-action btn-approve" data-id="' . $row->id . '" title="Approve Review"><i class="ri-check-double-line"></i></button>';
                 }
                 
                 if ($row->status !== 'rejected') {
-                    $buttons .= '<button type="button" class="btn btn-outline-danger btn-reject" data-id="' . $row->id . '" title="Reject"><i class="ri-close-line"></i></button>';
+                    $buttons .= '<button type="button" class="btn btn-action btn-delete" data-id="' . $row->id . '" title="Reject Review"><i class="ri-close-line"></i></button>';
                 }
                 
-                $buttons .= '<button type="button" class="btn btn-outline-danger btn-delete" data-id="' . $row->id . '" title="Delete"><i class="ri-delete-bin-line"></i></button>';
+                $buttons .= '<button type="button" class="btn btn-action btn-delete" data-id="' . $row->id . '" title="Delete Review"><i class="ri-delete-bin-line"></i></button>';
                 $buttons .= '</div>';
                 
                 return [
