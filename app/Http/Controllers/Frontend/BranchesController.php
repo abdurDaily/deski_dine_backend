@@ -12,7 +12,7 @@ class BranchesController extends Controller
 {
     public function index()
     {
-        $branches = Branch::orderBy('name')->get();
+        $branches = Branch::where('status', 1)->orderBy('name')->get();
         return view('frontend.branches.index', compact('branches'));
     }
 

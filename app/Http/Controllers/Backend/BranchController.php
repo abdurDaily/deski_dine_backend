@@ -58,12 +58,13 @@ class BranchController extends Controller
                 'name'           => 'required|string|max:255|unique:branches,name',
                 'phone'          => 'required|string|max:20',
                 'location'       => 'required|string|max:500',
+                'status'         => 'nullable|boolean',
                 'foodpanda_url'  => 'nullable|url',
                 'pathao_url'     => 'nullable|url',
                 'foodi_url'      => 'nullable|url',
-                'foodpanda_logo' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'pathao_logo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'foodi_logo'     => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'foodpanda_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                'pathao_logo'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                'foodi_logo'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             ]);
 
             \Log::info('Validation passed');
@@ -72,6 +73,7 @@ class BranchController extends Controller
                 'name'           => $validated['name'],
                 'phone'          => $validated['phone'],
                 'location'       => $validated['location'],
+                'status'         => $validated['status'] ?? 1,
                 'foodpanda_url'  => $validated['foodpanda_url'] ?? null,
                 'pathao_url'     => $validated['pathao_url'] ?? null,
                 'foodi_url'      => $validated['foodi_url'] ?? null,
@@ -146,12 +148,13 @@ class BranchController extends Controller
                 'name'           => 'required|string|max:255|unique:branches,name,' . $id,
                 'phone'          => 'required|string|max:20',
                 'location'       => 'required|string|max:500',
+                'status'         => 'nullable|boolean',
                 'foodpanda_url'  => 'nullable|url',
                 'pathao_url'     => 'nullable|url',
                 'foodi_url'      => 'nullable|url',
-                'foodpanda_logo' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'pathao_logo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'foodi_logo'     => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'foodpanda_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                'pathao_logo'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                'foodi_logo'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             ]);
 
             \Log::info('Update validation passed');
@@ -160,6 +163,7 @@ class BranchController extends Controller
                 'name'           => $validated['name'],
                 'phone'          => $validated['phone'],
                 'location'       => $validated['location'],
+                'status'         => $validated['status'] ?? 1,
                 'foodpanda_url'  => $validated['foodpanda_url'] ?? null,
                 'pathao_url'     => $validated['pathao_url'] ?? null,
                 'foodi_url'      => $validated['foodi_url'] ?? null,

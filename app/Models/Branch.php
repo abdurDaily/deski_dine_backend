@@ -11,6 +11,7 @@ class Branch extends Model
         'slug',
         'location',
         'phone',
+        'status',
         'foodpanda_url',
         'pathao_url',
         'foodi_url',

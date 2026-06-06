@@ -213,6 +213,15 @@
                                 <input type="text" name="phone" class="form-control" placeholder="e.g. +8801234567890" required>
                                 <span class="text-danger error-text phone_error d-block mt-1" style="font-size: 0.85rem;"></span>
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="statusCheck" name="status" value="1" checked>
+                                    <label class="form-check-label" for="statusCheck">
+                                        Active (visible on frontend)
+                                    </label>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label">Location <span class="text-danger">*</span></label>
                                 <input type="text" name="location" class="form-control" placeholder="e.g. 123 Main Street, Downtown" required>
@@ -236,8 +245,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small">FoodPanda Logo</label>
-                                        <input type="file" name="foodpanda_logo" class="form-control form-control-sm" accept="image/*">
-                                        <small class="text-muted d-block mt-1">Max: 2MB</small>
+                                        <input type="file" name="foodpanda_logo" class="form-control form-control-sm logo-file-input" accept="image/*" data-max-size="5120">
+                                        <small class="text-muted d-block mt-1">Max: 5MB (PNG, JPG, GIF, SVG)</small>
+                                        <span class="text-danger error-text foodpanda_logo_error d-block mt-1" style="font-size: 0.85rem;"></span>
                                     </div>
                                 </div>
 
@@ -250,8 +260,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small">Pathao Logo</label>
-                                        <input type="file" name="pathao_logo" class="form-control form-control-sm" accept="image/*">
-                                        <small class="text-muted d-block mt-1">Max: 2MB</small>
+                                        <input type="file" name="pathao_logo" class="form-control form-control-sm logo-file-input" accept="image/*" data-max-size="5120">
+                                        <small class="text-muted d-block mt-1">Max: 5MB (PNG, JPG, GIF, SVG)</small>
+                                        <span class="text-danger error-text pathao_logo_error d-block mt-1" style="font-size: 0.85rem;"></span>
                                     </div>
                                 </div>
 
@@ -264,8 +275,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small">Foodi Logo</label>
-                                        <input type="file" name="foodi_logo" class="form-control form-control-sm" accept="image/*">
-                                        <small class="text-muted d-block mt-1">Max: 2MB</small>
+                                        <input type="file" name="foodi_logo" class="form-control form-control-sm logo-file-input" accept="image/*" data-max-size="5120">
+                                        <small class="text-muted d-block mt-1">Max: 5MB (PNG, JPG, GIF, SVG)</small>
+                                        <span class="text-danger error-text foodi_logo_error d-block mt-1" style="font-size: 0.85rem;"></span>
                                     </div>
                                 </div>
                             </div>
@@ -349,6 +361,52 @@
                 }
             });
 
+            // File size validation on file input change
+            $(document).on('change', '.logo-file-input', function() {
+                const file = this.files[0];
+                if (file) {
+                    const maxSize = $(this).data('max-size') * 1024; // Convert KB to bytes
+                    const fileSizeInKB = Math.round(file.size / 1024);
+                    const fieldName = $(this).attr('name');
+                    const $errorElement = $('.' + fieldName + '_error');
+
+                    if (file.size > maxSize) {
+                        const maxSizeInMB = $(this).data('max-size') / 1024;
+                        const errorMsg = `Image size is ${fileSizeInKB}KB. Maximum allowed size is ${maxSizeInMB}MB.`;
+                        $errorElement.text(errorMsg).show();
+                        
+                        // Show alert to user
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'File Too Large',
+                            text: errorMsg,
+                            confirmButtonColor: '#667eea'
+                        });
+                        
+                        // Clear the input
+                        $(this).val('');
+                    } else {
+                        // Check if file is image
+                        const validMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+                        if (!validMimes.includes(file.type)) {
+                            const errorMsg = 'Please select a valid image file (PNG, JPG, GIF, SVG).';
+                            $errorElement.text(errorMsg).show();
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid File Type',
+                                text: errorMsg,
+                                confirmButtonColor: '#667eea'
+                            });
+                            
+                            $(this).val('');
+                        } else {
+                            $errorElement.text('').hide();
+                        }
+                    }
+                }
+            });
+
             // Reset form when modal is being shown for ADD
             $('#addBranchModal').on('show.bs.modal', function() {
                 if (!currentEditId || currentEditId <= 0) {
@@ -403,6 +461,10 @@
                 }
 
                 let formData = new FormData(this);
+                
+                // Handle status checkbox - if checked, set to 1, otherwise 0
+                formData.delete('status');
+                formData.append('status', $('#statusCheck').is(':checked') ? 1 : 0);
                 
                 console.log('=== FORM SUBMIT ===');
                 console.log('Mode:', currentEditId ? 'UPDATE' : 'CREATE');
@@ -477,6 +539,7 @@
                     $('input[name="foodpanda_url"]').val(data.foodpanda_url || '');
                     $('input[name="pathao_url"]').val(data.pathao_url || '');
                     $('input[name="foodi_url"]').val(data.foodi_url || '');
+                    $('input[name="status"]').prop('checked', data.status == 1);
 
                     $('#addBranchModal').modal('show');
                 }).fail(function(xhr) {
@@ -540,6 +603,7 @@
                     $('input[name="foodpanda_url"]').val(data.foodpanda_url || '');
                     $('input[name="pathao_url"]').val(data.pathao_url || '');
                     $('input[name="foodi_url"]').val(data.foodi_url || '');
+                    $('input[name="status"]').prop('checked', data.status == 1);
 
                     $('#addBranchModal').modal('show');
                 });
