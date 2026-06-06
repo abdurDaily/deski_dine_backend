@@ -95,8 +95,11 @@
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light border-0">
+                <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">All Reviews</h5>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search by name, email, or comment...">
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -118,6 +121,10 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center p-3">
+                        <div id="paginationInfo" class="flex-grow-1"></div>
+                    </div>
+                    <ul id="reviewsPagination" class="pagination mb-3"></ul>
                 </div>
             </div>
         </div>
@@ -192,7 +199,7 @@
     </div>
 </div>
 
-@push('back_css')
+@push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css">
 <style>
@@ -269,61 +276,212 @@
         margin: 0 2px;
     }
 
-    .dataTables_wrapper {
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    .search-box {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-box input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    #reviewsPagination {
+        display: flex;
+        list-style: none;
         padding: 0;
+        margin: 0;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-top: 1.5rem;
     }
 
-    .dataTables_paginate {
-        padding-top: 1rem;
+    #reviewsPagination .page-item .page-link {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #dee2e6;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
     }
 
-    .page-item.active .page-link {
-        background-color: #667eea;
+    #reviewsPagination .page-item .page-link:hover {
+        background-color: #f8f9fa;
         border-color: #667eea;
     }
 
-    .page-link {
-        color: #667eea;
+    #reviewsPagination .page-item.active .page-link {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
     }
 
-    .page-link:hover {
-        color: #667eea;
-        background-color: #f8f9fa;
+    #paginationInfo {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
     }
 </style>
 @endpush
 
-@push('back_js')
+@push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
 <script>
-    $(function() {
-        let table = $('.reviews-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            ajax: "{{ route('admin.reviews.index') }}",
-            columns: [
-                {data: 'DT_RowIndex', name: 'DT_RowIndex', width: '60px'},
-                {data: 'name_with_image', name: 'name', orderable: false},
-                {data: 'email_display', name: 'email'},
-                {data: 'rating_display', name: 'rating', orderable: false},
-                {data: 'title', name: 'title'},
-                {data: 'comment_preview', name: 'comment'},
-                {data: 'status_badge', name: 'status', orderable: false},
-                {data: 'created_at', name: 'created_at'},
-                {data: 'action', name: 'action', orderable: false, searchable: false}
-            ]
+    let currentPage = 1;
+    const perPage = 10;
+
+    function loadReviews(page = 1, search = '') {
+        currentPage = page;
+        
+        console.log('loadReviews called with page:', page, 'search:', search);
+        console.log('URL:', "{{ route('admin.reviews.index') }}");
+        
+        $.ajax({
+            url: "{{ route('admin.reviews.index') }}",
+            type: 'GET',
+            data: {
+                page: page,
+                search: search
+            },
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                console.log('✓ AJAX success - Full response:', response);
+                console.log('✓ response.success:', response.success);
+                console.log('✓ response.data type:', typeof response.data);
+                console.log('✓ response.data:', response.data);
+                console.log('✓ response.data is array:', Array.isArray(response.data));
+                console.log('✓ response.data length:', response.data ? response.data.length : 'N/A');
+                console.log('✓ response.pagination:', response.pagination);
+                
+                if (response.success && Array.isArray(response.data)) {
+                    console.log('Rendering', response.data.length, 'reviews');
+                    renderTable(response.data);
+                    renderPagination(response.pagination);
+                } else {
+                    console.error('✗ Invalid response structure');
+                    renderTable([]);
+                    if (response.pagination) renderPagination(response.pagination);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('✗ AJAX error');
+                console.error('Status:', status);
+                console.error('Error:', error);
+                console.error('XHR status code:', xhr.status);
+                console.error('XHR responseText:', xhr.responseText);
+                console.error('XHR responseJSON:', xhr.responseJSON);
+                toastr.error('Error loading reviews: ' + (error || xhr.status || 'Unknown error'));
+            }
+        });
+    }
+
+    function renderTable(data) {
+        const tbody = $('#reviewsTable tbody');
+        tbody.empty();
+
+        if (data.length === 0) {
+            tbody.html('<tr><td colspan="9" class="text-center text-muted py-4">No reviews found</td></tr>');
+            return;
+        }
+
+        data.forEach(row => {
+            const tr = $('<tr></tr>');
+            tr.append(`<td>${row.DT_RowIndex}</td>`);
+            tr.append(`<td>${row.name_with_image}</td>`);
+            tr.append(`<td>${row.email_display}</td>`);
+            tr.append(`<td>${row.rating_display}</td>`);
+            tr.append(`<td>${row.title}</td>`);
+            tr.append(`<td>${row.comment_preview}</td>`);
+            tr.append(`<td>${row.status_badge}</td>`);
+            tr.append(`<td>${row.created_at}</td>`);
+            tr.append(`<td>${row.action}</td>`);
+            tbody.append(tr);
         });
 
+        // Rebind event handlers after rendering
+        bindActionHandlers();
+    }
+
+    function renderPagination(pagination) {
+        const paginationContainer = $('#reviewsPagination');
+        paginationContainer.empty();
+
+        // Previous button
+        if (pagination.current_page > 1) {
+            paginationContainer.append(`
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadReviews(1, getSearchValue()); return false;">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadReviews(${pagination.current_page - 1}, getSearchValue()); return false;">Previous</a>
+                </li>
+            `);
+        }
+
+        // Page numbers
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, pagination.current_page - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(pagination.total_pages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === pagination.current_page ? 'active' : '';
+            paginationContainer.append(`
+                <li class="page-item ${activeClass}">
+                    <a class="page-link" href="#" onclick="loadReviews(${i}, getSearchValue()); return false;">${i}</a>
+                </li>
+            `);
+        }
+
+        // Next button
+        if (pagination.current_page < pagination.total_pages) {
+            paginationContainer.append(`
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadReviews(${pagination.current_page + 1}, getSearchValue()); return false;">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadReviews(${pagination.total_pages}, getSearchValue()); return false;">Last</a>
+                </li>
+            `);
+        }
+
+        // Update info
+        $('#paginationInfo').text(`Showing ${pagination.from} to ${pagination.to} of ${pagination.total} reviews`);
+    }
+
+    function getSearchValue() {
+        return $('#searchInput').val();
+    }
+
+    function bindActionHandlers() {
         // View Review
-        $(document).on('click', '.btn-view', function() {
+        $(document).off('click', '.btn-view').on('click', '.btn-view', function() {
             const btn = $(this);
             $('#modalImage').attr('src', btn.data('image') || 'https://i.pravatar.cc/80?u=' + encodeURIComponent(btn.data('name')));
             $('#modalName').text(btn.data('name'));
@@ -357,7 +515,7 @@
         });
 
         // Approve Review
-        $(document).on('click', '#modalApproveBtn', function() {
+        $(document).off('click', '#modalApproveBtn').on('click', '#modalApproveBtn', function() {
             const id = $(this).data('id');
             $.ajax({
                 url: '{{ route("admin.reviews.approve", ":id") }}'.replace(':id', id),
@@ -367,7 +525,7 @@
                     if (response.success) {
                         toastr.success(response.message);
                         bootstrap.Modal.getInstance(document.getElementById('viewReviewModal')).hide();
-                        table.draw();
+                        loadReviews(currentPage, getSearchValue());
                     }
                 },
                 error: function() {
@@ -377,7 +535,7 @@
         });
 
         // Reject Review
-        $(document).on('click', '#modalRejectBtn', function() {
+        $(document).off('click', '#modalRejectBtn').on('click', '#modalRejectBtn', function() {
             const id = $(this).data('id');
             $.ajax({
                 url: '{{ route("admin.reviews.reject", ":id") }}'.replace(':id', id),
@@ -387,7 +545,7 @@
                     if (response.success) {
                         toastr.success(response.message);
                         bootstrap.Modal.getInstance(document.getElementById('viewReviewModal')).hide();
-                        table.draw();
+                        loadReviews(currentPage, getSearchValue());
                     }
                 },
                 error: function() {
@@ -397,7 +555,7 @@
         });
 
         // Approve from button
-        $(document).on('click', '.btn-approve', function(e) {
+        $(document).off('click', '.btn-approve').on('click', '.btn-approve', function(e) {
             e.preventDefault();
             const id = $(this).data('id');
             $.ajax({
@@ -407,7 +565,7 @@
                 success: function(response) {
                     if (response.success) {
                         toastr.success(response.message);
-                        table.draw();
+                        loadReviews(currentPage, getSearchValue());
                     }
                 },
                 error: function() {
@@ -417,7 +575,7 @@
         });
 
         // Reject from button
-        $(document).on('click', '.btn-reject', function(e) {
+        $(document).off('click', '.btn-reject').on('click', '.btn-reject', function(e) {
             e.preventDefault();
             const id = $(this).data('id');
             $.ajax({
@@ -427,7 +585,7 @@
                 success: function(response) {
                     if (response.success) {
                         toastr.success(response.message);
-                        table.draw();
+                        loadReviews(currentPage, getSearchValue());
                     }
                 },
                 error: function() {
@@ -437,7 +595,7 @@
         });
 
         // Delete review
-        $(document).on('click', '.btn-delete', function(e) {
+        $(document).off('click', '.btn-delete').on('click', '.btn-delete', function(e) {
             e.preventDefault();
             if (!confirm('Are you sure?')) return;
             
@@ -449,7 +607,7 @@
                 success: function(response) {
                     if (response.success) {
                         toastr.success(response.message);
-                        table.draw();
+                        loadReviews(currentPage, getSearchValue());
                     }
                 },
                 error: function() {
@@ -457,6 +615,21 @@
                 }
             });
         });
+    }
+
+    // Search functionality
+    let searchTimeout;
+    $('#searchInput').on('keyup', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            loadReviews(1, getSearchValue());
+        }, 300);
+    });
+
+    // Initial load
+    $(function() {
+        console.log('Document ready - triggering initial load');
+        loadReviews(1);
     });
 </script>
 @endpush
