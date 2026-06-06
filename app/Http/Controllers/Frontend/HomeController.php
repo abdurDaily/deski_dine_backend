@@ -56,7 +56,7 @@ class HomeController extends Controller
         );
 
         $branches = cache()->remember('home_branches', 600, function () {
-            return \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone'])->get();
+            return \App\Models\Branch::orderBy('name')->select(['id', 'name', 'location', 'phone', 'slug', 'foodpanda_url', 'pathao_url', 'foodi_url', 'foodpanda_logo', 'pathao_logo', 'foodi_logo'])->get();
         });
 
         $signaturePlatters = SignaturePlatter::where('status', 1)

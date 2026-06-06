@@ -64,7 +64,7 @@
 
         <div class="branch-grid">
         @forelse($branches as $branch)
-          <a href="tel:{{ $branch->phone }}" class="branch-card">
+          <a href="{{ route('frontend.branches.show', $branch->slug) }}" class="branch-card">
             <div class="default-state">
               <h3>{{ $branch->name }}</h3>
               <span class="phone-number">

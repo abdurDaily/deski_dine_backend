@@ -53,10 +53,50 @@
                                 <input type="text" name="phone" class="form-control" placeholder="e.g. +123456789">
                                 <span class="text-danger error-text phone_error" style="font-size: 13px;"></span>
                             </div>
-                            <div class="mb-3">
+                    <div class="mb-3">
                                 <label class="form-label fw-bold">Full Address</label>
                                 <textarea name="location" class="form-control" rows="3" placeholder="Enter full address"></textarea>
                                 <span class="text-danger error-text location_error" style="font-size: 13px;"></span>
+                            </div>
+                            <hr class="my-3">
+                            <h6 class="mb-3 fw-bold">Delivery Services (Optional)</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">FoodPanda URL</label>
+                                <input type="url" name="foodpanda_url" class="form-control" placeholder="https://www.foodpanda.com.bd/restaurant/...">
+                                <span class="text-danger error-text foodpanda_url_error" style="font-size: 13px;"></span>
+                                <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Pathao URL</label>
+                                <input type="url" name="pathao_url" class="form-control" placeholder="https://www.pathao.com/...">
+                                <span class="text-danger error-text pathao_url_error" style="font-size: 13px;"></span>
+                                <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Foodi URL</label>
+                                <input type="url" name="foodi_url" class="form-control" placeholder="https://www.foodi.com/...">
+                                <span class="text-danger error-text foodi_url_error" style="font-size: 13px;"></span>
+                                <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                            </div>
+                            <hr class="my-3">
+                            <h6 class="mb-3 fw-bold">Delivery Service Logos</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold" for="foodpanda_logo">FoodPanda Logo</label>
+                                <input type="file" id="foodpanda_logo" name="foodpanda_logo" class="form-control" accept="image/*">
+                                <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
+                                <span class="text-danger error-text foodpanda_logo_error" style="font-size: 13px;"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold" for="pathao_logo">Pathao Logo</label>
+                                <input type="file" id="pathao_logo" name="pathao_logo" class="form-control" accept="image/*">
+                                <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
+                                <span class="text-danger error-text pathao_logo_error" style="font-size: 13px;"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold" for="foodi_logo">Foodi Logo</label>
+                                <input type="file" id="foodi_logo" name="foodi_logo" class="form-control" accept="image/*">
+                                <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
+                                <span class="text-danger error-text foodi_logo_error" style="font-size: 13px;"></span>
                             </div>
                             <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2">
                                 <i class="fas fa-save me-1"></i> Save Branch
@@ -88,6 +128,39 @@
         </div>
     </div>
 
+    <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Branch Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Name</label>
+                        <p id="view_name" class="form-control-plaintext"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Phone</label>
+                        <p id="view_phone" class="form-control-plaintext"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Location</label>
+                        <p id="view_location" class="form-control-plaintext" style="word-break: break-word;"></p>
+                    </div>
+                    <hr class="my-3">
+                    <h6 class="mb-3 fw-bold">Delivery Services</h6>
+                    <div id="view_delivery_services">
+                        <p class="text-muted">No delivery services added</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="editBranchModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0">
@@ -110,6 +183,40 @@
                         <div class="mb-3">
                             <label class="form-label">Location</label>
                             <textarea id="edit_location" name="location" class="form-control" rows="3"></textarea>
+                        </div>
+                        <hr class="my-3">
+                        <h6 class="mb-3 fw-bold">Delivery Services (Optional)</h6>
+                        <div class="mb-3">
+                            <label class="form-label">FoodPanda URL</label>
+                            <input type="url" id="edit_foodpanda_url" name="foodpanda_url" class="form-control" placeholder="https://www.foodpanda.com.bd/restaurant/...">
+                            <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pathao URL</label>
+                            <input type="url" id="edit_pathao_url" name="pathao_url" class="form-control" placeholder="https://www.pathao.com/...">
+                            <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Foodi URL</label>
+                            <input type="url" id="edit_foodi_url" name="foodi_url" class="form-control" placeholder="https://www.foodi.com/...">
+                            <small class="text-muted d-block mt-1">If provided, logo is required</small>
+                        </div>
+                        <hr class="my-3">
+                        <h6 class="mb-3 fw-bold">Delivery Service Logos</h6>
+                        <div class="mb-3">
+                            <label class="form-label" for="edit_foodpanda_logo">FoodPanda Logo</label>
+                            <input type="file" id="edit_foodpanda_logo" name="foodpanda_logo" class="form-control" accept="image/*">
+                            <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="edit_pathao_logo">Pathao Logo</label>
+                            <input type="file" id="edit_pathao_logo" name="pathao_logo" class="form-control" accept="image/*">
+                            <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="edit_foodi_logo">Foodi Logo</label>
+                            <input type="file" id="edit_foodi_logo" name="foodi_logo" class="form-control" accept="image/*">
+                            <small class="text-muted">JPG, PNG, GIF or SVG (Max 2MB)</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -216,6 +323,63 @@
                 });
             });
 
+            // Dynamic logo requirement based on URL input
+            $('input[name="foodpanda_url"], input[name="pathao_url"], input[name="foodi_url"]').on('change', function() {
+                const serviceType = $(this).attr('name').replace('_url', '');
+                const hasUrl = $(this).val().trim() !== '';
+                const logoLabel = $(this).closest('form').find(`label[for="${serviceType}_logo"]`);
+                const logoInput = $(this).closest('form').find(`input[name="${serviceType}_logo"]`);
+                
+                if (hasUrl) {
+                    logoLabel.html(`<span class="text-danger">*</span> ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)} Logo`);
+                    logoInput.attr('required', 'required');
+                } else {
+                    logoLabel.html(`${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)} Logo`);
+                    logoInput.removeAttr('required');
+                }
+            });
+
+            // Copy Link Button
+            $(document).on('click', '.copy-link-btn', function() {
+                const url = $(this).data('url');
+                
+                // Copy relative URL to clipboard
+                navigator.clipboard.writeText(url).then(function() {
+                    toastr.success('Branch link copied to clipboard!', 'Success', { timeOut: 2000 });
+                }).catch(function(err) {
+                    toastr.error('Failed to copy link', 'Error');
+                });
+            });
+
+            // VIEW DETAILS
+            $(document).on('click', '.view-details-btn', function() {
+                let id = $(this).data('id');
+                let url = "{{ route('admin.branch.edit', ':id') }}".replace(':id', id);
+                $.get(url, function(data) {
+                    $('#view_name').text(data.name);
+                    $('#view_phone').text(data.phone);
+                    $('#view_location').text(data.location);
+                    
+                    let servicesHtml = '';
+                    if (data.foodpanda_url) {
+                        servicesHtml += '<div class="mb-2"><strong>FoodPanda:</strong> <a href="' + data.foodpanda_url + '" target="_blank">' + data.foodpanda_url + '</a></div>';
+                    }
+                    if (data.pathao_url) {
+                        servicesHtml += '<div class="mb-2"><strong>Pathao:</strong> <a href="' + data.pathao_url + '" target="_blank">' + data.pathao_url + '</a></div>';
+                    }
+                    if (data.foodi_url) {
+                        servicesHtml += '<div class="mb-2"><strong>Foodi:</strong> <a href="' + data.foodi_url + '" target="_blank">' + data.foodi_url + '</a></div>';
+                    }
+                    
+                    if (servicesHtml === '') {
+                        servicesHtml = '<p class="text-muted">No delivery services added</p>';
+                    }
+                    
+                    $('#view_delivery_services').html(servicesHtml);
+                    $('#viewDetailsModal').modal('show');
+                });
+            });
+
             // 2. EDIT (Fetch)
             $(document).on('click', '.edit-btn', function() {
                 let id = $(this).data('id');
@@ -225,6 +389,9 @@
                     $('#edit_name').val(data.name);
                     $('#edit_phone').val(data.phone);
                     $('#edit_location').val(data.location);
+                    $('#edit_foodpanda_url').val(data.foodpanda_url);
+                    $('#edit_pathao_url').val(data.pathao_url);
+                    $('#edit_foodi_url').val(data.foodi_url);
                     $('#editBranchModal').modal('show');
                 });
             });
@@ -234,14 +401,25 @@
                 e.preventDefault();
                 let id = $('#edit_id').val();
                 let url = "{{ route('admin.branch.update', ':id') }}".replace(':id', id);
+                let formData = new FormData(this);
+                
                 $.ajax({
                     url: url,
                     method: 'POST',
-                    data: $(this).serialize(),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(res) {
                         $('#editBranchModal').modal('hide');
                         toastr.success(res.message);
                         table.ajax.reload(null, false); // Reload without resetting pagination
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            $.each(xhr.responseJSON.errors, function(key, val) {
+                                toastr.error(val[0], 'Validation Error');
+                            });
+                        }
                     }
                 });
             });

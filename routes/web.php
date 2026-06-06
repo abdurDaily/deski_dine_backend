@@ -104,6 +104,13 @@ Route::middleware(['auth', 'setLocale'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('menu', App\Http\Controllers\Backend\MenuController::class)->except(['show']);
         Route::post('menu/{menu}/delete', [App\Http\Controllers\Backend\MenuController::class, 'destroy'])->name('menu.delete');
+        
+        // Admin branch management
+        Route::get('branch', [App\Http\Controllers\Backend\BranchController::class, 'index'])->name('branch.index');
+        Route::post('branch', [App\Http\Controllers\Backend\BranchController::class, 'store'])->name('branch.store');
+        Route::get('branch/{branch}/edit', [App\Http\Controllers\Backend\BranchController::class, 'edit'])->name('branch.edit');
+        Route::post('branch/{branch}', [App\Http\Controllers\Backend\BranchController::class, 'update'])->name('branch.update');
+        Route::delete('branch/{branch}', [App\Http\Controllers\Backend\BranchController::class, 'destroy'])->name('branch.delete');
     });
     // User account orders & invoices
     Route::get('account/orders', [App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('account.orders');
@@ -123,6 +130,11 @@ Route::name('frontend.')->group(function () {
 
     //* HOME PAGE
     Route::get('/', [HomeController::class, 'home'])->name('home');
+
+    //* BRANCHES & MENU BY BRANCH
+    Route::get('/branches', [App\Http\Controllers\Frontend\BranchesController::class, 'index'])->name('branches.index');
+    Route::get('/branches/{branch:slug}', [App\Http\Controllers\Frontend\BranchesController::class, 'show'])->name('branches.show');
+    Route::get('/branches/{branch:slug}/search-menu', [App\Http\Controllers\Frontend\BranchesController::class, 'searchMenu'])->name('branches.search-menu');
 
     //* OFFER CHECKING (for displaying offer badges on cards)
     Route::get('/api/variation/{id}/offers', [App\Http\Controllers\Frontend\OfferCheckController::class, 'getOffersForVariation'])->name('api.offers.for-variation');
