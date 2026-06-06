@@ -153,6 +153,9 @@
         border-bottom: 1px solid #e9ecef;
         cursor: pointer;
         transition: background 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .search-result-item:hover {
@@ -166,12 +169,12 @@
     .search-result-name {
         font-weight: 700;
         color: var(--dark-text);
-        margin-bottom: 4px;
     }
 
     .search-result-meta {
         font-size: 0.85rem;
-        color: var(--muted-text);
+        color: var(--accent-orange);
+        font-weight: 700;
     }
 
     /* Category Filter */
@@ -208,7 +211,7 @@
         color: white;
     }
 
-    /* Menu Grid - Matching Reference Image */
+    /* Menu Grid */
     .menu-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -282,7 +285,7 @@
 
     .menu-card-price-section {
         display: flex;
-        align-items: flex-start;
+        align-items: flex-end;
         justify-content: space-between;
         margin-bottom: 15px;
     }
@@ -300,22 +303,6 @@
         font-weight: 700;
         font-size: 1.3rem;
         color: var(--accent-orange);
-    }
-
-    .menu-card-options {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        color: var(--muted-text);
-        background: #f5f1e8;
-        padding: 6px 12px;
-        border-radius: 6px;
-        width: fit-content;
-    }
-
-    .menu-card-options i {
-        font-size: 0.9rem;
     }
 
     .order-now-btn {
@@ -462,30 +449,30 @@
                             }
                             $minPrice = $menu->variations->min('price') ?? 0;
                         @endphp
-                        <div class="menu-card category-item" data-category="{{ $category->id }}" data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}" data-menu-price="{{ $minPrice }}">
-                            <div class="menu-card-image">
+                        <div class="menu-card menu-offer-card" data-category="{{ $category->id }}" data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}" data-menu-price="{{ $minPrice }}">
+                            <div class="menu-card-image menu-offer-image-wrap">
                                 @if($imageUrl)
-                                    <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" onerror="this.parentElement.style.background='#d3d3d3'; this.style.display='none';">
+                                    <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" onerror="this.parentElement.style.background='#d3d3d3'; this.style.display='none';">
                                 @else
                                     <i class="ri-restaurant-2-line"></i>
                                 @endif
                             </div>
                             <div class="menu-card-body">
-                                <h5 class="menu-card-title">{{ $menu->name }}</h5>
-                                <p class="menu-card-description">{{ Str::limit($menu->description ?? 'Fresh and delicious item', 80) }}</p>
+                                <h5 class="menu-card-title menu-offer-title">{{ $menu->name }}</h5>
+                                <p class="menu-card-description menu-offer-meta">{{ Str::limit($menu->description ?? 'Fresh and delicious item', 80) }}</p>
                                 
                                 <div class="menu-card-price-section">
                                     <div>
-                                        <div class="menu-card-price-label">Starts from</div>
-                                        <div class="menu-card-price">৳ {{ number_format((float) $minPrice, 2) }}</div>
-                                    </div>
-                                    <div class="menu-card-options">
-                                        <i class="ri-stack-line"></i>
-                                        <span>{{ $menu->variations->count() }} option{{ $menu->variations->count() > 1 ? 's' : '' }}</span>
+                                        <div class="menu-card-price-label menu-offer-price-label">Starts from</div>
+                                        <div class="menu-card-price menu-offer-price">৳ {{ number_format((float) $minPrice, 2) }}</div>
                                     </div>
                                 </div>
 
-                                <button class="order-now-btn add-to-cart" type="button" data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}" data-menu-price="{{ $minPrice }}">
+                                <span class="menu-offer-serve">
+                                    <i class="bi bi-collection"></i> {{ $menu->variations->count() }} option{{ $menu->variations->count() > 1 ? 's' : '' }}
+                                </span>
+
+                                <button class="order-now-btn menu-offer-cart-btn" type="button" data-variation-id="{{ $firstVariation?->id }}" data-original-price="{{ $minPrice }}">
                                     <i class="ri-shopping-bag-line"></i> Order Now
                                 </button>
                             </div>
@@ -498,150 +485,117 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        const branchSlug = '{{ $branch->slug }}';
-        let allMenus = [];
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const menuSearch = document.getElementById('menuSearch');
+    const searchResults = document.getElementById('searchResults');
+    const menuGrid = document.getElementById('menuGrid');
+    
+    console.log('Branch page loaded');
 
-        // Store all menus data on page load
-        function storeMenusData() {
-            $('.category-item').each(function() {
-                allMenus.push({
-                    id: $(this).data('menu-id'),
-                    name: $(this).data('menu-name'),
-                    price: $(this).data('menu-price'),
-                    category: $(this).data('category'),
-                    element: this
-                });
-            });
-        }
-
-        storeMenusData();
-
-        // Category Filter
-        $('.category-btn').click(function(e) {
+    // ===== CATEGORY FILTER =====
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
-            $('.category-btn').removeClass('active');
-            $(this).addClass('active');
+            categoryBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
             
-            const categoryId = $(this).data('category');
+            const categoryId = this.getAttribute('data-category');
+            console.log('Filter by category:', categoryId);
             
-            if (categoryId === 'all') {
-                $('.category-item').removeClass('hidden');
-            } else {
-                $('.category-item').addClass('hidden');
-                $('.category-item[data-category="' + categoryId + '"]').removeClass('hidden');
-            }
+            const menuCards = document.querySelectorAll('.menu-card');
+            menuCards.forEach(card => {
+                if (categoryId === 'all' || card.getAttribute('data-category') === categoryId) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
             
-            // Clear search when filtering
-            $('#menuSearch').val('');
-            $('#searchResults').empty().hide();
-        });
-
-        // Menu Search with AJAX
-        let searchTimeout;
-        $('#menuSearch').on('keyup', function() {
-            clearTimeout(searchTimeout);
-            const query = $(this).val().trim();
-            
-            if (query.length < 2) {
-                $('#searchResults').empty().hide();
-                // Reset to all items
-                $('.category-item').removeClass('hidden');
-                return;
-            }
-
-            searchTimeout = setTimeout(function() {
-                $.ajax({
-                    url: "{{ route('frontend.branches.search-menu', $branch->slug) }}",
-                    method: 'GET',
-                    data: { q: query },
-                    dataType: 'json',
-                    success: function(response) {
-                        const results = response.data;
-                        let html = '';
-
-                        if (results.length > 0) {
-                            // Hide all items first
-                            $('.category-item').addClass('hidden');
-                            
-                            results.forEach(item => {
-                                // Show matching items
-                                $('.category-item[data-menu-id="' + item.id + '"]').removeClass('hidden');
-                                
-                                html += `
-                                    <div class="search-result-item" data-menu-id="${item.id}" data-menu-name="${item.name}" data-menu-price="${item.price}">
-                                        <div class="search-result-name">${item.name}</div>
-                                        <div class="search-result-meta">
-                                            ${item.category} · ৳${parseFloat(item.price).toFixed(2)}
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            html = '<div class="search-result-item"><div class="search-result-name">No items found</div></div>';
-                        }
-
-                        $('#searchResults').html(html).show();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Search error:', error);
-                        $('#searchResults').html('<div class="search-result-item"><div class="search-result-name">Error searching</div></div>').show();
-                    }
-                });
-            }, 300);
-        });
-
-        // Add to cart from search result
-        $(document).on('click', '.search-result-item', function() {
-            const menuId = $(this).data('menu-id');
-            if (!menuId) return;
-            
-            const menuName = $(this).data('menu-name');
-            const menuPrice = $(this).data('menu-price');
-            
-            addToCart(menuId, menuName, menuPrice);
-            $('#menuSearch').val('');
-            $('#searchResults').empty().hide();
-            
-            // Reset to all items
-            $('.category-btn').removeClass('active');
-            $('.category-btn[data-category="all"]').addClass('active');
-            $('.category-item').removeClass('hidden');
-        });
-
-        // Add to cart button
-        $(document).on('click', '.add-to-cart', function() {
-            const menuId = $(this).data('menu-id');
-            const menuName = $(this).data('menu-name');
-            const menuPrice = $(this).data('menu-price');
-            
-            addToCart(menuId, menuName, menuPrice);
-        });
-
-        function addToCart(menuId, menuName, menuPrice) {
-            // Show notification
-            const notification = document.createElement('div');
-            notification.className = 'alert alert-success alert-dismissible fade show';
-            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; width: 90%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-            notification.innerHTML = `
-                <strong>✓ Added!</strong> "${menuName}" added to cart (৳${parseFloat(menuPrice).toFixed(2)})
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(notification);
-            
-            // Trigger cart update event if available
-            $(document).trigger('cartUpdated', { menuId, menuName, menuPrice });
-            
-            setTimeout(() => notification.remove(), 3000);
-        }
-
-        // Close search results when clicking outside
-        $(document).click(function(e) {
-            if (!$(e.target).closest('.search-wrapper').length) {
-                $('#searchResults').hide();
-            }
+            menuSearch.value = '';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
         });
     });
+
+    // ===== SEARCH FUNCTIONALITY =====
+    let searchTimeout;
+    menuSearch.addEventListener('keyup', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim().toLowerCase();
+        
+        if (query.length < 1) {
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            document.querySelectorAll('.menu-card').forEach(card => card.classList.remove('hidden'));
+            return;
+        }
+
+        searchTimeout = setTimeout(function() {
+            let matchCount = 0;
+            let html = '';
+            const menuCards = document.querySelectorAll('.menu-card');
+
+            menuCards.forEach(card => {
+                const menuName = card.getAttribute('data-menu-name').toLowerCase();
+                
+                if (menuName.includes(query)) {
+                    card.classList.remove('hidden');
+                    matchCount++;
+                    
+                    const id = card.getAttribute('data-menu-id');
+                    const name = card.getAttribute('data-menu-name');
+                    const price = card.getAttribute('data-menu-price');
+                    
+                    html += `<div class="search-result-item" data-menu-id="${id}" data-menu-name="${name}" data-menu-price="${price}">
+                        <div class="search-result-name">${name}</div>
+                        <div class="search-result-meta">৳${parseFloat(price).toFixed(2)}</div>
+                    </div>`;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (matchCount === 0) {
+                html = '<div class="search-result-item" style="cursor: default;"><div class="search-result-name">No items found</div></div>';
+            }
+
+            searchResults.innerHTML = html;
+            searchResults.style.display = 'block';
+        }, 300);
+    });
+
+    // ===== SEARCH RESULT CLICK - FILTER TO THAT ITEM =====
+    document.addEventListener('click', function(e) {
+        const resultItem = e.target.closest('.search-result-item');
+        if (resultItem && resultItem.hasAttribute('data-menu-id')) {
+            e.preventDefault();
+            const menuId = resultItem.getAttribute('data-menu-id');
+            
+            // Close search
+            menuSearch.value = '';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            
+            // Show only this item
+            const menuCards = document.querySelectorAll('.menu-card');
+            menuCards.forEach(card => {
+                if (card.getAttribute('data-menu-id') === menuId) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    // ===== CLOSE SEARCH WHEN CLICKING OUTSIDE =====
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) {
+            searchResults.style.display = 'none';
+        }
+    });
+});
 </script>
 
 @endsection

@@ -67,29 +67,41 @@ class BranchesController extends Controller
     public function searchMenu(Request $request, Branch $branch)
     {
         $query = $request->get('q');
+        \Log::info('Search Menu - Branch: ' . $branch->slug . ', Query: ' . $query);
         
         if (!$query || strlen($query) < 2) {
             return response()->json(['data' => []]);
         }
 
-        // Search in available menus with variations
+        // Search in available menus for this branch only
         $menus = Menu::where('is_available', 1)
             ->where('name', 'LIKE', "%{$query}%")
             ->with(['category', 'variations'])
             ->whereHas('variations') // Only menus with variations
+            ->whereHas('category', function($q) use ($branch) {
+                // Filter by branch categories
+                $q->where(function($subQ) use ($branch) {
+                    $subQ->where('branch_id', $branch->id)
+                         ->orWhereNull('branch_id');
+                });
+            })
             ->limit(15)
-            ->get()
-            ->map(function ($menu) {
-                return [
-                    'id' => $menu->id,
-                    'name' => $menu->name,
-                    'category' => $menu->category->name ?? 'Uncategorized',
-                    'price' => $menu->variations->min('price') ?? 0,
-                    'image' => $menu->variations->first()?->image,
-                    'description' => $menu->description,
-                ];
-            });
+            ->get();
 
-        return response()->json(['data' => $menus]);
+        \Log::info('Found ' . $menus->count() . ' menus');
+
+        $results = $menus->map(function ($menu) {
+            return [
+                'id' => $menu->id,
+                'name' => $menu->name,
+                'category' => $menu->category->name ?? 'Uncategorized',
+                'price' => $menu->variations->min('price') ?? 0,
+                'image' => $menu->variations->first()?->image,
+                'description' => $menu->description,
+            ];
+        });
+
+        \Log::info('Search results:', $results->toArray());
+        return response()->json(['data' => $results]);
     }
 }

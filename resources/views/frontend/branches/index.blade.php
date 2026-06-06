@@ -94,10 +94,12 @@
         padding: 15px 20px;
         background: #f8f9fa;
         border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 10px;
     }
 
     .btn-branch {
-        width: 100%;
+        flex: 1;
         padding: 10px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -108,12 +110,14 @@
         transition: all 0.3s;
         border: none;
         cursor: pointer;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        display: block;
     }
 
     .btn-branch:hover {
         transform: scale(1.02);
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        text-decoration: none;
     }
 
     .branches-grid {
@@ -153,6 +157,14 @@
         .branches-grid {
             grid-template-columns: 1fr;
         }
+
+        .branch-card-footer {
+            flex-direction: column;
+        }
+
+        .btn-branch {
+            width: 100%;
+        }
     }
 </style>
 
@@ -167,8 +179,8 @@
     <div class="container">
         <div class="branches-grid">
             @forelse($branches as $branch)
-                <div class="branch-card" onclick="goToBranch('{{ route('frontend.branches.show', $branch->slug) }}')">
-                    <div class="branch-card-header">
+                <div class="branch-card">
+                    <div class="branch-card-header" onclick="goToBranch('{{ route('frontend.branches.show', $branch) }}')">
                         <h3>{{ $branch->name }}</h3>
                     </div>
                     <div class="branch-card-body">
@@ -179,39 +191,27 @@
                         <div class="branch-info">
                             <div class="branch-info-label">📞 Phone</div>
                             <div class="branch-info-value">
-                                <span class="branch-phone" onclick="event.stopPropagation(); window.location.href='tel:{{ $branch->phone }}'">{{ $branch->phone }}</span>
+                                <span class="branch-phone" onclick="callPhone('{{ $branch->phone }}'); return false;">{{ $branch->phone }}</span>
                             </div>
                         </div>
                         
                         @if($branch->foodpanda_url || $branch->pathao_url || $branch->foodi_url)
                             <div class="branch-info">
                                 <div class="branch-info-label">🚚 Delivery Services</div>
-                                <div class="delivery-icons" onclick="event.stopPropagation()">
+                                <div class="delivery-icons">
                                     @if($branch->foodpanda_url)
                                         <a href="{{ $branch->foodpanda_url }}" target="_blank" rel="noopener noreferrer" title="Order from FoodPanda" class="delivery-icon-link">
-                                            @if($branch->foodpanda_logo)
-                                                <img src="{{ strpos($branch->foodpanda_logo, 'http') === 0 ? $branch->foodpanda_logo : asset('uploads/branches/' . $branch->foodpanda_logo) }}" alt="FoodPanda" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%23E62E04%22/%3E%3Ctext x=%2250%22 y=%2255%22 font-size=%2240%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EF%3C/text%3E%3C/svg%3E'">
-                                            @else
-                                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E62E04'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" alt="FoodPanda">
-                                            @endif
+                                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E62E04'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" alt="FoodPanda">
                                         </a>
                                     @endif
                                     @if($branch->pathao_url)
                                         <a href="{{ $branch->pathao_url }}" target="_blank" rel="noopener noreferrer" title="Order from Pathao" class="delivery-icon-link">
-                                            @if($branch->pathao_logo)
-                                                <img src="{{ strpos($branch->pathao_logo, 'http') === 0 ? $branch->pathao_logo : asset('uploads/branches/' . $branch->pathao_logo) }}" alt="Pathao" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%23F71735%22/%3E%3Ctext x=%2250%22 y=%2255%22 font-size=%2250%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EP%3C/text%3E%3C/svg%3E'">
-                                            @else
-                                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23F71735'/%3E%3Ctext x='50' y='55' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E" alt="Pathao">
-                                            @endif
+                                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23F71735'/%3E%3Ctext x='50' y='55' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E" alt="Pathao">
                                         </a>
                                     @endif
                                     @if($branch->foodi_url)
                                         <a href="{{ $branch->foodi_url }}" target="_blank" rel="noopener noreferrer" title="Order from Foodi" class="delivery-icon-link">
-                                            @if($branch->foodi_logo)
-                                                <img src="{{ strpos($branch->foodi_logo, 'http') === 0 ? $branch->foodi_logo : asset('uploads/branches/' . $branch->foodi_logo) }}" alt="Foodi" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%23C71E1E%22/%3E%3Ctext x=%2250%22 y=%2252%22 font-size=%2235%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3E%26%3C/text%3E%3C/svg%3E'">
-                                            @else
-                                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23C71E1E'/%3E%3Ctext x='50' y='52' font-size='35' font-weight='bold' fill='white' text-anchor='middle'%3E%26%3C/text%3E%3C/svg%3E" alt="Foodi">
-                                            @endif
+                                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23C71E1E'/%3E%3Ctext x='50' y='52' font-size='35' font-weight='bold' fill='white' text-anchor='middle'%3E%26%3C/text%3E%3C/svg%3E" alt="Foodi">
                                         </a>
                                     @endif
                                 </div>
@@ -219,7 +219,7 @@
                         @endif
                     </div>
                     <div class="branch-card-footer">
-                        <button class="btn-branch" onclick="event.stopPropagation()">
+                        <button class="btn-branch" onclick="goToBranch('{{ route('frontend.branches.show', $branch) }}')">
                             <i class="ri-store-2-line me-1"></i> View Menu
                         </button>
                     </div>
@@ -236,6 +236,10 @@
 <script>
     function goToBranch(url) {
         window.location.href = url;
+    }
+
+    function callPhone(phone) {
+        window.location.href = 'tel:' + phone;
     }
 </script>
 

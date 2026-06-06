@@ -334,6 +334,10 @@ const getCartTotal = (cart) => {
 };
 
 const buildCartItemId = (item) => {
+    // Use variation_id if available for better uniqueness, otherwise use title
+    if (item.variation_id) {
+        return `variation-${item.variation_id}`;
+    }
     return `${item.title}`
         .trim()
         .toLowerCase()
@@ -374,14 +378,16 @@ const createMenuItemFromCard = (button) => {
     }
 
     const item = {
-        id: buildCartItemId({ title }),
-        variation_id: variationId ? parseInt(variationId) : null,
         title: title || "Menu item",
         price: price,
         quantity: 1,
         image,
         note: quantityText.trim() || "1 person",
+        variation_id: variationId ? parseInt(variationId) : null,
     };
+    
+    // Generate ID after we have variation_id
+    item.id = buildCartItemId(item);
     
     console.log('Creating cart item:', item);
     return item;

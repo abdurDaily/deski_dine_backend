@@ -286,63 +286,13 @@
 
     <div class="offcanvas-body d-flex flex-column">
       <div id="cartDrawerItems" class="cart-drawer-items flex-grow-1">
-        <article class="cart-item">
-          <div class="cart-item-image-wrap">
-            <img src="images/signature_menu/1.jpg" alt="Mutton Kacchi" class="cart-item-image" />
-          </div>
-          <div class="cart-item-body">
-            <div class="cart-item-header-row">
-              <h6 class="cart-item-title">Mutton Kacchi</h6>
-              <button class="cart-item-remove-btn" type="button" aria-label="Remove item">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-            <div class="cart-item-footer-row">
-              <div class="cart-qty-row">
-                <button class="qty-adjust-btn" type="button" aria-label="Decrease quantity">
-                  —
-                </button>
-                <span class="cart-qty">1</span>
-                <button class="qty-adjust-btn" type="button" aria-label="Increase quantity">
-                  +
-                </button>
-              </div>
-              <div class="cart-item-meta">৳ 420</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="cart-item">
-          <div class="cart-item-image-wrap">
-            <img src="images/signature_menu/4.jpg" alt="Kacchi Biryani" class="cart-item-image" />
-          </div>
-          <div class="cart-item-body">
-            <div class="cart-item-header-row">
-              <h6 class="cart-item-title">Kacchi Biryani</h6>
-              <button class="cart-item-remove-btn" type="button" aria-label="Remove item">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-            <div class="cart-item-footer-row">
-              <div class="cart-qty-row">
-                <button class="qty-adjust-btn" type="button" aria-label="Decrease quantity">
-                  —
-                </button>
-                <span class="cart-qty">2</span>
-                <button class="qty-adjust-btn" type="button" aria-label="Increase quantity">
-                  +
-                </button>
-              </div>
-              <div class="cart-item-meta">৳ 360</div>
-            </div>
-          </div>
-        </article>
+        <p style="text-align: center; color: #999; padding: 40px 20px;">Your cart is empty</p>
       </div>
 
       <div class="cart-drawer-footer border-top pt-4 mt-auto">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <span class="cart-total-label text-uppercase">Subtotal</span>
-          <strong id="cartDrawerSubtotal" class="cart-total-value">৳ 1,140</strong>
+          <strong id="cartDrawerSubtotal" class="cart-total-value">৳ 0.00</strong>
         </div>
         <div class="d-grid gap-3">
           <a href="{{ route('frontend.addtocart') }}" class="btn cart-view-btn">View Full Cart</a>
