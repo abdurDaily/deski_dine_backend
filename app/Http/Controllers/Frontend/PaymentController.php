@@ -159,5 +159,82 @@ class PaymentController extends Controller
         ]);
 
         $order->creditMemberPurchase();
+
+        // Send payment confirmation SMS
+        $this->sendPaymentConfirmationSms($order);
+    }
+
+    /**
+     * Send payment confirmation SMS to customer
+     * @param Order $order
+     * @return array
+     */
+    private function sendPaymentConfirmationSms(Order $order)
+    {
+        try {
+            $member = $order->member;
+            
+            // Log the attempt
+            Log::info('Attempting to send payment SMS', [
+                'order_id' => $order->id,
+                'member_id' => $member?->id,
+                'member_phone' => $member?->phone ?? 'NULL',
+                'order_customer_phone' => $order->customer_phone ?? 'NULL'
+            ]);
+            
+            if (!$member || !$member->phone) {
+                Log::warning('Cannot send payment SMS - member or phone not found', [
+                    'order_id' => $order->id,
+                    'member_id' => $member?->id,
+                    'has_member' => $member ? 'yes' : 'no',
+                    'member_phone' => $member?->phone ?? 'NULL'
+                ]);
+                return ['success' => false];
+            }
+
+            // Format phone number to international format
+            $phone = format_phone($member->phone);
+            
+            Log::info('Formatted phone number', [
+                'original' => $member->phone,
+                'formatted' => $phone,
+                'order_id' => $order->id
+            ]);
+
+            // Send payment confirmation SMS
+            $response = send_payment_sms(
+                $phone,
+                $member->name,
+                $order->final_amount,
+                $order->transaction_id
+            );
+
+            if ($response['success']) {
+                Log::info('Payment confirmation SMS sent successfully', [
+                    'order_id' => $order->id,
+                    'member_id' => $member->id,
+                    'phone' => $phone,
+                    'response' => $response
+                ]);
+            } else {
+                Log::warning('Failed to send payment confirmation SMS', [
+                    'order_id' => $order->id,
+                    'member_id' => $member->id,
+                    'phone' => $phone,
+                    'error' => $response['error'] ?? 'Unknown error',
+                    'full_response' => $response
+                ]);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Exception while sending payment confirmation SMS', [
+                'order_id' => $order->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return ['success' => false];
+        }
     }
 }

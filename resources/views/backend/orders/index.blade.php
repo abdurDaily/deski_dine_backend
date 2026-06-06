@@ -293,14 +293,14 @@
 $(function () {
 
     /* ══════════════════════════════════════════════════
-       1. DATE RANGE PICKER  — defaults to Today
+       1. DATE RANGE PICKER  — defaults to All Time
     ══════════════════════════════════════════════════ */
     const todayStr = moment().format('YYYY-MM-DD');
-    let dateFrom   = todayStr;
-    let dateTo     = todayStr;
+    let dateFrom   = '';
+    let dateTo     = '';
 
     $('#dateRangePickerBtn').daterangepicker({
-        startDate : moment(),
+        startDate : moment('2020-01-01'),
         endDate   : moment(),
         opens     : 'left',
         locale: {
@@ -354,8 +354,8 @@ $(function () {
         table.draw();
     }
 
-    // Seed label for the default "Today"
-    $('#dateRangePickerBtn').val('Today');
+    // Seed label for the default "All Time"
+    $('#dateRangePickerBtn').val('All Time');
 
     /* ══════════════════════════════════════════════════
        2. DATATABLE
@@ -491,20 +491,37 @@ $(function () {
 
     function playBeep() {
         try {
-            const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-            const gain = ctx.createGain();
-            gain.gain.setValueAtTime(0.55, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.1);
-            gain.connect(ctx.destination);
-            [[0, 880], [0.28, 1100]].forEach(([off, freq]) => {
-                const osc = ctx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, ctx.currentTime + off);
-                osc.connect(gain);
-                osc.start(ctx.currentTime + off);
-                osc.stop(ctx.currentTime + off + 0.38);
+            // Use a simple beep sound (base64 encoded WAV file - short beep)
+            const beepSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj==');
+            beepSound.volume = 0.7;
+            beepSound.play().catch(err => {
+                console.log('Beep sound playback error (trying fallback):', err);
+                // Fallback: Try Web Audio API
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        const ctx = new AudioContext();
+                        if (ctx.state === 'suspended') {
+                            ctx.resume();
+                        }
+                        const gain = ctx.createGain();
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                        gain.connect(ctx.destination);
+                        
+                        const osc = ctx.createOscillator();
+                        osc.frequency.setValueAtTime(1000, ctx.currentTime);
+                        osc.connect(gain);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.3);
+                    }
+                } catch (e) {
+                    console.warn('Web Audio fallback also failed:', e);
+                }
             });
-        } catch (e) {}
+        } catch (e) {
+            console.warn('Beep sound error:', e);
+        }
     }
 
     setInterval(function () {
@@ -520,7 +537,7 @@ $(function () {
             }
             lastKnownId = newId;
         });
-    }, 10000);
+    }, 3000);  // Check every 3 seconds instead of 10
 
     /* ══════════════════════════════════════════════════
        8. SOUND TOGGLE

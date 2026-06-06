@@ -193,11 +193,56 @@ class HomeController extends Controller
         $member->unique_card_number = sprintf('MEM%s_%s', str_pad($member->id, 4, '0', STR_PAD_LEFT), $member->last4);
         $member->save();
 
+        // Send welcome SMS with card details
+        $this->sendWelcomeSms($member);
+
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Membership registered successfully. Your card number is ' . $member->unique_card_number, 'card' => $member->unique_card_number]);
         }
 
         return back()->with('success', 'Membership registered successfully. Your card number is ' . $member->unique_card_number . '.');
+    }
+
+    /**
+     * Send welcome SMS to newly registered member
+     * @param Member $member
+     * @return array
+     */
+    private function sendWelcomeSms($member)
+    {
+        try {
+            // Format phone number to international format
+            $phone = format_phone($member->phone);
+
+            // Send welcome SMS
+            $response = send_welcome_sms($phone, $member->name);
+
+            if ($response['success']) {
+                Log::info('Welcome SMS sent to member', [
+                    'member_id' => $member->id,
+                    'phone' => $phone,
+                    'name' => $member->name
+                ]);
+            } else {
+                Log::warning('Failed to send welcome SMS to member', [
+                    'member_id' => $member->id,
+                    'phone' => $phone,
+                    'error' => $response['error'] ?? 'Unknown error'
+                ]);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Exception while sending welcome SMS', [
+                'member_id' => $member->id,
+                'exception' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
 
     public function applyGoldenCard(Request $request)
