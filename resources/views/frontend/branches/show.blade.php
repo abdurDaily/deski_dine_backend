@@ -192,7 +192,7 @@
     }
 
     .category-btn.active {
-        background: #CC4632;
+        background: #f05a43;
         color: white;
     }
 
@@ -301,7 +301,7 @@
     .menu-card-image {
         width: 100%;
         height: 200px;
-        background: #d3d3d3;
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
