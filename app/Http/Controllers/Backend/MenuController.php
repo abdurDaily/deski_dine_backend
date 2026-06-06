@@ -15,38 +15,51 @@ class MenuController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            // CRITICAL: .with('variations') is required to show the prices
             $data = Menu::with(['category', 'variations'])->latest()->get();
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('category_name', fn($row) => $row->category->name ?? 'N/A')
-                ->addColumn('variations', function ($row) {
-                    $html = '';
-                    foreach ($row->variations as $v) {
-                        $html .= '<span class="badge bg-soft-primary text-primary view-variant-details me-1" 
-                        style="cursor:pointer"
-                        data-name="' . $v->name . '" 
-                        data-price="' . $v->price . '" 
-                        data-image="' . asset($v->image) . '">
-                        ' . $v->name . '
-                  </span>';
-                    }
-                    return $html;
+                ->addColumn('image_preview', function ($row) {
+                    $image = $row->variations->first()?->image 
+                        ? (strpos($row->variations->first()->image, 'http') === 0
+                            ? $row->variations->first()->image
+                            : asset($row->variations->first()->image))
+                        : asset('assets/placeholder/placeholder.png');
+                    return '<img src="' . $image . '" width="50" height="50" class="rounded shadow-sm object-fit-cover" />';
                 })
+                ->addColumn('category_name', fn($row) => $row->category->name ?? 'N/A')
+                ->addColumn('price_range', function ($row) {
+                    if ($row->variations->isEmpty()) {
+                        return '<span class="text-muted">No variations</span>';
+                    }
+                    $prices = $row->variations->pluck('price');
+                    $min = $prices->min();
+                    $max = $prices->max();
+                    return $min == $max 
+                        ? '৳' . number_format($min, 2)
+                        : '৳' . number_format($min, 2) . ' - ৳' . number_format($max, 2);
+                })
+                ->addColumn('variations_count', fn($row) => '<span class="badge bg-soft-info text-info">' . $row->variations->count() . ' variations</span>')
                 ->addColumn('status', function ($row) {
                     return $row->is_available
-                        ? '<span class="badge bg-success">Available</span>'
-                        : '<span class="badge bg-danger">Out of Stock</span>';
+                        ? '<span class="badge bg-success"><i class="ri-check-line me-1"></i>Available</span>'
+                        : '<span class="badge bg-danger"><i class="ri-close-line me-1"></i>Out of Stock</span>';
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-soft-info edit-btn" data-id="' . $row->id . '"><i class="ri-pencil-fill"></i></button>
-                        <button class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '"><i class="ri-delete-bin-fill"></i></button>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <button class="btn btn-sm btn-soft-info view-details-btn" data-id="' . $row->id . '" title="View Details" data-bs-toggle="tooltip">
+                            <i class="ri-eye-fill"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soft-warning edit-btn" data-id="' . $row->id . '" title="Edit" data-bs-toggle="tooltip">
+                            <i class="ri-pencil-fill"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soft-danger delete-btn" data-id="' . $row->id . '" title="Delete" data-bs-toggle="tooltip">
+                            <i class="ri-delete-bin-fill"></i>
+                        </button>
                     </div>';
                 })
-                ->rawColumns(['action', 'variations', 'status'])
+                ->rawColumns(['action', 'image_preview', 'variations_count', 'status', 'price_range'])
                 ->make(true);
         }
         $categories = Category::all();
@@ -101,8 +114,8 @@ class MenuController extends Controller
 
     public function edit($id)
     {
-        // Load variations so the edit form can see them
-        $menu = Menu::with('variations')->findOrFail($id);
+        // Load variations and category so the edit form can see them
+        $menu = Menu::with(['variations', 'category'])->findOrFail($id);
         return response()->json($menu);
     }
 

@@ -20,8 +20,10 @@ class SignaturePlatterController extends Controller
                     ->addIndexColumn()
                     ->addColumn('thumbnail_preview', function ($row) {
                         $url = $row->thumbnail_image
-                            ? asset('uploads/platters/' . $row->thumbnail_image)
-                            : 'https://via.placeholder.com/60x60?text=No+Thumb';
+                            ? (strpos($row->thumbnail_image, 'http') === 0
+                                ? $row->thumbnail_image
+                                : asset('uploads/platters/' . $row->thumbnail_image))
+                            : asset('assets/placeholder/placeholder.png');
                         return '<img src="' . $url . '" width="60" height="60" class="rounded shadow-sm object-fit-cover" title="Thumbnail" />';
                     })
                     ->addColumn('status', function ($row) {

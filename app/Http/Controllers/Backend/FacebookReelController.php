@@ -19,8 +19,10 @@ class FacebookReelController extends Controller
                     ->addIndexColumn()
                     ->addColumn('thumbnail_preview', function ($row) {
                         $url = $row->thumbnail
-                            ? asset('uploads/reels/' . $row->thumbnail)
-                            : 'https://via.placeholder.com/60x80?text=No+Thumb';
+                            ? (strpos($row->thumbnail, 'http') === 0
+                                ? $row->thumbnail
+                                : asset('uploads/reels/' . $row->thumbnail))
+                            : asset('assets/placeholder/placeholder.png');
                         return '<img src="' . $url . '" width="60" height="80" class="rounded shadow-sm object-fit-cover" />';
                     })
                     ->addColumn('facebook_link', function ($row) {

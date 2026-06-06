@@ -126,7 +126,7 @@
                   <a href="#" class="menu-offer-card">
                     <div class="menu-offer-image-wrap" style="position: relative;">
                       <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image"
-                           onerror="this.src='{{ asset('assets/frontend/images/placeholder.webp') }}'" />
+                           onerror="this.src='{{ asset('assets/placeholder/placeholder.png') }}'" />
                       
                       @if($activeOffers->count() > 0)
                         {{-- Offer icon badge (left side) --}}
@@ -241,7 +241,7 @@
                 @php
                   $thumbnailImage = $platter->thumbnail_image
                       ? (
-                          \Illuminate\Support\Str::startsWith($platter->thumbnail_image, ['http://', 'https://'])
+                          strpos($platter->thumbnail_image, 'http') === 0
                               ? $platter->thumbnail_image
                               : asset('uploads/platters/' . $platter->thumbnail_image)
                         )
@@ -276,7 +276,7 @@
                   $features = collect($platter->features ?? [])->filter()->values();
                   $menuCardImage = $platter->menu_card_image
                       ? (
-                          \Illuminate\Support\Str::startsWith($platter->menu_card_image, ['http://', 'https://'])
+                          strpos($platter->menu_card_image, 'http') === 0
                               ? $platter->menu_card_image
                               : asset('uploads/platters/' . $platter->menu_card_image)
                         )
@@ -305,6 +305,7 @@
                             {!! nl2br(e($feature)) !!}
                           @endif
                         </li>
+                      
                       @endforeach
                     </ul>
                   @endif
@@ -371,7 +372,6 @@
             <button class="vert-arrow vert-next" aria-label="Scroll Down">
               <i class="fas fa-chevron-down"></i>
             </button>
-
             <div class="vertical-carousel-engine js-modal-nav-carousel">
               <!-- Nav Item 1 -->
               <div class="vertical-carousel-item" data-img="./images/menu_card/1.jpg">
@@ -452,10 +452,10 @@
             @forelse($facebookReels as $reel)
               @php
                 $reelThumbnail = $reel->thumbnail
-                    ? (\Illuminate\Support\Str::startsWith($reel->thumbnail, ['http://', 'https://'])
+                    ? (strpos($reel->thumbnail, 'http') === 0
                         ? $reel->thumbnail
                         : asset('uploads/reels/' . $reel->thumbnail))
-                    : asset('assets/frontend/images/placeholder.webp');
+                    : asset('assets/placeholder/placeholder.png');
                 $reelUrl = $reel->facebook_url ?: 'https://www.facebook.com/DegchiDine';
               @endphp
               <div class="reel-slide-wrap">
@@ -475,7 +475,7 @@
                 <div class="reel-card">
                   <div class="reel-card-thumb">
                     <div class="reel-progress-indicator"></div>
-                    <img src="{{ asset('assets/frontend/images/placeholder.webp') }}" alt="No reels available" loading="lazy" />
+                    <img src="{{ asset('assets/placeholder/placeholder.png') }}" alt="No reels available" loading="lazy" />
                     <div class="reel-card-overlay">
                       <span class="reel-play-icon"><i class="bi bi-play-fill"></i></span>
                       <span class="reel-watch-label text-uppercase"><i class="bi bi-facebook me-1"></i>Watch on Facebook</span>
@@ -793,7 +793,7 @@
             @if($popupOffer->popup_image)
             <img src="{{ asset('storage/' . $popupOffer->popup_image) }}"
                  alt="{{ $popupOffer->name }}"
-                 onerror="this.src='{{ asset('assets/frontend/images/placeholder.webp') }}'"
+                 onerror="this.src='{{ asset('assets/placeholder/placeholder.png') }}'"
                  style="width:100%; max-height:240px; object-fit:cover; display:block;">
             @else
             <div style="background:linear-gradient(135deg,#c0392b,#e74c3c); height:140px; display:flex; align-items:center; justify-content:center;">

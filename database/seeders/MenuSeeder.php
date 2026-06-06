@@ -45,35 +45,35 @@ class MenuSeeder extends Seeder
                 'name' => 'Kacchi & Biryani',
                 'slug' => 'kacchi-biryani',
                 'description' => 'Our signature slow-cooked Dum Kacchi and aromatic Biryani items.',
-                'image' => 'assets/frontend/images/signature_menu/1.jpg',
+                'image' => 'assets/placeholder/placeholder.png',
                 'status' => 1,
             ],
             [
                 'name' => 'Signature Platters',
                 'slug' => 'signature-platters',
                 'description' => 'Carefully curated selections perfect for family sharing.',
-                'image' => 'assets/frontend/images/signature_menu/3.jpg',
+                'image' => 'assets/placeholder/placeholder.png',
                 'status' => 1,
             ],
             [
                 'name' => 'Sides & Appetizers',
                 'slug' => 'sides-appetizers',
                 'description' => 'Crispy and savory complements for your main course.',
-                'image' => 'assets/frontend/images/signature_menu/2.jpg',
+                'image' => 'assets/placeholder/placeholder.png',
                 'status' => 1,
             ],
             [
                 'name' => 'Desserts',
                 'slug' => 'desserts',
                 'description' => 'Sweet royal treats to end your meal on a perfect note.',
-                'image' => 'assets/frontend/images/signature_menu/1.jpg',
+                'image' => 'assets/placeholder/placeholder.png',
                 'status' => 1,
             ],
             [
                 'name' => 'Refreshing Drinks',
                 'slug' => 'refreshing-drinks',
                 'description' => 'Cold beverages, signature Borhani, and traditional drinks.',
-                'image' => 'assets/frontend/images/signature_menu/4.jpg',
+                'image' => 'assets/placeholder/placeholder.png',
                 'status' => 1,
             ],
         ];
@@ -102,12 +102,12 @@ class MenuSeeder extends Seeder
                     [
                         'name' => '1:2 Portion',
                         'price' => 420.00,
-                        'image' => 'assets/frontend/images/signature_menu/1.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                     [
                         'name' => '1:3 Portion',
                         'price' => 620.00,
-                        'image' => 'assets/frontend/images/signature_menu/1.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                 ]
             ],
@@ -119,12 +119,12 @@ class MenuSeeder extends Seeder
                     [
                         'name' => 'Single Pack',
                         'price' => 340.00,
-                        'image' => 'assets/frontend/images/signature_menu/2.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                     [
                         'name' => 'Double Pack',
                         'price' => 650.00,
-                        'image' => 'assets/frontend/images/signature_menu/2.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                 ]
             ],
@@ -136,7 +136,7 @@ class MenuSeeder extends Seeder
                     [
                         'name' => 'Regular',
                         'price' => 290.00,
-                        'image' => 'assets/frontend/images/signature_menu/3.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ]
                 ]
             ],
@@ -148,7 +148,7 @@ class MenuSeeder extends Seeder
                     [
                         'name' => 'Serve 2',
                         'price' => 890.00,
-                        'image' => 'assets/frontend/images/signature_menu/4.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ]
                 ]
             ],
@@ -160,7 +160,7 @@ class MenuSeeder extends Seeder
                     [
                         'name' => '1 Piece',
                         'price' => 140.00,
-                        'image' => 'assets/frontend/images/signature_menu/2.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ]
                 ]
             ],
@@ -172,7 +172,7 @@ class MenuSeeder extends Seeder
                     [
                         'name' => 'Cup',
                         'price' => 80.00,
-                        'image' => 'assets/frontend/images/signature_menu/1.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ]
                 ]
             ],
@@ -184,12 +184,12 @@ class MenuSeeder extends Seeder
                     [
                         'name' => 'Glass',
                         'price' => 50.00,
-                        'image' => 'assets/frontend/images/signature_menu/4.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                     [
                         'name' => '1 Liter Bottle',
                         'price' => 180.00,
-                        'image' => 'assets/frontend/images/signature_menu/4.jpg',
+                        'image' => 'assets/placeholder/placeholder.png',
                     ],
                 ]
             ],
