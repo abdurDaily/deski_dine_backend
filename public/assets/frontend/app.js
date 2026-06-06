@@ -54,12 +54,12 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#home",
             otherHref: "/#home",
         },
-        {
-            key: "about",
-            label: "About",
-            homeHref: "/#about",
-            otherHref: "/#about",
-        },
+        // {
+        //     key: "about",
+        //     label: "About",
+        //     homeHref: "/#about",
+        //     otherHref: "/#about",
+        // },
         // {
         //     key: "menu",
         //     label: "Menu",
@@ -98,11 +98,11 @@ const syncSharedNavigationAndFooter = () => {
             homeHref: "/#home",
             otherHref: "/#home",
         },
-        {
-            label: "About Us",
-            homeHref: "/#about",
-            otherHref: "/#about",
-        },
+        // {
+        //     label: "About Us",
+        //     homeHref: "/#about",
+        //     otherHref: "/#about",
+        // },
         // {
         //     label: "Menu",
         //     homeHref: "/#menu",

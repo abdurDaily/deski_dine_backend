@@ -10,105 +10,197 @@
         --light-bg: #f8f9fa;
         --dark-text: #212529;
         --muted-text: #6c757d;
+        --danger-red: #e74c3c;
     }
 
-    .branch-hero-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-        padding: 60px 0;
-        margin-bottom: 40px;
+    /* ===== MODERN QUICK DELIVERY SECTION ===== */
+    .branch-top-section {
+        background: #ffffff;
+        padding: 30px 0;
+        border-bottom: 1px solid #f1f3f5;
     }
 
-    .branch-hero-header h1 {
-        margin: 0 0 10px 0;
-        font-size: 2.2rem;
-        font-weight: 800;
-    }
-
-    .branch-info-line {
+    .branch-top-section .container {
         display: flex;
-        gap: 30px;
-        margin-top: 15px;
-        font-size: 0.95rem;
+        justify-content: space-between; /* Space out title and service buttons */
+        align-items: center;
+        gap: 24px;
         flex-wrap: wrap;
     }
 
-    .branch-info-line a {
-        color: white;
-        text-decoration: none;
-        transition: opacity 0.3s;
-    }
-
-    .branch-info-line a:hover {
-        opacity: 0.8;
-    }
-
-    /* Delivery Services Section */
-    .delivery-section {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 35px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .delivery-section-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--dark-text);
-        margin: 0 0 25px 0;
+    .branch-delivery-label {
         display: flex;
         align-items: center;
-        gap: 10px;
-    }
-
-    .delivery-services-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 15px;
-    }
-
-    .delivery-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 25px 15px;
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        background: white;
-        text-decoration: none;
+        gap: 12px;
+        font-weight: 800;
         color: var(--dark-text);
-        transition: all 0.3s;
-        font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 2rem;
+        font-family: 'Poppins', sans-serif;
+        letter-spacing: -0.5px;
+    }
+
+    .branch-delivery-label i {
+        font-size: 2.2rem;
+        color: var(--danger-red);
+        background: rgba(231, 76, 60, 0.1); /* Subtle badge background for icon */
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .branch-delivery-services {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+
+    /* Modern Service Pill Buttons */
+    .delivery-service-btn {
+        display: flex;
+        align-items: center; /* Linear alignment for icon and brand text */
+        gap: 12px;
+        padding: 10px 20px;
+        border-radius: 50px; /* Modern pill style */
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        text-decoration: none;
         cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #343a40;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
-    .delivery-btn:hover {
-        border-color: var(--primary-color);
-        background: linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
-        transform: translateY(-4px);
-        box-shadow: 0 6px 16px rgba(102,126,234,0.15);
-        text-decoration: none;
-        color: var(--dark-text);
+    .delivery-service-btn:hover {
+        border-color: transparent;
+        color: #ffffff;
+        transform: translateY(-3px);
     }
 
-    .delivery-logo {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 12px;
+    /* Brand Specific Interactive Hover Transitions */
+    .delivery-service-btn[data-brand="foodpanda"]:hover {
+        background: #D70F64; /* Brand Pink */
+        box-shadow: 0 8px 20px rgba(215, 15, 100, 0.3);
+    }
+
+    .delivery-service-btn[data-brand="pathao"]:hover {
+        background: #E31313; /* Brand Red */
+        box-shadow: 0 8px 20px rgba(227, 19, 19, 0.3);
+    }
+
+    .delivery-service-btn[data-brand="foodi"]:hover {
+        background: #FF6B00; /* Brand Orange */
+        box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+    }
+
+    .delivery-service-img {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
+        transition: transform 0.3s;
     }
 
-    /* Search & Filter Section */
+    .delivery-service-btn:hover .delivery-service-img {
+        transform: scale(1.1);
+    }
+
+    .branch-special-btn {
+        background: var(--danger-red);
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .branch-special-btn:hover {
+        background: darken(#e74c3c, 10%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .branch-special-btn i {
+        font-size: 1rem;
+    }
+
+    /* ===== MENU HEADER & NAVIGATION ===== */
+    .menu-header-section {
+        background: white;
+        padding: 20px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .menu-header-label {
+        display: inline-block;
+        background: var(--danger-red);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-right: 15px;
+        margin-bottom: 15px;
+    }
+
+    .category-nav {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        padding-top: 5px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .category-nav::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .category-nav::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .category-nav::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    .category-btn {
+        padding: 10px 18px;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        white-space: nowrap;
+        color: var(--muted-text);
+    }
+
+    .category-btn:hover {
+        border-color: #CC4632;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .category-btn.active {
+        background: #CC4632;
+        color: white;
+    }
+
+    /* ===== SEARCH SECTION ===== */
     .search-filter-section {
         background: white;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 35px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 20px 0;
+        border-bottom: 1px solid #e9ecef;
     }
 
     .search-wrapper {
@@ -128,7 +220,7 @@
     .search-input:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
 
     .search-results {
@@ -177,45 +269,12 @@
         font-weight: 700;
     }
 
-    /* Category Filter */
-    .category-nav {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .category-btn {
-        padding: 10px 20px;
-        border: 2px solid #e9ecef;
-        background: white;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.3s;
-        white-space: nowrap;
-        color: var(--muted-text);
-    }
-
-    .category-btn:hover {
-        border-color: var(--primary-color);
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-    }
-
-    .category-btn.active {
-        border-color: var(--primary-color);
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-    }
-
-    /* Menu Grid */
+    /* ===== MENU CARD GRID ===== */
     .menu-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 28px;
+        gap: 24px;
+        padding: 30px 0;
     }
 
     .menu-card {
@@ -334,14 +393,32 @@
         grid-column: 1 / -1;
     }
 
+    /* ===== RESPONSIVE MEDIA QUERIES ===== */
     @media (max-width: 768px) {
-        .branch-hero-header h1 {
+        .branch-top-section {
+            padding: 20px 0;
+        }
+
+        .branch-top-section .container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .branch-delivery-label {
             font-size: 1.6rem;
         }
 
-        .branch-info-line {
-            flex-direction: column;
-            gap: 10px;
+        .branch-delivery-label i {
+            font-size: 1.8rem;
+            padding: 8px;
+        }
+
+        .branch-delivery-services {
+            width: 100%;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
 
         .menu-grid {
@@ -349,33 +426,22 @@
             gap: 16px;
         }
 
-        .delivery-services-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .category-nav {
+            flex-wrap: wrap;
         }
     }
 </style>
 
-<!-- Branch Hero Header -->
-<div class="branch-hero-header">
-    <div class="container">
-        <h1>{{ $branch->name }}</h1>
-        <div class="branch-info-line">
-            <div>📍 {{ $branch->location }}</div>
-            <div>📞 <a href="tel:{{ $branch->phone }}">{{ $branch->phone }}</a></div>
+<div class="branch-top-section">
+    <div class="container px-4 px-lg-5">
+        <div class="branch-delivery-label">
+            <i class="ri-e-bike-2-fill"></i>
+            For Quick Delivery
         </div>
-    </div>
-</div>
-
-<div class="container pb-5">
-    <!-- Delivery Services Section -->
-    @if(!empty($deliveryServices))
-        <div class="delivery-section">
-            <h3 class="delivery-section-title">
-                <i class="ri-e-bike-2-fill"></i> Order for Quick Delivery
-            </h3>
-            <div class="delivery-services-grid">
+        <div class="branch-delivery-services">
+            @if(!empty($deliveryServices))
                 @foreach($deliveryServices as $key => $service)
-                    <a href="{{ $service['url'] }}" target="_blank" rel="noopener noreferrer" class="delivery-btn">
+                    <a href="{{ $service['url'] }}" target="_blank" rel="noopener noreferrer" class="delivery-service-btn" data-brand="{{ $key }}">
                         @php
                             $logoUrl = null;
                             if ($key === 'foodpanda' && $branch->foodpanda_logo) {
@@ -394,31 +460,27 @@
                         @endphp
                         
                         @if($logoUrl)
-                            <img src="{{ $logoUrl }}" class="delivery-logo" alt="{{ $service['name'] }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23667eea'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3E{{ strtoupper(substr($key, 0, 1)) }}%3C/text%3E%3C/svg%3E" class="delivery-logo" alt="{{ $service['name'] }}" style="display:none;">
+                            <img src="{{ $logoUrl }}" class="delivery-service-img" alt="{{ $service['name'] }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23667eea'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3E{{ strtoupper(substr($key, 0, 1)) }}%3C/text%3E%3C/svg%3E" class="delivery-service-img" alt="{{ $service['name'] }}" style="display:none;">
                         @else
                             @if($key === 'foodpanda')
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E62E04'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" class="delivery-logo" alt="FoodPanda">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E62E04'/%3E%3Ctext x='50' y='55' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" class="delivery-service-img" alt="FoodPanda">
                             @elseif($key === 'pathao')
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23F71735'/%3E%3Ctext x='50' y='55' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E" class="delivery-logo" alt="Pathao">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23F71735'/%3E%3Ctext x='50' y='55' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E" class="delivery-service-img" alt="Pathao">
                             @elseif($key === 'foodi')
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23C71E1E'/%3E%3Ctext x='50' y='52' font-size='35' font-weight='bold' fill='white' text-anchor='middle'%3E%26%3C/text%3E%3C/svg%3E" class="delivery-logo" alt="Foodi">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23C71E1E'/%3E%3Ctext x='50' y='52' font-size='35' font-weight='bold' fill='white' text-anchor='middle'%3E%26%3C/text%3E%3C/svg%3E" class="delivery-service-img" alt="Foodi">
                             @endif
                         @endif
-                        {{ $service['name'] }}
+                        <span>{{ $service['name'] }}</span>
                     </a>
                 @endforeach
-            </div>
+            @endif
         </div>
-    @endif
+    </div>
+</div>
 
-    <!-- Search & Filter Section -->
-    <div class="search-filter-section">
-        <div class="search-wrapper">
-            <input type="text" class="search-input" id="menuSearch" placeholder="🔍 Search menu items...">
-            <div class="search-results" id="searchResults"></div>
-        </div>
-
+<div class="menu-header-section">
+    <div class="container px-4 px-lg-5">
         <div class="category-nav" id="categoryNav">
             <button class="category-btn active" data-category="all">All Items</button>
             @foreach($categories as $category)
@@ -426,62 +488,66 @@
             @endforeach
         </div>
     </div>
+</div>
 
-    <!-- Menu Grid -->
-    <div>
-        @if($categories->isEmpty() || $categories->every(fn($c) => $c->menus->isEmpty()))
-            <div class="no-items">
-                <p>No menu items available for this branch.</p>
-            </div>
-        @else
-            <div class="menu-grid" id="menuGrid">
-                @foreach($categories as $category)
-                    @foreach($category->menus as $menu)
-                        @php
-                            $firstVariation = $menu->variations->sortBy('price')->first();
-                            $imagePath = $firstVariation?->image ?? null;
-                            if ($imagePath) {
-                                $imageUrl = strpos($imagePath, 'http') === 0
-                                    ? $imagePath
-                                    : asset($imagePath);
-                            } else {
-                                $imageUrl = null;
-                            }
-                            $minPrice = $menu->variations->min('price') ?? 0;
-                        @endphp
-                        <div class="menu-card menu-offer-card" data-category="{{ $category->id }}" data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}" data-menu-price="{{ $minPrice }}">
-                            <div class="menu-card-image menu-offer-image-wrap">
-                                @if($imageUrl)
-                                    <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" onerror="this.parentElement.style.background='#d3d3d3'; this.style.display='none';">
-                                @else
-                                    <i class="ri-restaurant-2-line"></i>
-                                @endif
-                            </div>
-                            <div class="menu-card-body">
-                                <h5 class="menu-card-title menu-offer-title">{{ $menu->name }}</h5>
-                                <p class="menu-card-description menu-offer-meta">{{ Str::limit($menu->description ?? 'Fresh and delicious item', 80) }}</p>
-                                
-                                <div class="menu-card-price-section">
-                                    <div>
-                                        <div class="menu-card-price-label menu-offer-price-label">Starts from</div>
-                                        <div class="menu-card-price menu-offer-price">৳ {{ number_format((float) $minPrice, 2) }}</div>
-                                    </div>
-                                </div>
-
-                                <span class="menu-offer-serve">
-                                    <i class="bi bi-collection"></i> {{ $menu->variations->count() }} option{{ $menu->variations->count() > 1 ? 's' : '' }}
-                                </span>
-
-                                <button class="order-now-btn menu-offer-cart-btn" type="button" data-variation-id="{{ $firstVariation?->id }}" data-original-price="{{ $minPrice }}">
-                                    <i class="ri-shopping-bag-line"></i> Order Now
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                @endforeach
-            </div>
-        @endif
+<div class="search-filter-section">
+    <div class="container px-4 px-lg-5">
+        <div class="search-wrapper">
+            <input type="text" class="search-input" id="menuSearch" placeholder=" Search menu or category...">
+            <div class="search-results" id="searchResults"></div>
+        </div>
     </div>
+</div>
+
+<div class="container px-4 px-lg-5 pb-5">
+    @if($categories->isEmpty() || $categories->every(fn($c) => $c->menus->isEmpty()))
+        <div class="no-items">
+            <p>No menu items available for this branch.</p>
+        </div>
+    @else
+        <div class="menu-grid" id="menuGrid">
+            @foreach($categories as $category)
+                @foreach($category->menus as $menu)
+                    @php
+                        $firstVariation = $menu->variations->sortBy('price')->first();
+                        $imagePath = $firstVariation?->image ?? null;
+                        if ($imagePath) {
+                            $imageUrl = strpos($imagePath, 'http') === 0
+                                ? $imagePath
+                                : asset($imagePath);
+                        } else {
+                            $imageUrl = null;
+                        }
+                        $minPrice = $menu->variations->min('price') ?? 0;
+                    @endphp
+                    <div class="menu-card menu-offer-card" data-category="{{ $category->id }}" data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}" data-menu-price="{{ $minPrice }}">
+                        <div class="menu-card-image menu-offer-image-wrap">
+                            @if($imageUrl)
+                                <img src="{{ $imageUrl }}" alt="{{ $menu->name }}" class="menu-offer-image" onerror="this.parentElement.style.background='#d3d3d3'; this.style.display='none';">
+                            @else
+                                <i class="ri-restaurant-2-line"></i>
+                            @endif
+                        </div>
+                        <div class="menu-card-body">
+                            <h5 class="menu-card-title menu-offer-title">{{ $menu->name }}</h5>
+                            <p class="menu-card-description menu-offer-meta">{{ Str::limit($menu->description ?? 'Fresh and delicious item', 80) }}</p>
+                            
+                            <div class="menu-card-price-section">
+                                <div>
+                                    <div class="menu-card-price-label menu-offer-price-label">Starts from</div>
+                                    <div class="menu-card-price menu-offer-price">৳ {{ number_format((float) $minPrice, 2) }}</div>
+                                </div>
+                            </div>
+
+                            <button class="order-now-btn menu-offer-cart-btn" type="button" data-variation-id="{{ $firstVariation?->id }}" data-original-price="{{ $minPrice }}">
+                                <i class="ri-shopping-bag-line"></i> Order Now
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
+    @endif
 </div>
 
 <script>
@@ -493,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Branch page loaded');
 
-    // ===== CATEGORY FILTER =====
+    // ===== CATEGORY FILTER ENGINE =====
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -518,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ===== SEARCH FUNCTIONALITY =====
+    // ===== SEARCH FUNCTIONALITY MOTOR =====
     let searchTimeout;
     menuSearch.addEventListener('keyup', function() {
         clearTimeout(searchTimeout);
@@ -565,19 +631,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
 
-    // ===== SEARCH RESULT CLICK - FILTER TO THAT ITEM =====
+    // ===== INTERACTIVE SEARCH RESULTS CLICK =====
     document.addEventListener('click', function(e) {
         const resultItem = e.target.closest('.search-result-item');
         if (resultItem && resultItem.hasAttribute('data-menu-id')) {
             e.preventDefault();
             const menuId = resultItem.getAttribute('data-menu-id');
             
-            // Close search
+            // Dismiss active search dropdown
             menuSearch.value = '';
             searchResults.innerHTML = '';
             searchResults.style.display = 'none';
             
-            // Show only this item
+            // Filter target item display configuration
             const menuCards = document.querySelectorAll('.menu-card');
             menuCards.forEach(card => {
                 if (card.getAttribute('data-menu-id') === menuId) {
@@ -589,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ===== CLOSE SEARCH WHEN CLICKING OUTSIDE =====
+    // ===== CLICK OUTSIDE TRIGGER CLOSES SEARCH DRopdown =====
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.search-wrapper')) {
             searchResults.style.display = 'none';
