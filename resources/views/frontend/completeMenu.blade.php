@@ -1,6 +1,26 @@
 @extends('frontend.layout')
 
 @section('frontend_content')
+<style>
+    /* Sticky Filter Sidebar */
+    .filter-sidebar {
+        transition: all 0.3s ease;
+    }
+
+    .filter-sidebar.is-sticky {
+        position: fixed;
+        top: 100px;
+        z-index: 50;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 991.98px) {
+        .filter-sidebar.is-sticky {
+            position: static;
+            box-shadow: none;
+        }
+    }
+</style>
 <!-- COMPLETE MENU HEADER -->
 <section class="menu-hero-section py-5 text-center position-relative">
     <div class="container px-4 px-lg-5">
@@ -33,7 +53,7 @@
                 Our Complete Menu
             @endif
         </h1>
-        <div class="luxury-accent-line mx-auto mb-3"></div>
+        <!-- <div class="luxury-accent-line mx-auto mb-3"></div>
         <p class="section-subtitle text-muted max-w-600 mx-auto">
             @if(isset($activeOfferDetails) && $activeOfferDetails)
                 All items shown below are eligible for <strong>{{ $activeOfferDetails->discount_percent }}% discount</strong>. Add them to your cart now!
@@ -41,7 +61,7 @@
                 Explore our curated culinary creations, prepared with heritage slow-cooking techniques and fresh local spices.
             @endif
         </p>
-    </div>
+    </div> -->
 </section>
 
 <!-- MAIN FILTER & GRID CONTAINER -->
@@ -51,7 +71,7 @@
             
             <!-- Sidebar Filter Panel -->
             <div class="col-12 col-lg-3">
-                <div class="filter-sidebar p-4 shadow-sm">
+                <div class="filter-sidebar p-4 shadow-sm sticky-filter">
                     <h5 class="filter-title mb-4"><i class="bi bi-sliders2-vertical me-2"></i>Filters</h5>
                     
                     <!-- Category Section -->
@@ -122,6 +142,61 @@
 @push('front_js')
 <script>
     $(document).ready(function() {
+        const filterSidebar = document.querySelector('.filter-sidebar');
+        const menuGridSection = document.querySelector('.menu-grid-section');
+        const filterColumn = filterSidebar.closest('.col-12');
+        const container = menuGridSection.querySelector('.container');
+        
+        const sectionTop = menuGridSection.offsetTop;
+        const sectionHeight = menuGridSection.offsetHeight;
+        let filterWidth = filterSidebar.offsetWidth;
+        let filterLeftPos = 0;
+        let containerLeftPos = 0;
+        let scrollTimeout;
+
+        // Calculate filter position relative to viewport
+        function calculatePositions() {
+            const filterRect = filterSidebar.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            filterWidth = filterSidebar.offsetWidth;
+            filterLeftPos = filterRect.left + window.scrollX; // Absolute position from left
+            containerLeftPos = containerRect.left + window.scrollX; // Container absolute position
+        }
+
+        // Handle window resize to update positions
+        window.addEventListener('resize', calculatePositions);
+        calculatePositions(); // Initial calculation
+
+        // Throttle scroll event for smooth performance
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            
+            scrollTimeout = setTimeout(function() {
+                const scrollTop = window.scrollY;
+                const sectionBottom = sectionTop + sectionHeight;
+
+                // Check if we're within the menu grid section
+                if (scrollTop >= sectionTop && scrollTop < sectionBottom - 300) {
+                    // Add sticky class
+                    if (!filterSidebar.classList.contains('is-sticky')) {
+                        calculatePositions();
+                        filterSidebar.classList.add('is-sticky');
+                        // Set the left position to keep it in place
+                        filterSidebar.style.left = filterLeftPos + 'px';
+                        filterSidebar.style.width = filterWidth + 'px';
+                    }
+                } else {
+                    // Remove sticky class
+                    if (filterSidebar.classList.contains('is-sticky')) {
+                        filterSidebar.classList.remove('is-sticky');
+                        filterSidebar.style.left = 'auto';
+                        filterSidebar.style.width = 'auto';
+                    }
+                }
+            }, 10);
+        }, { passive: true });
+
         const minInput = document.getElementById('minPriceInput');
         const maxInput = document.getElementById('maxPriceInput');
         const minDisplay = document.getElementById('minPriceDisplay');

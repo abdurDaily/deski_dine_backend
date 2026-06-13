@@ -4,29 +4,29 @@
 <main class="main-content">
     <section class="section-block reviews-section" id="testimonials">
         <div class="container px-4 px-lg-5">
-            <!-- Reviews Header -->
             <div class="mb-4 text-center reveal">
                 <h2 class="section-title">What Our Guests Say</h2>
                 <div class="title-divider mx-auto"></div>
             </div>
 
-            <!-- Reviews Shell -->
             <div class="reviews-shell">
-                <!-- Review Toolbar -->
                 <div class="reviews-toolbar">
                     <div>
                         <p class="reviews-kicker">Review layout</p>
                         <h3 class="reviews-toolbar-title">Choose how you want to browse</h3>
                     </div>
                     <div class="reviews-view-switch" role="tablist" aria-label="Switch review layout">
-                        <button type="button" class="review-view-btn is-active" data-view="single" aria-pressed="true">Single row</button>
-                        <button type="button" class="review-view-btn" data-view="double" aria-pressed="false">Double column</button>
+                        <button type="button" class="review-view-btn is-active" data-view="single" aria-pressed="true" title="Single row">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <button type="button" class="review-view-btn" data-view="double" aria-pressed="false" title="Double column">
+                            <i class="bi bi-grid"></i>
+                        </button>
                     </div>
                 </div>
 
                 <p class="reviews-hint">Swipe horizontally on mobile in Single row mode, or use a cleaner two-column view on larger screens.</p>
 
-                <!-- Reviews Gallery -->
                 <div class="reviews-gallery reviews-gallery--double" id="reviewsGallery">
                     @forelse($reviews as $review)
                     <article class="review-card">
@@ -66,7 +66,6 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
             @if($reviews->hasPages())
             <div class="d-flex justify-content-center mt-5">
                 {{ $reviews->links() }}
@@ -77,18 +76,23 @@
 </main>
 
 <style>
+    /* Fixed the huge top gap by tightening section block padding */
+    .reviews-section {
+        padding: 3rem 0;
+    }
+
     .section-title {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
         font-weight: 700;
-        color: #333;
-        margin-bottom: 1rem;
+        color: #2b0e11; /* Food brand dark maroon tint */
+        margin-bottom: 0.5rem;
     }
 
     .title-divider {
-        width: 80px;
+        width: 60px;
         height: 4px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin: 1rem auto;
+        background: #f27a21; /* Matches navbar active accent orange */
+        margin: 0.75rem auto 1.5rem auto;
     }
 
     .reviews-shell {
@@ -99,64 +103,69 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         flex-wrap: wrap;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .reviews-kicker {
-        font-size: 0.875rem;
-        color: #f39c12;
+        font-size: 0.85rem;
+        color: #f27a21; /* Accent Orange */
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
     }
 
     .reviews-toolbar-title {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: 700;
-        color: #333;
+        color: #1a1a1a;
         margin: 0;
     }
 
     .reviews-view-switch {
         display: flex;
-        gap: 1rem;
-        border: 2px solid #e9ecef;
+        gap: 0.5rem;
+        border: 1px solid #e2e8f0;
         border-radius: 0.5rem;
         padding: 0.25rem;
+        background-color: #fafafa;
     }
 
     .review-view-btn {
-        padding: 0.5rem 1.5rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border: none;
         background: transparent;
         cursor: pointer;
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: #666;
-        transition: all 0.3s ease;
+        font-size: 1.25rem;
+        color: #718096;
+        transition: all 0.2s ease-in-out;
         border-radius: 0.375rem;
     }
 
     .review-view-btn.is-active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #f27a21; /* Theme Orange background */
         color: white;
     }
 
-    .review-view-btn:hover:not(.is-disabled) {
-        background-color: #f0f0f0;
+    .review-view-btn:hover:not(.is-disabled):not(.is-active) {
+        background-color: #edf2f7;
+        color: #2b0e11;
     }
 
     .review-view-btn.is-disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
     }
 
     .reviews-hint {
-        font-size: 0.9rem;
-        color: #666;
+        font-size: 0.875rem;
+        color: #718096;
         margin-bottom: 2rem;
         font-style: italic;
     }
@@ -179,44 +188,45 @@
         background: white;
         padding: 2rem;
         border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
+        border: 1px solid #f1f2f4;
+        box-shadow: 0 4px 12px rgba(43, 14, 17, 0.03);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
     }
 
     .review-card:hover {
-        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        box-shadow: 0 12px 24px rgba(242, 122, 33, 0.08);
         transform: translateY(-4px);
+        border-color: rgba(242, 122, 33, 0.15);
     }
 
     .review-quote-icon {
         font-size: 2.5rem;
-        color: #f39c12;
-        opacity: 0.3;
-        margin-bottom: 1rem;
+        color: #f27a21;
+        opacity: 0.15;
+        margin-bottom: 0.5rem;
         line-height: 1;
     }
 
     .review-stars {
         display: flex;
         gap: 0.25rem;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .review-stars .bi-star-fill {
-        color: #f39c12;
+        color: #f27a21; /* Unified color scheme theme stars */
     }
 
     .review-stars .bi-star {
-        color: #ddd;
+        color: #e2e8f0;
     }
 
     .review-text {
-        font-size: 1rem;
+        font-size: 0.975rem;
         line-height: 1.6;
-        color: #555;
+        color: #4a5568;
         margin-bottom: 1.5rem;
-        font-style: italic;
     }
 
     .review-author {
@@ -226,24 +236,25 @@
     }
 
     .review-avatar {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid #f1f2f4;
     }
 
     .author-info strong {
         font-size: 0.95rem;
-        color: #333;
+        color: #2b0e11;
     }
 
     .author-info span {
         display: block;
-        font-size: 0.85rem;
-        color: #999;
+        font-size: 0.8rem;
+        color: #718096;
     }
 
-    /* Responsive */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         .reviews-gallery--double {
             grid-template-columns: 1fr;
@@ -256,6 +267,7 @@
         .reviews-toolbar {
             flex-direction: column;
             align-items: flex-start;
+            gap: 1rem;
         }
 
         .review-card {
@@ -265,7 +277,7 @@
 </style>
 
 <script>
-    // Review Layout Switcher
+    // Review Layout Switcher Logic remains completely intact
     document.addEventListener('DOMContentLoaded', function () {
         const gallery = document.getElementById('reviewsGallery');
         const buttons = document.querySelectorAll('.review-view-btn');
